@@ -1,39 +1,61 @@
+const STATS = [
+  { value: '5', label: 'Countries' },
+  { value: 'Corporate', label: 'Payouts' },
+  { value: 'Real-Time', label: 'Rates' },
+  { value: 'Business', label: 'Focus' },
+];
+
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-slate-50">
-      <div className="mx-auto grid min-h-[720px] max-w-7xl grid-cols-1 items-center gap-12 px-6 py-24 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-20">
         <div>
-          <div className="mb-6 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700">
-            Crypto-to-Bank Infrastructure
+          <div className="mb-6 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
+            Business Payment Infrastructure
           </div>
 
-          <h1 className="text-5xl font-bold tracking-tight text-slate-950 md:text-7xl">
-            Pay with Crypto.
+          <h1 className="text-5xl font-bold tracking-tight text-slate-950 md:text-6xl lg:text-7xl">
+            Pay Suppliers.
             <br />
-            Settle in Local Currency.
+            Pay Contractors.
+            <br />
+            Pay Businesses.
           </h1>
 
           <p className="mt-6 max-w-2xl text-xl leading-8 text-slate-600">
-            Nexora enables individuals and businesses to send cryptocurrency and
-            receive payouts to corporate bank accounts, personal accounts and
-            bank cards across CIS countries.
+            Send cryptocurrency and settle payments in local currencies across
+            CIS countries. Corporate accounts, supplier payments and business
+            settlements.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <button className="rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20">
+            <button
+              type="button"
+              className="rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20"
+            >
               Create Request
             </button>
 
-            <button className="rounded-2xl border border-slate-300 bg-white px-7 py-4 text-base font-semibold text-slate-900">
+            <button
+              type="button"
+              className="rounded-2xl border border-slate-300 bg-white px-7 py-4 text-base font-semibold text-slate-900"
+            >
               Business Solutions
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 gap-4 text-sm font-medium text-slate-600 sm:grid-cols-4">
-            <div>✓ Corporate payouts</div>
-            <div>✓ Real-time rates</div>
-            <div>✓ AML monitoring</div>
-            <div>✓ Dedicated support</div>
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {STATS.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              >
+                <p className="text-xl font-bold text-blue-900">{stat.value}</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
