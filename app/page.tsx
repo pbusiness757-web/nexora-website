@@ -4,6 +4,7 @@ import HeroSection from "../components/hero/HeroSection";
 import LiveCalculator from "../components/calculator/LiveCalculator";
 import BusinessSolutions from "../components/business/BusinessSolutions";
 import CorporatePayouts from "../components/business/CorporatePayouts";
+import HowItWorks from "../components/how-it-works/HowItWorks";
 
 export default function HomePage() {
   return (
@@ -14,6 +15,7 @@ export default function HomePage() {
         <LiveCalculator />
         <BusinessSolutions />
         <CorporatePayouts />
+        <HowItWorks />
       </main>
       <Footer />
     </>
