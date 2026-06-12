@@ -1,3 +1,19 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+type ApiPartner = {
+  id: string;
+  name: string;
+  country: string;
+  currency: string;
+  reserve: string;
+  feePercent: string;
+  status: string;
+};
+
 type KpiCard = {
   label: string;
   value: string;
@@ -10,71 +26,18 @@ const KPIS: KpiCard[] = [
   { label: "Limited Partners", value: "2" },
 ];
 
-type PartnerRow = {
-  id: string;
-  name: string;
-  country: string;
-  currency: string;
-  methods: string;
-  dailyLimit: string;
-  reserve: string;
-  fee: string;
-  status: string;
+const STATUS_META: Record<string, { label: string; style: string }> = {
+  ACTIVE: { label: "Active", style: "bg-emerald-50 text-emerald-600" },
+  LIMITED: { label: "Limited", style: "bg-amber-50 text-amber-600" },
+  LOW_RESERVE: { label: "Low Reserve", style: "bg-rose-50 text-rose-600" },
+  PAUSED: { label: "Paused", style: "bg-slate-100 text-slate-500" },
 };
 
-const PARTNERS: PartnerRow[] = [
-  {
-    id: "PR-001",
-    name: "Moscow Liquidity Desk",
-    country: "Russia",
-    currency: "RUB",
-    methods: "Corporate Account, Bank Card",
-    dailyLimit: "150,000 USDT",
-    reserve: "82,000 USDT",
-    fee: "1.2%",
-    status: "Active",
-  },
-  {
-    id: "PR-002",
-    name: "KZ Settlement Partner",
-    country: "Kazakhstan",
-    currency: "KZT",
-    methods: "Bank Card, Personal Account",
-    dailyLimit: "80,000 USDT",
-    reserve: "44,000 USDT",
-    fee: "1.5%",
-    status: "Active",
-  },
-  {
-    id: "PR-003",
-    name: "UZ Corporate Route",
-    country: "Uzbekistan",
-    currency: "UZS",
-    methods: "Corporate Account",
-    dailyLimit: "120,000 USDT",
-    reserve: "31,000 USDT",
-    fee: "1.8%",
-    status: "Limited",
-  },
-  {
-    id: "PR-004",
-    name: "AZ Payout Partner",
-    country: "Azerbaijan",
-    currency: "AZN",
-    methods: "Bank Account",
-    dailyLimit: "50,000 USDT",
-    reserve: "19,000 USDT",
-    fee: "1.6%",
-    status: "Active",
-  },
-];
-
-const statusStyles: Record<string, string> = {
-  Active: "bg-emerald-50 text-emerald-600",
-  Limited: "bg-amber-50 text-amber-600",
-  "Low Reserve": "bg-rose-50 text-rose-600",
-  Paused: "bg-slate-100 text-slate-500",
-};
+function statusMeta(status: string) {
+  return (
+    STATUS_META[status] ?? { label: status, style: "bg-slate-100 text-slate-500" }
+  );
+}
 
 const LIQUIDITY_STATUSES = ["Healthy", "Limited", "Low Reserve", "Paused"];
 
@@ -91,10 +54,40 @@ const PARTNER_RULES = [
   "Manual approval for payouts above limit",
 ];
 
+function formatNumber(value: string) {
+  return Number(value).toLocaleString("en-US");
+}
+
 const thClass = "pb-3 font-semibold";
 const tdClass = "py-4";
 
 export default function AdminPartnersPage() {
+  const [partners, setPartners] = useState<ApiPartner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function load() {
+      try {
+        const res = await fetch(`${API_BASE}/api/partners`);
+        if (!res.ok) throw new Error("partners");
+        const data = await res.json();
+        if (active) setPartners(data);
+      } catch {
+        if (active) setError("Failed to load partners.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="px-6 py-16">
       <div className="mx-auto max-w-7xl">
@@ -123,51 +116,60 @@ export default function AdminPartnersPage() {
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
           <h2 className="text-lg font-bold text-slate-950">Partners</h2>
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
-                  <th className={thClass}>Partner ID</th>
-                  <th className={thClass}>Name</th>
-                  <th className={thClass}>Country</th>
-                  <th className={thClass}>Currency</th>
-                  <th className={thClass}>Methods</th>
-                  <th className={thClass}>Daily Limit</th>
-                  <th className={thClass}>Available Reserve</th>
-                  <th className={thClass}>Fee</th>
-                  <th className={thClass}>Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {PARTNERS.map((row) => (
-                  <tr key={row.id} className="text-slate-700">
-                    <td className={`${tdClass} font-semibold text-slate-950`}>
-                      {row.id}
-                    </td>
-                    <td className={tdClass}>{row.name}</td>
-                    <td className={tdClass}>{row.country}</td>
-                    <td className={tdClass}>{row.currency}</td>
-                    <td className={tdClass}>{row.methods}</td>
-                    <td className={tdClass}>{row.dailyLimit}</td>
-                    <td className={`${tdClass} font-semibold text-slate-950`}>
-                      {row.reserve}
-                    </td>
-                    <td className={tdClass}>{row.fee}</td>
-                    <td className={tdClass}>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          statusStyles[row.status] ??
-                          "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
+
+          {loading ? (
+            <p className="mt-6 text-sm text-slate-500">Loading partners…</p>
+          ) : error ? (
+            <p className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+              {error}
+            </p>
+          ) : partners.length === 0 ? (
+            <p className="mt-6 text-sm text-slate-500">No partners yet.</p>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full min-w-[820px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500">
+                    <th className={thClass}>Partner ID</th>
+                    <th className={thClass}>Name</th>
+                    <th className={thClass}>Country</th>
+                    <th className={thClass}>Currency</th>
+                    <th className={thClass}>Available Reserve</th>
+                    <th className={thClass}>Fee</th>
+                    <th className={thClass}>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {partners.map((row) => {
+                    const meta = statusMeta(row.status);
+                    return (
+                      <tr key={row.id} className="text-slate-700">
+                        <td className={`${tdClass} font-mono text-slate-500`}>
+                          {row.id}
+                        </td>
+                        <td className={`${tdClass} font-semibold text-slate-950`}>
+                          {row.name}
+                        </td>
+                        <td className={tdClass}>{row.country}</td>
+                        <td className={tdClass}>{row.currency}</td>
+                        <td className={`${tdClass} font-semibold text-slate-950`}>
+                          {formatNumber(row.reserve)}
+                        </td>
+                        <td className={tdClass}>{row.feePercent}%</td>
+                        <td className={tdClass}>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${meta.style}`}
+                          >
+                            {meta.label}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
