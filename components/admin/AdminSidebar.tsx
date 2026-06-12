@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Clients', href: '/admin/clients' },
   { label: 'Partners', href: '/admin/partners' },
   { label: 'Reports', href: '/admin/reports' },
+  { label: 'Audit Logs', href: '/admin/audit-logs' },
 ];
 
 export default function AdminSidebar() {
