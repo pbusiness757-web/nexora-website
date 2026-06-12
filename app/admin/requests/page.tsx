@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type ApiRequest = {
   id: string;
@@ -219,7 +220,12 @@ export default function AdminRequestsPage() {
                     return (
                       <tr key={row.id} className="text-slate-700">
                         <td className="py-4 font-semibold text-slate-950">
-                          {row.requestNumber}
+                          <Link
+                            href={`/admin/requests/${row.id}`}
+                            className="text-blue-900 transition hover:underline"
+                          >
+                            {row.requestNumber}
+                          </Link>
                         </td>
                         <td className="py-4">{row.createdAt.slice(0, 10)}</td>
                         <td className="py-4 font-mono text-slate-500">
