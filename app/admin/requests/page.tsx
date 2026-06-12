@@ -1,6 +1,3 @@
-import Header from "../../../components/layout/Header";
-import Footer from "../../../components/layout/Footer";
-
 type RequestRow = {
   id: string;
   date: string;
@@ -96,9 +93,7 @@ const selectClass =
 
 export default function AdminRequestsPage() {
   return (
-    <>
-      <Header />
-      <main className="bg-slate-50 py-16">
+    <main className="bg-slate-50 py-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
@@ -234,8 +229,6 @@ export default function AdminRequestsPage() {
             </div>
           </section>
         </div>
-      </main>
-      <Footer />
-    </>
+    </main>
   );
 }

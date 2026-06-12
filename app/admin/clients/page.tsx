@@ -1,6 +1,3 @@
-import Header from "../../../components/layout/Header";
-import Footer from "../../../components/layout/Footer";
-
 type KpiCard = {
   label: string;
   value: string;
@@ -105,9 +102,7 @@ const tdClass = "py-4";
 
 export default function AdminClientsPage() {
   return (
-    <>
-      <Header />
-      <main className="bg-slate-50 py-16">
+    <main className="bg-slate-50 py-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
@@ -276,8 +271,6 @@ export default function AdminClientsPage() {
             </div>
           </section>
         </div>
-      </main>
-      <Footer />
-    </>
+    </main>
   );
 }
