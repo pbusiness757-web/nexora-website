@@ -4,10 +4,10 @@ type KpiCard = {
 };
 
 const KPIS: KpiCard[] = [
-  { label: "Pending Payouts", value: "9" },
-  { label: "Processing", value: "6" },
-  { label: "Completed Today", value: "18" },
-  { label: "Failed / On Hold", value: "2" },
+  { label: "Ожидают выплаты", value: "9" },
+  { label: "В обработке", value: "6" },
+  { label: "Завершено сегодня", value: "18" },
+  { label: "Ошибки / Удержания", value: "2" },
 ];
 
 type PayoutRow = {
@@ -28,85 +28,85 @@ const PAYOUTS: PayoutRow[] = [
     id: "PO-2026-0001",
     requestId: "NX-2026-0001",
     recipient: "Alpha Trade LLC",
-    recipientType: "Organization",
-    country: "Russia",
+    recipientType: "Организация",
+    country: "Россия",
     currency: "RUB",
     amount: "925,000",
-    method: "Corporate Account",
-    status: "Processing",
-    operator: "Anna",
+    method: "Корпоративный счёт",
+    status: "В обработке",
+    operator: "Анна",
   },
   {
     id: "PO-2026-0002",
     requestId: "NX-2026-0002",
-    recipient: "Private Client",
-    recipientType: "Individual",
-    country: "Kazakhstan",
+    recipient: "Частный клиент",
+    recipientType: "Физлицо",
+    country: "Казахстан",
     currency: "KZT",
     amount: "1,125,000",
-    method: "Bank Card",
-    status: "Pending",
-    operator: "Ivan",
+    method: "Банковская карта",
+    status: "Ожидает",
+    operator: "Иван",
   },
   {
     id: "PO-2026-0003",
     requestId: "NX-2026-0003",
     recipient: "UzMarket Group",
-    recipientType: "Organization",
-    country: "Uzbekistan",
+    recipientType: "Организация",
+    country: "Узбекистан",
     currency: "UZS",
     amount: "228,000,000",
-    method: "Corporate Account",
-    status: "Ready",
-    operator: "Marina",
+    method: "Корпоративный счёт",
+    status: "Готово",
+    operator: "Марина",
   },
   {
     id: "PO-2026-0004",
     requestId: "NX-2026-0004",
-    recipient: "Contractor",
-    recipientType: "Individual",
-    country: "Azerbaijan",
+    recipient: "Подрядчик",
+    recipientType: "Физлицо",
+    country: "Азербайджан",
     currency: "AZN",
     amount: "6,800",
-    method: "Personal Account",
-    status: "Completed",
-    operator: "Anna",
+    method: "Личный счёт",
+    status: "Завершено",
+    operator: "Анна",
   },
 ];
 
 const STATUSES = [
-  "Pending",
-  "Ready",
-  "Processing",
-  "Completed",
-  "Failed",
-  "On Hold",
+  "Ожидает",
+  "Готово",
+  "В обработке",
+  "Завершено",
+  "Ошибка",
+  "Удержание",
 ];
 
 const statusStyles: Record<string, string> = {
-  Pending: "bg-slate-100 text-slate-600",
-  Ready: "bg-indigo-50 text-indigo-700",
-  Processing: "bg-amber-50 text-amber-600",
-  Completed: "bg-emerald-50 text-emerald-600",
-  Failed: "bg-rose-50 text-rose-600",
-  "On Hold": "bg-orange-50 text-orange-600",
+  Ожидает: "bg-slate-100 text-slate-600",
+  Готово: "bg-indigo-50 text-indigo-700",
+  "В обработке": "bg-amber-50 text-amber-600",
+  Завершено: "bg-emerald-50 text-emerald-600",
+  Ошибка: "bg-rose-50 text-rose-600",
+  Удержание: "bg-orange-50 text-orange-600",
 };
 
 const FILTER_COUNTRY = [
-  "All Countries",
-  "Russia",
-  "Kazakhstan",
-  "Uzbekistan",
-  "Azerbaijan",
-  "Kyrgyzstan",
+  "Все страны",
+  "Россия",
+  "Казахстан",
+  "Узбекистан",
+  "Азербайджан",
+  "Кыргызстан",
 ];
 const FILTER_METHOD = [
-  "All Methods",
-  "Corporate Account",
-  "Personal Account",
-  "Bank Card",
+  "Все способы",
+  "Корпоративный счёт",
+  "Личный счёт",
+  "Банковская карта",
 ];
-const FILTER_STATUS = ["All Statuses", ...STATUSES];
+const FILTER_STATUS = ["Все статусы", ...STATUSES];
 
 const fieldClass =
   "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100";
@@ -117,11 +117,11 @@ export default function AdminPayoutsPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Payouts Management
+              Управление выплатами
             </h1>
             <p className="text-lg text-slate-600">
-              Track and manage local currency payouts to individuals, companies
-              and corporate bank accounts.
+              Отслеживание и управление выплатами в национальной валюте физлицам,
+              компаниям и на корпоративные счета.
             </p>
           </div>
 
@@ -148,12 +148,12 @@ export default function AdminPayoutsPage() {
                   htmlFor="search-id"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Search by Payout ID
+                  Поиск по ID выплаты
                 </label>
                 <input
                   id="search-id"
                   type="text"
-                  placeholder="e.g. PO-2026-0001"
+                  placeholder="напр. PO-2026-0001"
                   className={`mt-2 ${fieldClass}`}
                 />
               </div>
@@ -163,7 +163,7 @@ export default function AdminPayoutsPage() {
                   htmlFor="filter-country"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Country
+                  Страна
                 </label>
                 <select id="filter-country" className={`mt-2 ${fieldClass}`}>
                   {FILTER_COUNTRY.map((option) => (
@@ -177,7 +177,7 @@ export default function AdminPayoutsPage() {
                   htmlFor="filter-method"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Method
+                  Способ
                 </label>
                 <select id="filter-method" className={`mt-2 ${fieldClass}`}>
                   {FILTER_METHOD.map((option) => (
@@ -191,7 +191,7 @@ export default function AdminPayoutsPage() {
                   htmlFor="filter-status"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Status
+                  Статус
                 </label>
                 <select id="filter-status" className={`mt-2 ${fieldClass}`}>
                   {FILTER_STATUS.map((option) => (
@@ -203,22 +203,22 @@ export default function AdminPayoutsPage() {
           </section>
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Payouts</h2>
+            <h2 className="text-lg font-bold text-slate-950">Выплаты</h2>
 
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[1100px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className="pb-3 font-semibold">Payout ID</th>
-                    <th className="pb-3 font-semibold">Request ID</th>
-                    <th className="pb-3 font-semibold">Recipient</th>
-                    <th className="pb-3 font-semibold">Recipient Type</th>
-                    <th className="pb-3 font-semibold">Country</th>
-                    <th className="pb-3 font-semibold">Currency</th>
-                    <th className="pb-3 font-semibold">Amount</th>
-                    <th className="pb-3 font-semibold">Method</th>
-                    <th className="pb-3 font-semibold">Status</th>
-                    <th className="pb-3 font-semibold">Operator</th>
+                    <th className="pb-3 font-semibold">ID выплаты</th>
+                    <th className="pb-3 font-semibold">ID заявки</th>
+                    <th className="pb-3 font-semibold">Получатель</th>
+                    <th className="pb-3 font-semibold">Тип получателя</th>
+                    <th className="pb-3 font-semibold">Страна</th>
+                    <th className="pb-3 font-semibold">Валюта</th>
+                    <th className="pb-3 font-semibold">Сумма</th>
+                    <th className="pb-3 font-semibold">Способ</th>
+                    <th className="pb-3 font-semibold">Статус</th>
+                    <th className="pb-3 font-semibold">Оператор</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -255,7 +255,7 @@ export default function AdminPayoutsPage() {
           </section>
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Status Legend</h2>
+            <h2 className="text-lg font-bold text-slate-950">Легенда статусов</h2>
             <div className="mt-6 flex flex-wrap gap-3">
               {STATUSES.map((status) => (
                 <span

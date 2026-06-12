@@ -1,60 +1,36 @@
-type Feature = {
-  title: string;
-  description: string;
-  icon: string;
-};
+'use client';
 
-const FEATURES: Feature[] = [
-  {
-    title: 'Corporate Bank Accounts',
-    description: 'Send local currency directly to company bank accounts.',
-    icon: '🏛️',
-  },
-  {
-    title: 'Supplier Payments',
-    description: 'Pay suppliers across supported countries.',
-    icon: '🏭',
-  },
-  {
-    title: 'Contractor Settlements',
-    description: 'Pay contractors and business partners efficiently.',
-    icon: '👥',
-  },
-  {
-    title: 'Invoice Payments',
-    description: 'Settle business invoices using crypto conversion.',
-    icon: '🧾',
-  },
-];
+import { useLocale } from '../../lib/locale-context';
 
+const ICONS = ['🏛️', '🏭', '👥', '🧾'];
 const CURRENCIES = ['RUB', 'KZT', 'UZS', 'AZN', 'KGS'];
 
 export default function CorporatePayouts() {
+  const { dict } = useLocale();
+  const t = dict.corporatePayouts;
+
   return (
     <section className="bg-white py-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            Corporate Payouts
+            {t.badge}
           </div>
           <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
-            Pay Companies and Organizations with Cryptocurrency
+            {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Nexora enables crypto-to-bank settlements for legal entities,
-            suppliers, contractors and business partners.
-          </p>
+          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
         </div>
 
         <div className="mt-16 grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {FEATURES.map((feature) => (
+            {t.features.map((feature, index) => (
               <div
                 key={feature.title}
                 className="group rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl transition group-hover:bg-blue-900 group-hover:text-white">
-                  <span>{feature.icon}</span>
+                  <span>{ICONS[index]}</span>
                 </div>
                 <h3 className="mt-6 text-lg font-bold text-slate-950">
                   {feature.title}
@@ -68,30 +44,30 @@ export default function CorporatePayouts() {
 
           <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200">
             <span className="text-sm font-semibold text-slate-500">
-              Settlement Flow
+              {t.flowLabel}
             </span>
 
             <div className="mt-6 space-y-4">
               <div className="rounded-2xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Step 1</p>
+                <p className="text-sm text-slate-500">{t.stepLabel} 1</p>
                 <p className="mt-1 text-xl font-bold text-slate-950">
-                  Client Sends Crypto
+                  {t.step1}
                 </p>
               </div>
 
               <div className="flex justify-center text-2xl text-cyan-500">↓</div>
 
               <div className="rounded-2xl bg-blue-900 p-5 text-white">
-                <p className="text-sm text-blue-100">Step 2</p>
-                <p className="mt-1 text-xl font-bold">Nexora Processing</p>
+                <p className="text-sm text-blue-100">{t.stepLabel} 2</p>
+                <p className="mt-1 text-xl font-bold">{t.step2}</p>
               </div>
 
               <div className="flex justify-center text-2xl text-cyan-500">↓</div>
 
               <div className="rounded-2xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Step 3</p>
+                <p className="text-sm text-slate-500">{t.stepLabel} 3</p>
                 <p className="mt-1 text-xl font-bold text-slate-950">
-                  Company Bank Account Receives Local Currency
+                  {t.step3}
                 </p>
               </div>
             </div>
@@ -111,7 +87,7 @@ export default function CorporatePayouts() {
               type="button"
               className="mt-6 w-full rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20 transition hover:bg-blue-950"
             >
-              Create Business Request
+              {t.button}
             </button>
           </div>
         </div>

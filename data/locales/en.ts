@@ -15,10 +15,270 @@ const en = {
     secondaryCta: "Business Solutions",
   },
   calculator: {
+    badge: "Live Calculator",
     title: "Estimate your payout",
     subtitle: "Real-time conversion from crypto to local bank currency.",
+    sendLabel: "You send (crypto)",
+    amountLabel: "Amount",
+    countryLabel: "Payout country",
+    currencyLabel: "Recipient currency",
+    autoLabel: "auto",
+    summarySend: "You send",
+    summaryFee: "Network fee (1%)",
+    summaryRate: "Exchange rate",
+    receiveLabel: "Recipient receives",
+    button: "Create Request",
+    footnote: "Rates are indicative and updated at request confirmation.",
+  },
+  businessSolutions: {
+    badge: "Business Payments",
+    title: "Business Payment Solutions",
+    subtitle:
+      "Built for companies, suppliers, contractors and organizations across CIS countries.",
+    items: [
+      {
+        title: "Supplier Payments",
+        description:
+          "Pay suppliers using cryptocurrency with local currency settlement.",
+        features: [
+          "Local currency payouts",
+          "Corporate bank accounts",
+          "Fast processing",
+        ],
+      },
+      {
+        title: "Contractor Payments",
+        description:
+          "Pay contractors and remote teams directly to local bank accounts.",
+        features: [
+          "Individual recipients",
+          "Cross-border payouts",
+          "Real-time rates",
+        ],
+      },
+      {
+        title: "Corporate Account Payouts",
+        description:
+          "Send payouts directly to legal entities and company bank accounts.",
+        features: ["Business accounts", "Organization payouts", "Invoice support"],
+      },
+      {
+        title: "Invoice Settlements",
+        description: "Settle invoices using crypto-to-bank conversion.",
+        features: ["Business payments", "Transparent rates", "Secure processing"],
+      },
+    ],
+    ctaTitle: "Need a custom business payment solution?",
+    ctaText:
+      "Contact Nexora for supplier payments, contractor payouts and corporate settlements.",
+    ctaButton: "Contact Business Team",
+  },
+  corporatePayouts: {
+    badge: "Corporate Payouts",
+    title: "Pay Companies and Organizations with Cryptocurrency",
+    subtitle:
+      "Nexora enables crypto-to-bank settlements for legal entities, suppliers, contractors and business partners.",
+    features: [
+      {
+        title: "Corporate Bank Accounts",
+        description: "Send local currency directly to company bank accounts.",
+      },
+      {
+        title: "Supplier Payments",
+        description: "Pay suppliers across supported countries.",
+      },
+      {
+        title: "Contractor Settlements",
+        description: "Pay contractors and business partners efficiently.",
+      },
+      {
+        title: "Invoice Payments",
+        description: "Settle business invoices using crypto conversion.",
+      },
+    ],
+    flowLabel: "Settlement Flow",
+    stepLabel: "Step",
+    step1: "Client Sends Crypto",
+    step2: "Nexora Processing",
+    step3: "Company Bank Account Receives Local Currency",
+    button: "Create Business Request",
+  },
+  howItWorks: {
+    badge: "How It Works",
+    title: "From Crypto to Local Currency in Four Steps",
+    subtitle:
+      "A controlled payout flow for individuals, suppliers, contractors and organizations.",
+    steps: [
+      {
+        title: "Create Request",
+        description:
+          "Choose cryptocurrency, payout country, recipient type and payout method.",
+      },
+      {
+        title: "Send Cryptocurrency",
+        description: "Transfer crypto to the provided wallet address.",
+      },
+      {
+        title: "Nexora Processes Payment",
+        description:
+          "The transaction is verified and prepared for local currency payout.",
+      },
+      {
+        title: "Recipient Receives Funds",
+        description:
+          "Funds are sent to a bank card, personal account or corporate bank account.",
+      },
+    ],
+  },
+  countries: {
+    badge: "Supported Countries",
+    title: "Local Currency Payouts Across CIS Countries",
+    subtitle:
+      "Nexora supports crypto-to-bank payouts in key CIS markets with local currency settlement.",
+    names: {
+      Russia: "Russia",
+      Kazakhstan: "Kazakhstan",
+      Uzbekistan: "Uzbekistan",
+      Azerbaijan: "Azerbaijan",
+      Kyrgyzstan: "Kyrgyzstan",
+    },
+    methods: ["Bank cards", "Personal accounts", "Corporate accounts"],
+    note: "More payout corridors will be added soon.",
+  },
+  liveRates: {
+    badge: "Live Rates",
+    title: "Crypto and Payout Currency Rates",
+    subtitle: "Transparent reference rates for crypto-to-bank settlements.",
+    lastUpdated: "Last Updated",
+    cryptoTitle: "Crypto Rates",
+    cryptoSubtitle: "Price in USD",
+    fiatTitle: "Payout Currencies",
+    fiatSubtitle: "Local currency per USDT",
+    perUsdt: "1 USDT",
+    footnote: "Rates are indicative placeholders and confirmed at request creation.",
+  },
+  faq: {
+    badge: "FAQ",
+    title: "Frequently Asked Questions",
+    subtitle: "Everything you need to know about Nexora crypto-to-bank payouts.",
+    items: [
+      {
+        question: "What is Nexora?",
+        answer:
+          "Nexora is a crypto-to-bank payout infrastructure platform for individuals and businesses.",
+      },
+      {
+        question: "Which cryptocurrencies are supported?",
+        answer: "USDT, BTC, ETH, TON, TRX, USDC and LTC.",
+      },
+      {
+        question: "Which countries are supported?",
+        answer: "Russia, Kazakhstan, Uzbekistan, Azerbaijan and Kyrgyzstan.",
+      },
+      {
+        question: "Can Nexora send payouts to organizations?",
+        answer:
+          "Yes. Nexora supports payouts to legal entities and corporate bank accounts.",
+      },
+      {
+        question: "Can I pay suppliers with crypto?",
+        answer:
+          "Yes. Nexora can process supplier payments through crypto-to-bank settlement.",
+      },
+      {
+        question: "How long does processing take?",
+        answer:
+          "Processing time depends on country, payout method and transaction verification.",
+      },
+      {
+        question: "How are exchange rates calculated?",
+        answer: "Rates are based on market data and include the service margin.",
+      },
+      {
+        question: "Are transactions checked for AML risk?",
+        answer:
+          "Yes. Transactions may be reviewed according to AML and risk policies.",
+      },
+    ],
+  },
+  statistics: {
+    badge: "Platform Metrics",
+    title: "Built for Reliable Crypto-to-Bank Payouts",
+    subtitle:
+      "Nexora is designed for controlled payouts, business settlements and local currency transfers.",
+    items: [
+      { value: "5", label: "Supported Countries" },
+      { value: "7", label: "Supported Crypto Assets" },
+      { value: "5", label: "Local Currencies" },
+      { value: "24/7", label: "Support Channel" },
+    ],
+    note: "Live operational statistics will be displayed after launch.",
+  },
+  news: {
+    badge: "Market Insights",
+    title: "Crypto Market News and Updates",
+    subtitle:
+      "Stay informed about digital assets, stablecoins and payment market trends.",
+    items: [
+      {
+        category: "Stablecoins",
+        title: "USDT remains the leading settlement asset for crypto payments",
+        date: "Market Update",
+      },
+      {
+        category: "Payments",
+        title:
+          "Businesses continue adopting digital assets for cross-border settlements",
+        date: "Industry Insight",
+      },
+      {
+        category: "Regulation",
+        title:
+          "AML and compliance become key factors in crypto payment infrastructure",
+        date: "Compliance Watch",
+      },
+    ],
+    cta: "View All News",
+  },
+  contact: {
+    badge: "Business Request",
+    title: "Ready to Process Business Payouts with Nexora?",
+    subtitle:
+      "Contact the Nexora team for supplier payments, contractor payouts, corporate bank account settlements and high-volume crypto-to-bank operations.",
+    points: [
+      "Corporate account payouts",
+      "Supplier and contractor payments",
+      "Local currency settlement across CIS countries",
+    ],
+    primaryButton: "Create Business Request",
+    secondaryButton: "Contact via Telegram",
   },
   footer: {
+    description:
+      "Crypto-to-bank payout infrastructure for individuals and businesses.",
+    columns: {
+      platform: {
+        title: "Platform",
+        links: ["Calculator", "Rates", "Countries", "FAQ"],
+      },
+      business: {
+        title: "Business",
+        links: [
+          "Supplier Payments",
+          "Contractor Payments",
+          "Corporate Payouts",
+          "Invoice Settlements",
+        ],
+      },
+      countries: {
+        title: "Countries",
+        links: ["Russia", "Kazakhstan", "Uzbekistan", "Azerbaijan", "Kyrgyzstan"],
+      },
+      legal: {
+        title: "Legal",
+        links: ["AML Policy", "Privacy Policy", "Terms of Service", "Contacts"],
+      },
+    },
     rights: "© 2026 Nexora. All rights reserved.",
   },
 };

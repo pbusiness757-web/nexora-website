@@ -30,56 +30,56 @@ type RequestRow = {
 const REQUESTS: RequestRow[] = [
   {
     id: "NX-2026-0042",
-    country: "Russia",
-    recipientType: "Business",
+    country: "Россия",
+    recipientType: "Бизнес",
     amount: "10,000 USDT",
-    status: "Waiting Payment",
+    status: "Ожидание оплаты",
   },
   {
     id: "NX-2026-0041",
-    country: "Kazakhstan",
-    recipientType: "Individual",
+    country: "Казахстан",
+    recipientType: "Физлицо",
     amount: "2,500 USDT",
-    status: "AML Review",
+    status: "AML-проверка",
   },
   {
     id: "NX-2026-0040",
-    country: "Uzbekistan",
-    recipientType: "Business",
+    country: "Узбекистан",
+    recipientType: "Бизнес",
     amount: "18,000 USDT",
-    status: "Ready for Payout",
+    status: "Готово к выплате",
   },
   {
     id: "NX-2026-0039",
-    country: "Azerbaijan",
-    recipientType: "Individual",
+    country: "Азербайджан",
+    recipientType: "Физлицо",
     amount: "4,200 USDT",
-    status: "Processing",
+    status: "В обработке",
   },
   {
     id: "NX-2026-0038",
-    country: "Kyrgyzstan",
-    recipientType: "Business",
+    country: "Кыргызстан",
+    recipientType: "Бизнес",
     amount: "9,800 USDT",
-    status: "Completed",
+    status: "Завершено",
   },
 ];
 
 const statusStyles: Record<string, string> = {
-  "Waiting Payment": "bg-slate-100 text-slate-600",
-  "AML Review": "bg-cyan-50 text-cyan-700",
-  "Ready for Payout": "bg-blue-50 text-blue-900",
-  Processing: "bg-amber-50 text-amber-600",
-  Completed: "bg-emerald-50 text-emerald-600",
+  "Ожидание оплаты": "bg-slate-100 text-slate-600",
+  "AML-проверка": "bg-cyan-50 text-cyan-700",
+  "Готово к выплате": "bg-blue-50 text-blue-900",
+  "В обработке": "bg-amber-50 text-amber-600",
+  Завершено: "bg-emerald-50 text-emerald-600",
 };
 
 const LIQUIDITY = ["RUB", "KZT", "UZS", "AZN", "KGS"];
 
 const QUICK_ACTIONS = [
-  { label: "New Request", primary: true },
-  { label: "Review AML", primary: false },
-  { label: "Manage Rates", primary: false },
-  { label: "View Reports", primary: false },
+  { label: "Новая заявка", primary: true },
+  { label: "AML-проверка", primary: false },
+  { label: "Управление курсами", primary: false },
+  { label: "Просмотр отчётов", primary: false },
 ];
 
 export default function AdminPage() {
@@ -97,7 +97,7 @@ export default function AdminPage() {
         const data = await res.json();
         if (active) setStats(data);
       } catch {
-        if (active) setError("Failed to load statistics.");
+        if (active) setError("Не удалось загрузить статистику.");
       } finally {
         if (active) setLoading(false);
       }
@@ -111,20 +111,20 @@ export default function AdminPage() {
 
   const cards = stats
     ? [
-        { label: "Total Requests", value: formatNumber(stats.totalRequests) },
-        { label: "Created", value: formatNumber(stats.createdRequests) },
-        { label: "Processing", value: formatNumber(stats.processingRequests) },
-        { label: "Completed", value: formatNumber(stats.completedRequests) },
+        { label: "Всего заявок", value: formatNumber(stats.totalRequests) },
+        { label: "Создано", value: formatNumber(stats.createdRequests) },
+        { label: "В обработке", value: formatNumber(stats.processingRequests) },
+        { label: "Завершено", value: formatNumber(stats.completedRequests) },
         {
-          label: "Crypto Volume",
+          label: "Объём крипто",
           value: `${formatNumber(stats.totalCryptoVolume)} USDT`,
         },
         {
-          label: "Payout Volume",
+          label: "Объём выплат",
           value: formatNumber(stats.totalPayoutVolume),
         },
-        { label: "Active Partners", value: formatNumber(stats.activePartners) },
-        { label: "Total Clients", value: formatNumber(stats.totalClients) },
+        { label: "Активные партнёры", value: formatNumber(stats.activePartners) },
+        { label: "Всего клиентов", value: formatNumber(stats.totalClients) },
       ]
     : [];
 
@@ -133,15 +133,15 @@ export default function AdminPage() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-            Operations Dashboard
+            Операционная панель
           </h1>
           <p className="text-lg text-slate-600">
-            Monitor requests, payouts and platform activity.
+            Контроль заявок, выплат и активности платформы.
           </p>
         </div>
 
         {loading ? (
-          <p className="mt-10 text-sm text-slate-500">Loading statistics…</p>
+          <p className="mt-10 text-sm text-slate-500">Загрузка статистики…</p>
         ) : error ? (
           <p className="mt-10 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
             {error}
@@ -168,7 +168,7 @@ export default function AdminPage() {
           <section className="lg:col-span-2">
             <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
               <h2 className="text-lg font-bold text-slate-950">
-                Recent Requests
+                Последние заявки
               </h2>
 
               <div className="mt-6 overflow-x-auto">
@@ -176,10 +176,10 @@ export default function AdminPage() {
                   <thead>
                     <tr className="border-b border-slate-200 text-slate-500">
                       <th className="pb-3 font-semibold">ID</th>
-                      <th className="pb-3 font-semibold">Country</th>
-                      <th className="pb-3 font-semibold">Recipient Type</th>
-                      <th className="pb-3 font-semibold">Amount</th>
-                      <th className="pb-3 font-semibold">Status</th>
+                      <th className="pb-3 font-semibold">Страна</th>
+                      <th className="pb-3 font-semibold">Тип получателя</th>
+                      <th className="pb-3 font-semibold">Сумма</th>
+                      <th className="pb-3 font-semibold">Статус</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -213,11 +213,11 @@ export default function AdminPage() {
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-slate-950">
-                  Liquidity Overview
+                  Обзор ликвидности
                 </h2>
                 <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
                   <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                  Healthy
+                  В норме
                 </span>
               </div>
 
@@ -232,7 +232,7 @@ export default function AdminPage() {
                     </span>
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600">
                       <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                      Green
+                      Норма
                     </span>
                   </li>
                 ))}
@@ -241,7 +241,7 @@ export default function AdminPage() {
 
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
               <h2 className="text-lg font-bold text-slate-950">
-                Quick Actions
+                Быстрые действия
               </h2>
               <div className="mt-6 flex flex-col gap-3">
                 {QUICK_ACTIONS.map((action) => (

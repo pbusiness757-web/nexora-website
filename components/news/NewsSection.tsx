@@ -1,48 +1,26 @@
-type NewsItem = {
-  category: string;
-  title: string;
-  date: string;
-};
+'use client';
 
-const NEWS: NewsItem[] = [
-  {
-    category: 'Stablecoins',
-    title: 'USDT remains the leading settlement asset for crypto payments',
-    date: 'Market Update',
-  },
-  {
-    category: 'Payments',
-    title:
-      'Businesses continue adopting digital assets for cross-border settlements',
-    date: 'Industry Insight',
-  },
-  {
-    category: 'Regulation',
-    title:
-      'AML and compliance become key factors in crypto payment infrastructure',
-    date: 'Compliance Watch',
-  },
-];
+import { useLocale } from '../../lib/locale-context';
 
 export default function NewsSection() {
+  const { dict } = useLocale();
+  const t = dict.news;
+
   return (
     <section className="bg-white py-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            Market Insights
+            {t.badge}
           </div>
           <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
-            Crypto Market News and Updates
+            {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Stay informed about digital assets, stablecoins and payment market
-            trends.
-          </p>
+          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {NEWS.map((item) => (
+          {t.items.map((item) => (
             <article
               key={item.title}
               className="group flex flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
@@ -59,9 +37,6 @@ export default function NewsSection() {
                 <span className="text-sm font-medium text-slate-500">
                   {item.date}
                 </span>
-                <span className="text-sm font-semibold text-blue-900 opacity-0 transition group-hover:opacity-100">
-                  Read →
-                </span>
               </div>
             </article>
           ))}
@@ -72,7 +47,7 @@ export default function NewsSection() {
             type="button"
             className="rounded-2xl border border-slate-300 bg-white px-7 py-4 text-base font-semibold text-slate-900 transition hover:border-blue-200 hover:text-blue-900"
           >
-            View All News
+            {t.cta}
           </button>
         </div>
       </div>

@@ -9,15 +9,15 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', href: '/admin' },
-  { label: 'Requests', href: '/admin/requests' },
-  { label: 'Payouts', href: '/admin/payouts' },
-  { label: 'Rates', href: '/admin/rates' },
-  { label: 'AML Review', href: '/admin/aml' },
-  { label: 'Clients', href: '/admin/clients' },
-  { label: 'Partners', href: '/admin/partners' },
-  { label: 'Reports', href: '/admin/reports' },
-  { label: 'Audit Logs', href: '/admin/audit-logs' },
+  { label: 'Панель управления', href: '/admin' },
+  { label: 'Заявки', href: '/admin/requests' },
+  { label: 'Выплаты', href: '/admin/payouts' },
+  { label: 'Курсы и маржа', href: '/admin/rates' },
+  { label: 'AML-проверка', href: '/admin/aml' },
+  { label: 'Клиенты', href: '/admin/clients' },
+  { label: 'Партнёры и ликвидность', href: '/admin/partners' },
+  { label: 'Отчёты', href: '/admin/reports' },
+  { label: 'Журнал действий', href: '/admin/audit-logs' },
 ];
 
 export default function AdminSidebar() {
@@ -59,10 +59,10 @@ export default function AdminSidebar() {
 
         <div className="mt-auto rounded-2xl bg-slate-50 p-4">
           <p className="text-sm font-semibold text-slate-950">
-            Operations Center
+            Операционный центр
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Crypto-to-bank payout infrastructure
+            Инфраструктура выплат крипто-в-банк
           </p>
         </div>
       </div>

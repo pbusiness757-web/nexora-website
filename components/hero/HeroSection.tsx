@@ -1,3 +1,7 @@
+'use client';
+
+import { useLocale } from '../../lib/locale-context';
+
 type Node = {
   label: string;
   x: number;
@@ -32,26 +36,22 @@ const nodeStyles: Record<Node['variant'], string> = {
 };
 
 export default function HeroSection() {
+  const { dict } = useLocale();
+
   return (
     <section className="relative overflow-hidden bg-slate-50">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-20">
         <div>
           <div className="mb-6 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            Business Payment Infrastructure
+            {dict.hero.badge}
           </div>
 
           <h1 className="text-5xl font-bold tracking-tight text-slate-950 md:text-6xl lg:text-7xl">
-            Pay Suppliers.
-            <br />
-            Pay Contractors.
-            <br />
-            Pay Businesses.
+            {dict.hero.title}
           </h1>
 
           <p className="mt-6 max-w-2xl text-xl leading-8 text-slate-600">
-            Send cryptocurrency and settle payments in local currencies across
-            CIS countries. Corporate accounts, supplier payments and business
-            settlements.
+            {dict.hero.subtitle}
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -59,14 +59,14 @@ export default function HeroSection() {
               type="button"
               className="rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20"
             >
-              Create Request
+              {dict.hero.primaryCta}
             </button>
 
             <button
               type="button"
               className="rounded-2xl border border-slate-300 bg-white px-7 py-4 text-base font-semibold text-slate-900"
             >
-              Business Solutions
+              {dict.hero.secondaryCta}
             </button>
           </div>
 

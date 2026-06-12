@@ -19,14 +19,14 @@ type ApiRequest = {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 const STATUS_META: Record<string, { label: string; style: string }> = {
-  CREATED: { label: "Created", style: "bg-slate-100 text-slate-600" },
-  WAITING_PAYMENT: { label: "Waiting Payment", style: "bg-slate-100 text-slate-600" },
-  CRYPTO_RECEIVED: { label: "Crypto Received", style: "bg-blue-50 text-blue-700" },
-  AML_REVIEW: { label: "AML Review", style: "bg-cyan-50 text-cyan-700" },
-  READY_FOR_PAYOUT: { label: "Ready for Payout", style: "bg-indigo-50 text-indigo-700" },
-  PROCESSING: { label: "Processing", style: "bg-amber-50 text-amber-600" },
-  COMPLETED: { label: "Completed", style: "bg-emerald-50 text-emerald-600" },
-  ON_HOLD: { label: "On Hold", style: "bg-rose-50 text-rose-600" },
+  CREATED: { label: "Создана", style: "bg-slate-100 text-slate-600" },
+  WAITING_PAYMENT: { label: "Ожидание оплаты", style: "bg-slate-100 text-slate-600" },
+  CRYPTO_RECEIVED: { label: "Крипто получено", style: "bg-blue-50 text-blue-700" },
+  AML_REVIEW: { label: "AML-проверка", style: "bg-cyan-50 text-cyan-700" },
+  READY_FOR_PAYOUT: { label: "Готово к выплате", style: "bg-indigo-50 text-indigo-700" },
+  PROCESSING: { label: "В обработке", style: "bg-amber-50 text-amber-600" },
+  COMPLETED: { label: "Завершено", style: "bg-emerald-50 text-emerald-600" },
+  ON_HOLD: { label: "На удержании", style: "bg-rose-50 text-rose-600" },
 };
 
 function statusMeta(status: string) {
@@ -37,16 +37,16 @@ function statusMeta(status: string) {
 
 const STATUS_OPTIONS = Object.keys(STATUS_META);
 
-const FILTER_STATUS = ["All Statuses", ...Object.values(STATUS_META).map((s) => s.label)];
+const FILTER_STATUS = ["Все статусы", ...Object.values(STATUS_META).map((s) => s.label)];
 const FILTER_COUNTRY = [
-  "All Countries",
-  "Russia",
-  "Kazakhstan",
-  "Uzbekistan",
-  "Azerbaijan",
-  "Kyrgyzstan",
+  "Все страны",
+  "Россия",
+  "Казахстан",
+  "Узбекистан",
+  "Азербайджан",
+  "Кыргызстан",
 ];
-const FILTER_RECIPIENT = ["All Types", "Individual", "Organization"];
+const FILTER_RECIPIENT = ["Все типы", "Физлицо", "Организация"];
 
 const selectClass =
   "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100";
@@ -70,7 +70,7 @@ export default function AdminRequestsPage() {
         const data = await res.json();
         if (active) setRequests(data);
       } catch {
-        if (active) setError("Failed to load requests.");
+        if (active) setError("Не удалось загрузить заявки.");
       } finally {
         if (active) setLoading(false);
       }
@@ -97,10 +97,10 @@ export default function AdminRequestsPage() {
       );
       setMessage({
         type: "ok",
-        text: `Status updated to ${statusMeta(updated.status).label}.`,
+        text: `Статус изменён на «${statusMeta(updated.status).label}».`,
       });
     } catch {
-      setMessage({ type: "err", text: "Failed to update status." });
+      setMessage({ type: "err", text: "Не удалось обновить статус." });
     }
   }
 
@@ -109,10 +109,10 @@ export default function AdminRequestsPage() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-            Requests Management
+            Управление заявками
           </h1>
           <p className="text-lg text-slate-600">
-            Review, track and process crypto-to-bank payout requests.
+            Просмотр, отслеживание и обработка заявок на выплаты крипто-в-банк.
           </p>
         </div>
 
@@ -123,12 +123,12 @@ export default function AdminRequestsPage() {
                 htmlFor="search-id"
                 className="text-sm font-semibold text-slate-500"
               >
-                Search by Request ID
+                Поиск по ID заявки
               </label>
               <input
                 id="search-id"
                 type="text"
-                placeholder="e.g. NX-2026-0001"
+                placeholder="напр. NX-2026-0001"
                 className={`mt-2 ${selectClass}`}
               />
             </div>
@@ -138,7 +138,7 @@ export default function AdminRequestsPage() {
                 htmlFor="filter-status"
                 className="text-sm font-semibold text-slate-500"
               >
-                Status
+                Статус
               </label>
               <select id="filter-status" className={`mt-2 ${selectClass}`}>
                 {FILTER_STATUS.map((option) => (
@@ -152,7 +152,7 @@ export default function AdminRequestsPage() {
                 htmlFor="filter-country"
                 className="text-sm font-semibold text-slate-500"
               >
-                Country
+                Страна
               </label>
               <select id="filter-country" className={`mt-2 ${selectClass}`}>
                 {FILTER_COUNTRY.map((option) => (
@@ -166,7 +166,7 @@ export default function AdminRequestsPage() {
                 htmlFor="filter-recipient"
                 className="text-sm font-semibold text-slate-500"
               >
-                Recipient Type
+                Тип получателя
               </label>
               <select id="filter-recipient" className={`mt-2 ${selectClass}`}>
                 {FILTER_RECIPIENT.map((option) => (
@@ -178,7 +178,7 @@ export default function AdminRequestsPage() {
         </section>
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Requests</h2>
+          <h2 className="text-lg font-bold text-slate-950">Заявки</h2>
 
           {message && (
             <p
@@ -193,25 +193,26 @@ export default function AdminRequestsPage() {
           )}
 
           {loading ? (
-            <p className="mt-6 text-sm text-slate-500">Loading requests…</p>
+            <p className="mt-6 text-sm text-slate-500">Загрузка заявок…</p>
           ) : error ? (
             <p className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
               {error}
             </p>
           ) : requests.length === 0 ? (
-            <p className="mt-6 text-sm text-slate-500">No requests yet.</p>
+            <p className="mt-6 text-sm text-slate-500">Заявок пока нет.</p>
           ) : (
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className="pb-3 font-semibold">Request ID</th>
-                    <th className="pb-3 font-semibold">Date</th>
-                    <th className="pb-3 font-semibold">Client</th>
-                    <th className="pb-3 font-semibold">Crypto Amount</th>
-                    <th className="pb-3 font-semibold">Network</th>
-                    <th className="pb-3 font-semibold">Payout</th>
-                    <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 font-semibold">ID заявки</th>
+                    <th className="pb-3 font-semibold">Дата</th>
+                    <th className="pb-3 font-semibold">Клиент</th>
+                    <th className="pb-3 font-semibold">Сумма крипто</th>
+                    <th className="pb-3 font-semibold">Сеть</th>
+                    <th className="pb-3 font-semibold">Выплата</th>
+                    <th className="pb-3 font-semibold">Валюта</th>
+                    <th className="pb-3 font-semibold">Статус</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -239,12 +240,17 @@ export default function AdminRequestsPage() {
                           {row.payoutAmount} {row.payoutCurrency}
                         </td>
                         <td className="py-4">
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {row.payoutCurrency}
+                          </span>
+                        </td>
+                        <td className="py-4">
                           <select
                             value={row.status}
                             onChange={(e) =>
                               handleStatusChange(row.id, e.target.value)
                             }
-                            aria-label="Update status"
+                            aria-label="Изменить статус"
                             className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold outline-none ring-1 ring-inset ring-slate-200 transition focus:ring-cyan-400 ${meta.style}`}
                           >
                             {STATUS_OPTIONS.map((option) => (
@@ -264,7 +270,7 @@ export default function AdminRequestsPage() {
         </section>
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Status Legend</h2>
+          <h2 className="text-lg font-bold text-slate-950">Легенда статусов</h2>
           <div className="mt-6 flex flex-wrap gap-3">
             {Object.values(STATUS_META).map((meta) => (
               <span

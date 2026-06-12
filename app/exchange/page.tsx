@@ -3,6 +3,10 @@
 import { useState } from "react";
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
+import {
+  getPayoutCurrency,
+  supportedPayoutCountries,
+} from "../../lib/countryCurrency";
 
 const STEPS = [
   { number: "01", label: "Asset & Amount" },
@@ -12,14 +16,7 @@ const STEPS = [
 
 const CRYPTOCURRENCIES = ["USDT", "BTC", "ETH", "TON", "TRX", "USDC", "LTC"];
 const NETWORKS = ["TRC20", "ERC20", "TON", "Bitcoin", "Litecoin"];
-const COUNTRIES = [
-  "Russia",
-  "Kazakhstan",
-  "Uzbekistan",
-  "Azerbaijan",
-  "Kyrgyzstan",
-];
-const PAYOUT_CURRENCIES = ["RUB", "KZT", "UZS", "AZN", "KGS"];
+const COUNTRIES = supportedPayoutCountries;
 const RECIPIENT_TYPES = ["Individual", "Business"];
 const PAYOUT_METHODS = ["Bank card", "Personal account", "Corporate account"];
 
@@ -44,8 +41,8 @@ export default function ExchangePage() {
   const [cryptoAsset, setCryptoAsset] = useState(CRYPTOCURRENCIES[0]);
   const [network, setNetwork] = useState(NETWORKS[0]);
   const [cryptoAmount, setCryptoAmount] = useState("");
-  const [payoutCurrency, setPayoutCurrency] = useState(PAYOUT_CURRENCIES[0]);
   const [payoutAmount, setPayoutAmount] = useState("");
+  const payoutCurrency = getPayoutCurrency(country);
   const [recipientType, setRecipientType] = useState(RECIPIENT_TYPES[0]);
   const [payoutMethod, setPayoutMethod] = useState(PAYOUT_METHODS[0]);
   const [recipientDetails, setRecipientDetails] = useState("");
@@ -226,7 +223,9 @@ export default function ExchangePage() {
                       <select
                         id="country"
                         value={country}
-                        onChange={(e) => setCountry(e.target.value)}
+                        onChange={(e) =>
+                          setCountry(e.target.value as (typeof COUNTRIES)[number])
+                        }
                         className={selectClass}
                       >
                         {COUNTRIES.map((item) => (
@@ -238,21 +237,15 @@ export default function ExchangePage() {
                     </div>
 
                     <div>
-                      <label htmlFor="payout-currency" className={labelClass}>
-                        Payout currency
-                      </label>
-                      <select
-                        id="payout-currency"
-                        value={payoutCurrency}
-                        onChange={(e) => setPayoutCurrency(e.target.value)}
-                        className={selectClass}
-                      >
-                        {PAYOUT_CURRENCIES.map((item) => (
-                          <option key={item} value={item}>
-                            {item}
-                          </option>
-                        ))}
-                      </select>
+                      <span className={labelClass}>Payout currency</span>
+                      <div className="mt-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-100 px-4 py-4">
+                        <span className="text-base font-semibold text-slate-950">
+                          {payoutCurrency}
+                        </span>
+                        <span className="text-xs font-medium text-slate-400">
+                          auto · {country}
+                        </span>
+                      </div>
                     </div>
 
                     <div>
