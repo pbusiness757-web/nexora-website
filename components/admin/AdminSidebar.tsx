@@ -15,6 +15,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Rates', href: '/admin/rates' },
   { label: 'AML Review', href: '/admin/aml' },
   { label: 'Clients', href: '/admin/clients' },
+  { label: 'Partners', href: '/admin/partners' },
   { label: 'Reports', href: '/admin/reports' },
 ];
 
