@@ -41,10 +41,10 @@ const SOLUTIONS: Solution[] = [
 
 export default function BusinessSolutions() {
   return (
-    <section className="bg-white py-24">
+    <section className="bg-slate-50 py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="mb-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-blue-900">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
             Business Payments
           </div>
           <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">

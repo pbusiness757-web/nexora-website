@@ -47,7 +47,7 @@ export default function LiveCalculator() {
     <section className="bg-white py-24">
       <div className="mx-auto max-w-3xl px-6">
         <div className="mb-10 text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700">
+          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
             Live Calculator
           </div>
           <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
@@ -141,7 +141,10 @@ export default function LiveCalculator() {
             </p>
           </div>
 
-          <button className="mt-6 w-full rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20">
+          <button
+            type="button"
+            className="mt-6 w-full rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20"
+          >
             Create Request
           </button>
 

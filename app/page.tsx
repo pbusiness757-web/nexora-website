@@ -10,6 +10,7 @@ import LiveRates from "../components/rates/LiveRates";
 import FAQSection from "../components/faq/FAQSection";
 import StatisticsSection from "../components/statistics/StatisticsSection";
 import NewsSection from "../components/news/NewsSection";
+import ContactCTA from "../components/contact/ContactCTA";
 
 export default function HomePage() {
   return (
@@ -18,14 +19,23 @@ export default function HomePage() {
       <main>
         <HeroSection />
         <LiveCalculator />
-        <BusinessSolutions />
+        <div id="business" className="scroll-mt-20">
+          <BusinessSolutions />
+        </div>
         <CorporatePayouts />
         <HowItWorks />
-        <CountriesSection />
-        <LiveRates />
-        <FAQSection />
+        <div id="countries" className="scroll-mt-20">
+          <CountriesSection />
+        </div>
+        <div id="rates" className="scroll-mt-20">
+          <LiveRates />
+        </div>
+        <div id="faq" className="scroll-mt-20">
+          <FAQSection />
+        </div>
         <StatisticsSection />
         <NewsSection />
+        <ContactCTA />
       </main>
       <Footer />
     </>

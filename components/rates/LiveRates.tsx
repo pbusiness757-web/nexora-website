@@ -39,7 +39,7 @@ const formatNumber = (value: number, fractionDigits = 2) =>
 
 export default function LiveRates() {
   return (
-    <section className="bg-white py-24">
+    <section className="bg-slate-50 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">

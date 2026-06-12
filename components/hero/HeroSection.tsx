@@ -1,9 +1,35 @@
+type Node = {
+  label: string;
+  x: number;
+  y: number;
+  variant: 'crypto' | 'hub' | 'output';
+  delay: string;
+};
+
+const NODES: Node[] = [
+  { label: 'USDT', x: 16, y: 16, variant: 'crypto', delay: '0ms' },
+  { label: 'BTC', x: 50, y: 9, variant: 'crypto', delay: '200ms' },
+  { label: 'ETH', x: 84, y: 16, variant: 'crypto', delay: '400ms' },
+  { label: 'NEXORA', x: 50, y: 50, variant: 'hub', delay: '0ms' },
+  { label: 'Corporate Account', x: 18, y: 86, variant: 'output', delay: '300ms' },
+  { label: 'Bank Card', x: 50, y: 93, variant: 'output', delay: '500ms' },
+  { label: 'Local Currency', x: 82, y: 86, variant: 'output', delay: '700ms' },
+];
+
+const HUB = { x: 50, y: 50 };
+
 const STATS = [
   { value: '5', label: 'Countries' },
   { value: 'Corporate', label: 'Payouts' },
   { value: 'Real-Time', label: 'Rates' },
   { value: 'Business', label: 'Focus' },
 ];
+
+const nodeStyles: Record<Node['variant'], string> = {
+  crypto: 'bg-white text-slate-900 border border-slate-200',
+  hub: 'bg-blue-900 text-white border border-blue-700 shadow-lg shadow-blue-900/40',
+  output: 'bg-white text-blue-900 border border-blue-200',
+};
 
 export default function HeroSection() {
   return (
@@ -63,41 +89,55 @@ export default function HeroSection() {
           <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-200">
             <div className="mb-6 flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-500">
-                Payment Route
+                Payment Network
               </span>
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
                 Live
               </span>
             </div>
 
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Client sends</p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">
-                  10,000 USDT
-                </p>
-              </div>
+            <div className="relative aspect-square w-full">
+              <svg
+                className="absolute inset-0 h-full w-full"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                {NODES.filter((n) => n.variant !== 'hub').map((node) => (
+                  <line
+                    key={node.label}
+                    x1={node.x}
+                    y1={node.y}
+                    x2={HUB.x}
+                    y2={HUB.y}
+                    stroke="#06b6d4"
+                    strokeWidth="0.6"
+                    strokeLinecap="round"
+                    className="animate-pulse motion-reduce:animate-none"
+                    style={{ animationDelay: node.delay }}
+                  />
+                ))}
+              </svg>
 
-              <div className="flex justify-center text-2xl text-cyan-500">↓</div>
-
-              <div className="rounded-2xl bg-blue-900 p-5 text-white">
-                <p className="text-sm text-blue-100">Nexora Network</p>
-                <p className="mt-2 text-2xl font-bold">
-                  Crypto-to-Bank Processing
-                </p>
-              </div>
-
-              <div className="flex justify-center text-2xl text-cyan-500">↓</div>
-
-              <div className="rounded-2xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">Recipient receives</p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">
-                  Corporate Bank Account
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  RUB · KZT · UZS · AZN · KGS
-                </p>
-              </div>
+              {NODES.map((node) => (
+                <div
+                  key={node.label}
+                  className="absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                >
+                  <span className="relative flex items-center justify-center">
+                    <span
+                      className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300/40 motion-reduce:animate-none"
+                      style={{ animationDelay: node.delay }}
+                    />
+                    <span
+                      className={`relative whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold ${nodeStyles[node.variant]}`}
+                    >
+                      {node.label}
+                    </span>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
