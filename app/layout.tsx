@@ -35,7 +35,18 @@ export const metadata: Metadata = {
     "CIS payments",
     "Nexora",
   ],
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    languages: {
+      ru: "/",
+      en: "/",
+      kk: "/",
+      uz: "/",
+      az: "/",
+      ky: "/",
+      "x-default": "/",
+    },
+  },
   openGraph: {
     title: "Nexora — Crypto-to-Bank Payout Infrastructure",
     description:

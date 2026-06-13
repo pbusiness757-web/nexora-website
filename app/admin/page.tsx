@@ -7,11 +7,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 type Stats = {
   totalRequests: number;
   createdRequests: number;
+  activeRequests: number;
   processingRequests: number;
   completedRequests: number;
   totalCryptoVolume: number | string;
   totalPayoutVolume: number | string;
   activePartners: number;
+  totalPartners: number;
   totalClients: number;
 };
 
@@ -112,9 +114,11 @@ export default function AdminPage() {
   const cards = stats
     ? [
         { label: "Всего заявок", value: formatNumber(stats.totalRequests) },
-        { label: "Создано", value: formatNumber(stats.createdRequests) },
-        { label: "В обработке", value: formatNumber(stats.processingRequests) },
+        { label: "Активные заявки", value: formatNumber(stats.activeRequests) },
         { label: "Завершено", value: formatNumber(stats.completedRequests) },
+        { label: "Всего клиентов", value: formatNumber(stats.totalClients) },
+        { label: "Всего партнёров", value: formatNumber(stats.totalPartners) },
+        { label: "Активные партнёры", value: formatNumber(stats.activePartners) },
         {
           label: "Объём крипто",
           value: `${formatNumber(stats.totalCryptoVolume)} USDT`,
@@ -123,8 +127,6 @@ export default function AdminPage() {
           label: "Объём выплат",
           value: formatNumber(stats.totalPayoutVolume),
         },
-        { label: "Активные партнёры", value: formatNumber(stats.activePartners) },
-        { label: "Всего клиентов", value: formatNumber(stats.totalClients) },
       ]
     : [];
 
