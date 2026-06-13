@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
+import SmartImage from '../ui/SmartImage';
 
 const ICONS = ['🏭', '👥', '🏛️', '🧾'];
 
@@ -21,7 +22,14 @@ export default function BusinessSolutions() {
           <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <SmartImage
+          src="/images/business/business-payments.jpg"
+          alt={t.title}
+          sizes="(min-width: 1280px) 1280px, 100vw"
+          className="mt-12 h-48 w-full rounded-[2rem] border border-slate-200 shadow-lg shadow-slate-200/60 md:h-64"
+        />
+
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {t.items.map((solution, index) => (
             <div
               key={solution.title}

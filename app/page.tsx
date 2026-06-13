@@ -4,6 +4,7 @@ import HeroSection from "../components/hero/HeroSection";
 import LiveCalculator from "../components/calculator/LiveCalculator";
 import BusinessSolutions from "../components/business/BusinessSolutions";
 import CorporatePayouts from "../components/business/CorporatePayouts";
+import SecuritySection from "../components/security/SecuritySection";
 import HowItWorks from "../components/how-it-works/HowItWorks";
 import CountriesSection from "../components/countries/CountriesSection";
 import LiveRates from "../components/rates/LiveRates";
@@ -11,6 +12,7 @@ import FAQSection from "../components/faq/FAQSection";
 import StatisticsSection from "../components/statistics/StatisticsSection";
 import NewsSection from "../components/news/NewsSection";
 import ContactCTA from "../components/contact/ContactCTA";
+import Reveal from "../components/ui/Reveal";
 
 export default function HomePage() {
   return (
@@ -18,24 +20,47 @@ export default function HomePage() {
       <Header />
       <main>
         <HeroSection />
-        <LiveCalculator />
+        <Reveal>
+          <LiveCalculator />
+        </Reveal>
         <div id="business" className="scroll-mt-20">
-          <BusinessSolutions />
+          <Reveal>
+            <BusinessSolutions />
+          </Reveal>
         </div>
-        <CorporatePayouts />
-        <HowItWorks />
+        <Reveal>
+          <CorporatePayouts />
+        </Reveal>
+        <Reveal>
+          <SecuritySection />
+        </Reveal>
+        <Reveal>
+          <HowItWorks />
+        </Reveal>
         <div id="countries" className="scroll-mt-20">
-          <CountriesSection />
+          <Reveal>
+            <CountriesSection />
+          </Reveal>
         </div>
         <div id="rates" className="scroll-mt-20">
-          <LiveRates />
+          <Reveal>
+            <LiveRates />
+          </Reveal>
         </div>
         <div id="faq" className="scroll-mt-20">
-          <FAQSection />
+          <Reveal>
+            <FAQSection />
+          </Reveal>
         </div>
-        <StatisticsSection />
-        <NewsSection />
-        <ContactCTA />
+        <Reveal>
+          <StatisticsSection />
+        </Reveal>
+        <Reveal>
+          <NewsSection />
+        </Reveal>
+        <Reveal>
+          <ContactCTA />
+        </Reveal>
       </main>
       <Footer />
     </>

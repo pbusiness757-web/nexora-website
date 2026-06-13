@@ -4,10 +4,10 @@ type KpiCard = {
 };
 
 const KPIS: KpiCard[] = [
-  { label: "Last Update", value: "30 sec ago" },
-  { label: "Active Pairs", value: "12" },
-  { label: "Average Margin", value: "2.8%" },
-  { label: "Manual Overrides", value: "1" },
+  { label: "Последнее обновление", value: "30 сек назад" },
+  { label: "Активные пары", value: "12" },
+  { label: "Средняя маржа", value: "2.8%" },
+  { label: "Ручные изменения", value: "1" },
 ];
 
 type CryptoRow = {
@@ -26,7 +26,7 @@ const CRYPTO_RATES: CryptoRow[] = [
     client: "0.975 USD",
     margin: "2.5%",
     source: "Binance",
-    status: "Active",
+    status: "Активна",
   },
   {
     asset: "BTC",
@@ -34,7 +34,7 @@ const CRYPTO_RATES: CryptoRow[] = [
     client: "65,475 USD",
     margin: "3.0%",
     source: "Binance",
-    status: "Active",
+    status: "Активна",
   },
   {
     asset: "ETH",
@@ -42,7 +42,7 @@ const CRYPTO_RATES: CryptoRow[] = [
     client: "3,346 USD",
     margin: "3.0%",
     source: "Binance",
-    status: "Active",
+    status: "Активна",
   },
   {
     asset: "TON",
@@ -50,7 +50,7 @@ const CRYPTO_RATES: CryptoRow[] = [
     client: "6.98 USD",
     margin: "3.0%",
     source: "CoinGecko",
-    status: "Active",
+    status: "Активна",
   },
 ];
 
@@ -66,50 +66,50 @@ type FiatRow = {
 const FIAT_RATES: FiatRow[] = [
   {
     currency: "RUB",
-    country: "Russia",
+    country: "Россия",
     market: "92.50",
     client: "90.18",
     margin: "2.5%",
-    status: "Active",
+    status: "Активна",
   },
   {
     currency: "KZT",
-    country: "Kazakhstan",
+    country: "Казахстан",
     market: "450.00",
     client: "438.75",
     margin: "2.5%",
-    status: "Active",
+    status: "Активна",
   },
   {
     currency: "UZS",
-    country: "Uzbekistan",
+    country: "Узбекистан",
     market: "12650.00",
     client: "12333.75",
     margin: "2.5%",
-    status: "Active",
+    status: "Активна",
   },
   {
     currency: "AZN",
-    country: "Azerbaijan",
+    country: "Азербайджан",
     market: "1.70",
     client: "1.66",
     margin: "2.5%",
-    status: "Active",
+    status: "Активна",
   },
   {
     currency: "KGS",
-    country: "Kyrgyzstan",
+    country: "Кыргызстан",
     market: "89.00",
     client: "86.78",
     margin: "2.5%",
-    status: "Active",
+    status: "Активна",
   },
 ];
 
 const MARGIN_RULES = [
-  { label: "Individual clients", value: "2% - 5%" },
-  { label: "Business clients", value: "1% - 3%" },
-  { label: "VIP clients", value: "Custom" },
+  { label: "Частные клиенты", value: "2% - 5%" },
+  { label: "Бизнес-клиенты", value: "1% - 3%" },
+  { label: "VIP-клиенты", value: "Индивидуально" },
 ];
 
 const statusBadge =
@@ -123,10 +123,10 @@ export default function AdminRatesPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Rates &amp; Margins
+              Курсы и маржа
             </h1>
             <p className="text-lg text-slate-600">
-              Monitor market rates, client rates and service margins.
+              Контроль рыночных курсов, клиентских курсов и сервисной маржи.
             </p>
           </div>
 
@@ -147,17 +147,17 @@ export default function AdminRatesPage() {
           </section>
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Crypto Rates</h2>
+            <h2 className="text-lg font-bold text-slate-950">Курсы криптовалют</h2>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Asset</th>
-                    <th className={thClass}>Market Rate</th>
-                    <th className={thClass}>Client Rate</th>
-                    <th className={thClass}>Margin</th>
-                    <th className={thClass}>Source</th>
-                    <th className={thClass}>Status</th>
+                    <th className={thClass}>Актив</th>
+                    <th className={thClass}>Рыночный курс</th>
+                    <th className={thClass}>Клиентский курс</th>
+                    <th className={thClass}>Маржа</th>
+                    <th className={thClass}>Источник</th>
+                    <th className={thClass}>Статус</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -184,18 +184,18 @@ export default function AdminRatesPage() {
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
             <h2 className="text-lg font-bold text-slate-950">
-              Fiat Payout Rates
+              Курсы фиатных выплат
             </h2>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Currency</th>
-                    <th className={thClass}>Country</th>
-                    <th className={thClass}>Market Rate</th>
-                    <th className={thClass}>Client Rate</th>
-                    <th className={thClass}>Margin</th>
-                    <th className={thClass}>Status</th>
+                    <th className={thClass}>Валюта</th>
+                    <th className={thClass}>Страна</th>
+                    <th className={thClass}>Рыночный курс</th>
+                    <th className={thClass}>Клиентский курс</th>
+                    <th className={thClass}>Маржа</th>
+                    <th className={thClass}>Статус</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -221,7 +221,7 @@ export default function AdminRatesPage() {
           </section>
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Margin Rules</h2>
+            <h2 className="text-lg font-bold text-slate-950">Правила маржи</h2>
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {MARGIN_RULES.map((rule) => (
                 <div key={rule.label} className="rounded-2xl bg-slate-50 p-5">

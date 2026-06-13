@@ -13,6 +13,21 @@ const en = {
       "Send cryptocurrency and settle payments in local currencies across CIS countries. Corporate accounts, supplier payments and business settlements.",
     primaryCta: "Create Request",
     secondaryCta: "Business Solutions",
+    stats: [
+      { value: "5", label: "Countries" },
+      { value: "Corporate", label: "Payouts" },
+      { value: "Real-Time", label: "Rates" },
+      { value: "Business", label: "Focus" },
+    ],
+    network: {
+      title: "Payment Network",
+      live: "Live",
+      nodes: {
+        corporate: "Corporate Account",
+        bankCard: "Bank Card",
+        localCurrency: "Local Currency",
+      },
+    },
   },
   calculator: {
     badge: "Live Calculator",
@@ -102,6 +117,33 @@ const en = {
     step2: "Nexora Processing",
     step3: "Company Bank Account Receives Local Currency",
     button: "Create Business Request",
+  },
+  security: {
+    badge: "Security & Compliance",
+    title: "AML monitoring and secure crypto-to-bank settlements",
+    subtitle:
+      "Every transaction is screened and verified. Nexora combines AML monitoring, KYC verification and bank-grade security across all payouts.",
+    features: [
+      {
+        title: "AML Monitoring",
+        description:
+          "Continuous screening of transactions against AML and risk policies.",
+      },
+      {
+        title: "KYC Verification",
+        description:
+          "Identity and business verification for individuals and organizations.",
+      },
+      {
+        title: "Transaction Screening",
+        description: "Wallet and counterparty risk scoring before every payout.",
+      },
+      {
+        title: "Bank-grade Security",
+        description:
+          "Encrypted processing and controlled settlement to local bank accounts.",
+      },
+    ],
   },
   howItWorks: {
     badge: "How It Works",

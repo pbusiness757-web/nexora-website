@@ -4,10 +4,10 @@ type KpiCard = {
 };
 
 const KPIS: KpiCard[] = [
-  { label: "Pending Review", value: "7" },
-  { label: "Passed Today", value: "21" },
-  { label: "High Risk", value: "2" },
-  { label: "Rejected", value: "1" },
+  { label: "Ожидают проверки", value: "7" },
+  { label: "Пройдено сегодня", value: "21" },
+  { label: "Высокий риск", value: "2" },
+  { label: "Отклонено", value: "1" },
 ];
 
 type AmlRow = {
@@ -30,9 +30,9 @@ const REVIEWS: AmlRow[] = [
     asset: "USDT",
     amount: "10,000",
     score: "18",
-    level: "Low",
-    status: "Passed",
-    decision: "Approved",
+    level: "Низкий",
+    status: "Пройдено",
+    decision: "Одобрено",
   },
   {
     id: "NX-2026-0003",
@@ -41,44 +41,44 @@ const REVIEWS: AmlRow[] = [
     asset: "ETH",
     amount: "18,000",
     score: "42",
-    level: "Medium",
-    status: "Manual Review",
-    decision: "Pending",
+    level: "Средний",
+    status: "Ручная проверка",
+    decision: "Ожидает",
   },
   {
     id: "NX-2026-0005",
-    client: "Private Client",
+    client: "Частный клиент",
     wallet: "bc1q...7xz",
     asset: "BTC",
     amount: "1.2",
     score: "79",
-    level: "High",
-    status: "Review Required",
-    decision: "Hold",
+    level: "Высокий",
+    status: "Требует проверки",
+    decision: "Удержание",
   },
 ];
 
-const RISK_LEVELS = ["Low", "Medium", "High", "Critical"];
+const RISK_LEVELS = ["Низкий", "Средний", "Высокий", "Критический"];
 
 const levelStyles: Record<string, string> = {
-  Low: "bg-emerald-50 text-emerald-600",
-  Medium: "bg-amber-50 text-amber-600",
-  High: "bg-rose-50 text-rose-600",
-  Critical: "bg-red-100 text-red-700",
+  Низкий: "bg-emerald-50 text-emerald-600",
+  Средний: "bg-amber-50 text-amber-600",
+  Высокий: "bg-rose-50 text-rose-600",
+  Критический: "bg-red-100 text-red-700",
 };
 
 const decisionStyles: Record<string, string> = {
-  Approved: "bg-emerald-50 text-emerald-600",
-  Pending: "bg-cyan-50 text-cyan-700",
-  Hold: "bg-orange-50 text-orange-600",
-  Rejected: "bg-rose-50 text-rose-600",
+  Одобрено: "bg-emerald-50 text-emerald-600",
+  Ожидает: "bg-cyan-50 text-cyan-700",
+  Удержание: "bg-orange-50 text-orange-600",
+  Отклонено: "bg-rose-50 text-rose-600",
 };
 
 const ACTIONS = [
-  { label: "Approve", primary: true },
-  { label: "Hold", primary: false },
-  { label: "Request documents", primary: false },
-  { label: "Reject", primary: false },
+  { label: "Одобрить", primary: true },
+  { label: "Удержать", primary: false },
+  { label: "Запросить документы", primary: false },
+  { label: "Отклонить", primary: false },
 ];
 
 const thClass = "pb-3 font-semibold";
@@ -90,10 +90,10 @@ export default function AdminAmlPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              AML &amp; Risk Review
+              AML и оценка рисков
             </h1>
             <p className="text-lg text-slate-600">
-              Monitor transaction risk, wallet checks and compliance decisions.
+              Контроль рисков транзакций, проверок кошельков и комплаенс-решений.
             </p>
           </div>
 
@@ -114,20 +114,20 @@ export default function AdminAmlPage() {
           </section>
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">AML Review</h2>
+            <h2 className="text-lg font-bold text-slate-950">AML-проверка</h2>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Request ID</th>
-                    <th className={thClass}>Client</th>
-                    <th className={thClass}>Wallet</th>
-                    <th className={thClass}>Asset</th>
-                    <th className={thClass}>Amount</th>
-                    <th className={thClass}>Risk Score</th>
-                    <th className={thClass}>Risk Level</th>
-                    <th className={thClass}>Status</th>
-                    <th className={thClass}>Decision</th>
+                    <th className={thClass}>ID заявки</th>
+                    <th className={thClass}>Клиент</th>
+                    <th className={thClass}>Кошелёк</th>
+                    <th className={thClass}>Актив</th>
+                    <th className={thClass}>Сумма</th>
+                    <th className={thClass}>Балл риска</th>
+                    <th className={thClass}>Уровень риска</th>
+                    <th className={thClass}>Статус</th>
+                    <th className={thClass}>Решение</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -176,7 +176,7 @@ export default function AdminAmlPage() {
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8 lg:col-span-2">
               <h2 className="text-lg font-bold text-slate-950">
-                Risk Level Legend
+                Легенда уровней риска
               </h2>
               <div className="mt-6 flex flex-wrap gap-3">
                 {RISK_LEVELS.map((level) => (
@@ -194,7 +194,7 @@ export default function AdminAmlPage() {
 
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
               <h2 className="text-lg font-bold text-slate-950">
-                Operator Actions
+                Действия оператора
               </h2>
               <div className="mt-6 flex flex-col gap-3">
                 {ACTIONS.map((action) => (

@@ -4,10 +4,10 @@ type KpiCard = {
 };
 
 const KPIS: KpiCard[] = [
-  { label: "Monthly Volume", value: "1,240,000 USDT" },
-  { label: "Monthly Profit", value: "34,800 USDT" },
-  { label: "Completed Requests", value: "486" },
-  { label: "Average Margin", value: "2.8%" },
+  { label: "Объём за месяц", value: "1,240,000 USDT" },
+  { label: "Прибыль за месяц", value: "34,800 USDT" },
+  { label: "Завершённые заявки", value: "486" },
+  { label: "Средняя маржа", value: "2.8%" },
 ];
 
 type CountryRow = {
@@ -20,35 +20,35 @@ type CountryRow = {
 
 const COUNTRIES: CountryRow[] = [
   {
-    country: "Russia",
+    country: "Россия",
     currency: "RUB",
     volume: "520,000 USDT",
     requests: "184",
     profit: "14,600 USDT",
   },
   {
-    country: "Kazakhstan",
+    country: "Казахстан",
     currency: "KZT",
     volume: "310,000 USDT",
     requests: "112",
     profit: "8,700 USDT",
   },
   {
-    country: "Uzbekistan",
+    country: "Узбекистан",
     currency: "UZS",
     volume: "245,000 USDT",
     requests: "96",
     profit: "6,900 USDT",
   },
   {
-    country: "Azerbaijan",
+    country: "Азербайджан",
     currency: "AZN",
     volume: "95,000 USDT",
     requests: "54",
     profit: "2,600 USDT",
   },
   {
-    country: "Kyrgyzstan",
+    country: "Кыргызстан",
     currency: "KGS",
     volume: "70,000 USDT",
     requests: "40",
@@ -57,14 +57,14 @@ const COUNTRIES: CountryRow[] = [
 ];
 
 const METHODS = [
-  { label: "Corporate Accounts", percent: 58 },
-  { label: "Bank Cards", percent: 27 },
-  { label: "Personal Accounts", percent: 15 },
+  { label: "Корпоративные счета", percent: 58 },
+  { label: "Банковские карты", percent: 27 },
+  { label: "Личные счета", percent: 15 },
 ];
 
 const SEGMENTS = [
-  { label: "Business Clients Volume", value: "820,000 USDT", percent: 66 },
-  { label: "Individual Clients Volume", value: "420,000 USDT", percent: 34 },
+  { label: "Объём бизнес-клиентов", value: "820,000 USDT", percent: 66 },
+  { label: "Объём частных клиентов", value: "420,000 USDT", percent: 34 },
 ];
 
 const thClass = "pb-3 font-semibold";
@@ -76,11 +76,11 @@ export default function AdminReportsPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Reports &amp; Analytics
+              Отчёты и аналитика
             </h1>
             <p className="text-lg text-slate-600">
-              Track turnover, profit, countries, payout methods and business
-              performance.
+              Контроль оборота, прибыли, стран, способов выплат и показателей
+              бизнеса.
             </p>
           </div>
 
@@ -102,17 +102,17 @@ export default function AdminReportsPage() {
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
             <h2 className="text-lg font-bold text-slate-950">
-              Volume by Country
+              Объём по странам
             </h2>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Country</th>
-                    <th className={thClass}>Currency</th>
-                    <th className={thClass}>Volume</th>
-                    <th className={thClass}>Requests</th>
-                    <th className={thClass}>Profit</th>
+                    <th className={thClass}>Страна</th>
+                    <th className={thClass}>Валюта</th>
+                    <th className={thClass}>Объём</th>
+                    <th className={thClass}>Заявки</th>
+                    <th className={thClass}>Прибыль</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -139,7 +139,7 @@ export default function AdminReportsPage() {
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
               <h2 className="text-lg font-bold text-slate-950">
-                Payout Method Performance
+                Эффективность способов выплат
               </h2>
               <div className="mt-6 space-y-5">
                 {METHODS.map((method) => (
@@ -165,7 +165,7 @@ export default function AdminReportsPage() {
 
             <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
               <h2 className="text-lg font-bold text-slate-950">
-                Business Segment
+                Бизнес-сегмент
               </h2>
               <div className="mt-6 space-y-5">
                 {SEGMENTS.map((segment) => (
@@ -188,7 +188,7 @@ export default function AdminReportsPage() {
                 ))}
               </div>
               <p className="mt-6 rounded-2xl bg-slate-50 p-4 text-sm font-medium text-slate-600">
-                Corporate payouts are the leading segment.
+                Корпоративные выплаты — ведущий сегмент.
               </p>
             </section>
           </div>

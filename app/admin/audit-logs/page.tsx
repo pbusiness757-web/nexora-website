@@ -4,10 +4,10 @@ type KpiCard = {
 };
 
 const KPIS: KpiCard[] = [
-  { label: "Actions Today", value: "86" },
-  { label: "Status Changes", value: "34" },
-  { label: "Rate Updates", value: "7" },
-  { label: "AML Decisions", value: "12" },
+  { label: "Действий сегодня", value: "86" },
+  { label: "Изменений статусов", value: "34" },
+  { label: "Обновлений курсов", value: "7" },
+  { label: "AML-решений", value: "12" },
 ];
 
 type LogRow = {
@@ -23,17 +23,17 @@ type LogRow = {
 const LOGS: LogRow[] = [
   {
     time: "12:44",
-    operator: "Anna",
-    action: "Request status changed",
+    operator: "Анна",
+    action: "Изменён статус заявки",
     entity: "NX-2026-0001",
-    oldValue: "AML Review",
-    newValue: "Ready for Payout",
+    oldValue: "AML-проверка",
+    newValue: "Готово к выплате",
     ip: "192.168.1.12",
   },
   {
     time: "12:32",
-    operator: "Ivan",
-    action: "Margin updated",
+    operator: "Иван",
+    action: "Обновлена маржа",
     entity: "USDT/RUB",
     oldValue: "2.5%",
     newValue: "2.8%",
@@ -41,30 +41,30 @@ const LOGS: LogRow[] = [
   },
   {
     time: "12:10",
-    operator: "Marina",
-    action: "AML decision",
+    operator: "Марина",
+    action: "AML-решение",
     entity: "NX-2026-0003",
-    oldValue: "Pending",
-    newValue: "Approved",
+    oldValue: "Ожидает",
+    newValue: "Одобрено",
     ip: "192.168.1.21",
   },
   {
     time: "11:58",
-    operator: "Anna",
-    action: "Payout completed",
+    operator: "Анна",
+    action: "Выплата завершена",
     entity: "PO-2026-0001",
-    oldValue: "Processing",
-    newValue: "Completed",
+    oldValue: "В обработке",
+    newValue: "Завершено",
     ip: "192.168.1.12",
   },
 ];
 
 const IMPORTANT_ACTIONS = [
-  "Payout completion",
-  "AML decisions",
-  "Rate and margin changes",
-  "Client risk level updates",
-  "Partner status changes",
+  "Завершение выплаты",
+  "AML-решения",
+  "Изменения курсов и маржи",
+  "Обновления уровня риска клиента",
+  "Изменения статуса партнёра",
 ];
 
 const thClass = "pb-3 font-semibold";
@@ -76,11 +76,11 @@ export default function AdminAuditLogsPage() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-            Audit Logs
+            Журнал действий
           </h1>
           <p className="text-lg text-slate-600">
-            Track critical actions, status changes, rate updates and operator
-            decisions.
+            Контроль критичных действий, изменений статусов, обновлений курсов и
+            решений операторов.
           </p>
         </div>
 
@@ -99,17 +99,17 @@ export default function AdminAuditLogsPage() {
         </section>
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Audit Logs</h2>
+          <h2 className="text-lg font-bold text-slate-950">Журнал действий</h2>
           <div className="mt-6 overflow-x-auto">
             <table className="w-full min-w-[920px] text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500">
-                  <th className={thClass}>Time</th>
-                  <th className={thClass}>Operator</th>
-                  <th className={thClass}>Action</th>
-                  <th className={thClass}>Entity</th>
-                  <th className={thClass}>Old Value</th>
-                  <th className={thClass}>New Value</th>
+                  <th className={thClass}>Время</th>
+                  <th className={thClass}>Оператор</th>
+                  <th className={thClass}>Действие</th>
+                  <th className={thClass}>Объект</th>
+                  <th className={thClass}>Было</th>
+                  <th className={thClass}>Стало</th>
                   <th className={thClass}>IP</th>
                 </tr>
               </thead>
@@ -145,7 +145,7 @@ export default function AdminAuditLogsPage() {
         </section>
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Important Actions</h2>
+          <h2 className="text-lg font-bold text-slate-950">Важные действия</h2>
           <ul className="mt-6 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
             {IMPORTANT_ACTIONS.map((action) => (
               <li

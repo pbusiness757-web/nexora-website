@@ -4,27 +4,27 @@ type CountryItem = {
 };
 
 const COUNTRIES: CountryItem[] = [
-  { name: "Russia", currency: "RUB" },
-  { name: "Kazakhstan", currency: "KZT" },
-  { name: "Uzbekistan", currency: "UZS" },
-  { name: "Azerbaijan", currency: "AZN" },
-  { name: "Kyrgyzstan", currency: "KGS" },
+  { name: "Россия", currency: "RUB" },
+  { name: "Казахстан", currency: "KZT" },
+  { name: "Узбекистан", currency: "UZS" },
+  { name: "Азербайджан", currency: "AZN" },
+  { name: "Кыргызстан", currency: "KGS" },
 ];
 
 const CRYPTO_ASSETS = ["USDT", "BTC", "ETH", "TON", "TRX", "USDC", "LTC"];
 
 const MARGIN_SETTINGS = [
-  { label: "Individual clients", value: "2% - 5%" },
-  { label: "Business clients", value: "1% - 3%" },
-  { label: "VIP clients", value: "Custom" },
-  { label: "Urgent payout fee", value: "Optional" },
+  { label: "Частные клиенты", value: "2% - 5%" },
+  { label: "Бизнес-клиенты", value: "1% - 3%" },
+  { label: "VIP-клиенты", value: "Индивидуально" },
+  { label: "Комиссия за срочную выплату", value: "Опционально" },
 ];
 
 const REQUEST_LIMITS = [
-  { label: "Minimum request", value: "100 USDT" },
-  { label: "Individual max", value: "10,000 USDT" },
-  { label: "Business max", value: "100,000 USDT" },
-  { label: "Manual review above", value: "50,000 USDT" },
+  { label: "Минимальная заявка", value: "100 USDT" },
+  { label: "Максимум для физлиц", value: "10,000 USDT" },
+  { label: "Максимум для бизнеса", value: "100,000 USDT" },
+  { label: "Ручная проверка свыше", value: "50,000 USDT" },
 ];
 
 type OperationalRow = {
@@ -34,10 +34,10 @@ type OperationalRow = {
 };
 
 const OPERATIONAL_SETTINGS: OperationalRow[] = [
-  { label: "Rate update interval", value: "30 seconds", state: "neutral" },
-  { label: "Request expiration", value: "15 minutes", state: "neutral" },
-  { label: "AML review", value: "Enabled", state: "on" },
-  { label: "Maintenance mode", value: "Off", state: "off" },
+  { label: "Интервал обновления курсов", value: "30 секунд", state: "neutral" },
+  { label: "Срок действия заявки", value: "15 минут", state: "neutral" },
+  { label: "AML-проверка", value: "Включена", state: "on" },
+  { label: "Режим обслуживания", value: "Выключен", state: "off" },
 ];
 
 const activeBadge =
@@ -80,17 +80,17 @@ export default function AdminSettingsPage() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-            Platform Settings
+            Настройки платформы
           </h1>
           <p className="text-lg text-slate-600">
-            Manage payout countries, currencies, crypto assets, margins and
-            operational limits.
+            Управление странами выплат, валютами, криптоактивами, маржой и
+            операционными лимитами.
           </p>
         </div>
 
         <section className="mt-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
           <h2 className="text-lg font-bold text-slate-950">
-            Supported Countries
+            Поддерживаемые страны
           </h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {COUNTRIES.map((country) => (
@@ -102,7 +102,7 @@ export default function AdminSettingsPage() {
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-900">
                     {country.currency}
                   </span>
-                  <span className={activeBadge}>Active</span>
+                  <span className={activeBadge}>Активна</span>
                 </div>
                 <p className="mt-4 font-semibold text-slate-950">
                   {country.name}
@@ -114,7 +114,7 @@ export default function AdminSettingsPage() {
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
           <h2 className="text-lg font-bold text-slate-950">
-            Supported Crypto Assets
+            Поддерживаемые криптоактивы
           </h2>
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
             {CRYPTO_ASSETS.map((asset) => (
@@ -130,13 +130,13 @@ export default function AdminSettingsPage() {
         </section>
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <KeyValueCard title="Margin Settings" rows={MARGIN_SETTINGS} />
-          <KeyValueCard title="Request Limits" rows={REQUEST_LIMITS} />
+          <KeyValueCard title="Настройки маржи" rows={MARGIN_SETTINGS} />
+          <KeyValueCard title="Лимиты заявок" rows={REQUEST_LIMITS} />
         </div>
 
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
           <h2 className="text-lg font-bold text-slate-950">
-            Operational Settings
+            Операционные настройки
           </h2>
           <dl className="mt-6 divide-y divide-slate-100">
             {OPERATIONAL_SETTINGS.map((row) => (

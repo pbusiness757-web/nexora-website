@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
+import SmartImage from '../ui/SmartImage';
 
 const ICONS = ['🏛️', '🏭', '👥', '🧾'];
 const CURRENCIES = ['RUB', 'KZT', 'UZS', 'AZN', 'KGS'];
@@ -22,7 +23,14 @@ export default function CorporatePayouts() {
           <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
+        <SmartImage
+          src="/images/business/corporate-payouts.jpg"
+          alt={t.title}
+          sizes="(min-width: 1280px) 1280px, 100vw"
+          className="mt-12 h-48 w-full rounded-[2rem] border border-slate-200 shadow-lg shadow-slate-200/60 md:h-64"
+        />
+
+        <div className="mt-12 grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {t.features.map((feature, index) => (
               <div

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
+import SmartImage from '../ui/SmartImage';
 
 type CountryKey =
   | 'Russia'
@@ -38,8 +39,16 @@ export default function CountriesSection() {
           {COUNTRIES.map((country) => (
             <div
               key={country.key}
-              className="group rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
+              className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
             >
+              <SmartImage
+                src={`/images/countries/${country.key.toLowerCase()}.jpg`}
+                alt={t.names[country.key]}
+                sizes="(min-width: 1280px) 256px, (min-width: 640px) 50vw, 100vw"
+                className="h-28 w-full"
+              />
+
+              <div className="p-8">
               <div className="flex items-center justify-between">
                 <span className="text-4xl">{country.flag}</span>
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-900">
@@ -59,6 +68,7 @@ export default function CountriesSection() {
                   </li>
                 ))}
               </ul>
+              </div>
             </div>
           ))}
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
+import CountUp from '../ui/CountUp';
 
 export default function StatisticsSection() {
   const { dict } = useLocale();
@@ -25,7 +26,9 @@ export default function StatisticsSection() {
               key={stat.label}
               className="rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
             >
-              <p className="text-5xl font-bold text-blue-900">{stat.value}</p>
+              <p className="text-5xl font-bold text-blue-900">
+                <CountUp value={stat.value} />
+              </p>
               <p className="mt-3 text-base font-medium text-slate-600">
                 {stat.label}
               </p>

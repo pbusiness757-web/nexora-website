@@ -13,6 +13,21 @@ const az = {
       "Kriptovalyuta göndərin və MDB ölkələri üzrə milli valyutalarda ödənişlər alın. Korporativ hesablar, təchizatçı ödənişləri və biznes hesablaşmaları.",
     primaryCta: "Sorğu yarat",
     secondaryCta: "Biznes həllər",
+    stats: [
+      { value: "5", label: "Ölkə" },
+      { value: "Korp.", label: "Ödənişlər" },
+      { value: "Onlayn", label: "Məzənnələr" },
+      { value: "B2B", label: "Fokus" },
+    ],
+    network: {
+      title: "Ödəniş şəbəkəsi",
+      live: "Onlayn",
+      nodes: {
+        corporate: "Korp. hesab",
+        bankCard: "Bank kartı",
+        localCurrency: "Yerli valyuta",
+      },
+    },
   },
   calculator: {
     badge: "Kalkulyator",
@@ -110,6 +125,33 @@ const az = {
     step2: "Nexora emalı",
     step3: "Şirkət hesabı yerli valyuta alır",
     button: "Biznes sorğusu yarat",
+  },
+  security: {
+    badge: "Təhlükəsizlik və uyğunluq",
+    title: "AML monitorinqi və təhlükəsiz kripto-bank hesablaşmaları",
+    subtitle:
+      "Hər əməliyyat yoxlanılır və təsdiqlənir. Nexora bütün ödənişlərdə AML monitorinqini, KYC yoxlamasını və bank səviyyəli təhlükəsizliyi birləşdirir.",
+    features: [
+      {
+        title: "AML monitorinqi",
+        description:
+          "Əməliyyatların AML və risk siyasətlərinə uyğun davamlı yoxlanılması.",
+      },
+      {
+        title: "KYC yoxlaması",
+        description:
+          "Fiziki şəxslər və təşkilatlar üçün şəxsiyyət və biznes yoxlaması.",
+      },
+      {
+        title: "Əməliyyat skrininqi",
+        description: "Hər ödənişdən əvvəl pulqabı və qarşı tərəf riskinin qiymətləndirilməsi.",
+      },
+      {
+        title: "Bank səviyyəli təhlükəsizlik",
+        description:
+          "Şifrələnmiş emal və yerli hesablara nəzarətli hesablaşma.",
+      },
+    ],
   },
   howItWorks: {
     badge: "Necə işləyir",

@@ -13,6 +13,21 @@ const uz = {
       "Kriptovalyuta yuboring va MDH davlatlari boʻylab milliy valyutalarda toʻlovlarni qabul qiling. Korporativ hisoblar, yetkazib beruvchilarga toʻlovlar va biznes hisob-kitoblari.",
     primaryCta: "Soʻrov yaratish",
     secondaryCta: "Biznes yechimlar",
+    stats: [
+      { value: "5", label: "Davlat" },
+      { value: "Korp.", label: "Toʻlovlar" },
+      { value: "Onlayn", label: "Kurslar" },
+      { value: "B2B", label: "Fokus" },
+    ],
+    network: {
+      title: "Toʻlov tarmogʻi",
+      live: "Onlayn",
+      nodes: {
+        corporate: "Korp. hisob",
+        bankCard: "Bank kartasi",
+        localCurrency: "Mahalliy valyuta",
+      },
+    },
   },
   calculator: {
     badge: "Kalkulyator",
@@ -110,6 +125,33 @@ const uz = {
     step2: "Nexora qayta ishlashi",
     step3: "Kompaniya hisobi mahalliy valyutani oladi",
     button: "Biznes soʻrov yaratish",
+  },
+  security: {
+    badge: "Xavfsizlik va muvofiqlik",
+    title: "AML monitoringi va xavfsiz kripto-bank hisob-kitoblari",
+    subtitle:
+      "Har bir tranzaksiya tekshiriladi va tasdiqlanadi. Nexora barcha toʻlovlarda AML monitoringi, KYC verifikatsiyasi va bank darajasidagi xavfsizlikni birlashtiradi.",
+    features: [
+      {
+        title: "AML monitoringi",
+        description:
+          "Tranzaksiyalarni AML va xavf siyosatlari boʻyicha uzluksiz tekshirish.",
+      },
+      {
+        title: "KYC verifikatsiyasi",
+        description:
+          "Jismoniy shaxslar va tashkilotlar uchun shaxs va biznes tekshiruvi.",
+      },
+      {
+        title: "Tranzaksiyalar skriningi",
+        description: "Har bir toʻlovdan oldin hamyon va kontragent xavfini baholash.",
+      },
+      {
+        title: "Bank darajasidagi xavfsizlik",
+        description:
+          "Shifrlangan qayta ishlash va mahalliy hisoblarga nazoratli hisob-kitob.",
+      },
+    ],
   },
   howItWorks: {
     badge: "Bu qanday ishlaydi",

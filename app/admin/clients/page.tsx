@@ -4,10 +4,10 @@ type KpiCard = {
 };
 
 const KPIS: KpiCard[] = [
-  { label: "Total Clients", value: "248" },
-  { label: "Business Clients", value: "64" },
-  { label: "Individual Clients", value: "184" },
-  { label: "High Value Clients", value: "17" },
+  { label: "Всего клиентов", value: "248" },
+  { label: "Бизнес-клиенты", value: "64" },
+  { label: "Частные клиенты", value: "184" },
+  { label: "Крупные клиенты", value: "17" },
 ];
 
 type ClientRow = {
@@ -25,75 +25,75 @@ const CLIENTS: ClientRow[] = [
   {
     id: "CL-0001",
     name: "Alpha Trade LLC",
-    type: "Business",
-    country: "Russia",
+    type: "Бизнес",
+    country: "Россия",
     volume: "125,000 USDT",
     requests: "14",
-    risk: "Low",
-    status: "Active",
+    risk: "Низкий",
+    status: "Активен",
   },
   {
     id: "CL-0002",
-    name: "Private Client",
-    type: "Individual",
-    country: "Kazakhstan",
+    name: "Частный клиент",
+    type: "Физлицо",
+    country: "Казахстан",
     volume: "18,500 USDT",
     requests: "6",
-    risk: "Medium",
-    status: "Active",
+    risk: "Средний",
+    status: "Активен",
   },
   {
     id: "CL-0003",
     name: "UzMarket Group",
-    type: "Business",
-    country: "Uzbekistan",
+    type: "Бизнес",
+    country: "Узбекистан",
     volume: "240,000 USDT",
     requests: "22",
-    risk: "Low",
+    risk: "Низкий",
     status: "VIP",
   },
   {
     id: "CL-0004",
-    name: "Contractor",
-    type: "Individual",
-    country: "Azerbaijan",
+    name: "Подрядчик",
+    type: "Физлицо",
+    country: "Азербайджан",
     volume: "9,200 USDT",
     requests: "3",
-    risk: "Low",
-    status: "Active",
+    risk: "Низкий",
+    status: "Активен",
   },
 ];
 
 const riskStyles: Record<string, string> = {
-  Low: "bg-emerald-50 text-emerald-600",
-  Medium: "bg-amber-50 text-amber-600",
-  High: "bg-rose-50 text-rose-600",
+  Низкий: "bg-emerald-50 text-emerald-600",
+  Средний: "bg-amber-50 text-amber-600",
+  Высокий: "bg-rose-50 text-rose-600",
 };
 
 const statusStyles: Record<string, string> = {
-  Active: "bg-emerald-50 text-emerald-600",
+  Активен: "bg-emerald-50 text-emerald-600",
   VIP: "bg-indigo-50 text-indigo-700",
-  Suspended: "bg-rose-50 text-rose-600",
+  Заблокирован: "bg-rose-50 text-rose-600",
 };
 
-const CLIENT_TYPES = ["Individual", "Business", "VIP"];
+const CLIENT_TYPES = ["Физлицо", "Бизнес", "VIP"];
 
 const typeStyles: Record<string, string> = {
-  Individual: "bg-slate-100 text-slate-600",
-  Business: "bg-blue-50 text-blue-700",
+  Физлицо: "bg-slate-100 text-slate-600",
+  Бизнес: "bg-blue-50 text-blue-700",
   VIP: "bg-indigo-50 text-indigo-700",
 };
 
-const FILTER_TYPE = ["All Types", "Individual", "Business", "VIP"];
+const FILTER_TYPE = ["Все типы", "Физлицо", "Бизнес", "VIP"];
 const FILTER_COUNTRY = [
-  "All Countries",
-  "Russia",
-  "Kazakhstan",
-  "Uzbekistan",
-  "Azerbaijan",
-  "Kyrgyzstan",
+  "Все страны",
+  "Россия",
+  "Казахстан",
+  "Узбекистан",
+  "Азербайджан",
+  "Кыргызстан",
 ];
-const FILTER_RISK = ["All Levels", "Low", "Medium", "High"];
+const FILTER_RISK = ["Все уровни", "Низкий", "Средний", "Высокий"];
 
 const fieldClass =
   "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100";
@@ -106,10 +106,10 @@ export default function AdminClientsPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Clients Management
+              Управление клиентами
             </h1>
             <p className="text-lg text-slate-600">
-              View individual and business clients, volumes and risk levels.
+              Просмотр частных и бизнес-клиентов, объёмов и уровней риска.
             </p>
           </div>
 
@@ -136,12 +136,12 @@ export default function AdminClientsPage() {
                   htmlFor="search-name"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Search by name
+                  Поиск по названию
                 </label>
                 <input
                   id="search-name"
                   type="text"
-                  placeholder="e.g. Alpha Trade LLC"
+                  placeholder="напр. Alpha Trade LLC"
                   className={`mt-2 ${fieldClass}`}
                 />
               </div>
@@ -151,7 +151,7 @@ export default function AdminClientsPage() {
                   htmlFor="filter-type"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Client Type
+                  Тип клиента
                 </label>
                 <select id="filter-type" className={`mt-2 ${fieldClass}`}>
                   {FILTER_TYPE.map((option) => (
@@ -165,7 +165,7 @@ export default function AdminClientsPage() {
                   htmlFor="filter-country"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Country
+                  Страна
                 </label>
                 <select id="filter-country" className={`mt-2 ${fieldClass}`}>
                   {FILTER_COUNTRY.map((option) => (
@@ -179,7 +179,7 @@ export default function AdminClientsPage() {
                   htmlFor="filter-risk"
                   className="text-sm font-semibold text-slate-500"
                 >
-                  Risk Level
+                  Уровень риска
                 </label>
                 <select id="filter-risk" className={`mt-2 ${fieldClass}`}>
                   {FILTER_RISK.map((option) => (
@@ -191,19 +191,19 @@ export default function AdminClientsPage() {
           </section>
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Clients</h2>
+            <h2 className="text-lg font-bold text-slate-950">Клиенты</h2>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[920px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Client ID</th>
-                    <th className={thClass}>Name</th>
-                    <th className={thClass}>Type</th>
-                    <th className={thClass}>Country</th>
-                    <th className={thClass}>Total Volume</th>
-                    <th className={thClass}>Requests</th>
-                    <th className={thClass}>Risk Level</th>
-                    <th className={thClass}>Status</th>
+                    <th className={thClass}>ID клиента</th>
+                    <th className={thClass}>Название</th>
+                    <th className={thClass}>Тип</th>
+                    <th className={thClass}>Страна</th>
+                    <th className={thClass}>Общий объём</th>
+                    <th className={thClass}>Заявки</th>
+                    <th className={thClass}>Уровень риска</th>
+                    <th className={thClass}>Статус</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -255,7 +255,7 @@ export default function AdminClientsPage() {
 
           <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
             <h2 className="text-lg font-bold text-slate-950">
-              Client Types Legend
+              Легенда типов клиентов
             </h2>
             <div className="mt-6 flex flex-wrap gap-3">
               {CLIENT_TYPES.map((type) => (
