@@ -37,16 +37,28 @@ function statusMeta(status: string) {
 
 const STATUS_OPTIONS = Object.keys(STATUS_META);
 
-const FILTER_STATUS = ["Все статусы", ...Object.values(STATUS_META).map((s) => s.label)];
-const FILTER_COUNTRY = [
-  "Все страны",
-  "Россия",
-  "Казахстан",
-  "Узбекистан",
-  "Азербайджан",
-  "Кыргызстан",
-];
-const FILTER_RECIPIENT = ["Все типы", "Физлицо", "Организация"];
+const ALL_STATUSES = "Все статусы";
+const ALL_COUNTRIES = "Все страны";
+const ALL_ASSETS = "Все активы";
+
+const FILTER_STATUS = [ALL_STATUSES, ...STATUS_OPTIONS.map((s) => statusMeta(s).label)];
+const CRYPTO_ASSETS = ["USDT", "BTC", "ETH", "TON", "TRX", "USDC", "LTC"];
+const FILTER_ASSET = [ALL_ASSETS, ...CRYPTO_ASSETS];
+
+// Reverse of country -> currency (RU labels) for the country filter.
+const COUNTRY_CURRENCY: Record<string, string> = {
+  Россия: "RUB",
+  Казахстан: "KZT",
+  Узбекистан: "UZS",
+  Азербайджан: "AZN",
+  Кыргызстан: "KGS",
+};
+const FILTER_COUNTRY = [ALL_COUNTRIES, ...Object.keys(COUNTRY_CURRENCY)];
+
+// Status display label -> enum value, for filtering.
+const LABEL_TO_STATUS: Record<string, string> = Object.fromEntries(
+  STATUS_OPTIONS.map((s) => [statusMeta(s).label, s])
+);
 
 const selectClass =
   "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100";
@@ -59,6 +71,30 @@ export default function AdminRequestsPage() {
     type: "ok" | "err";
     text: string;
   } | null>(null);
+
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState(ALL_STATUSES);
+  const [countryFilter, setCountryFilter] = useState(ALL_COUNTRIES);
+  const [assetFilter, setAssetFilter] = useState(ALL_ASSETS);
+
+  const filtered = requests.filter((r) => {
+    if (query && !r.requestNumber.toLowerCase().includes(query.toLowerCase())) {
+      return false;
+    }
+    if (statusFilter !== ALL_STATUSES && r.status !== LABEL_TO_STATUS[statusFilter]) {
+      return false;
+    }
+    if (
+      countryFilter !== ALL_COUNTRIES &&
+      r.payoutCurrency !== COUNTRY_CURRENCY[countryFilter]
+    ) {
+      return false;
+    }
+    if (assetFilter !== ALL_ASSETS && r.cryptoAsset !== assetFilter) {
+      return false;
+    }
+    return true;
+  });
 
   useEffect(() => {
     let active = true;
@@ -128,6 +164,8 @@ export default function AdminRequestsPage() {
               <input
                 id="search-id"
                 type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="напр. NX-2026-0001"
                 className={`mt-2 ${selectClass}`}
               />
@@ -140,7 +178,12 @@ export default function AdminRequestsPage() {
               >
                 Статус
               </label>
-              <select id="filter-status" className={`mt-2 ${selectClass}`}>
+              <select
+                id="filter-status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className={`mt-2 ${selectClass}`}
+              >
                 {FILTER_STATUS.map((option) => (
                   <option key={option}>{option}</option>
                 ))}
@@ -154,7 +197,12 @@ export default function AdminRequestsPage() {
               >
                 Страна
               </label>
-              <select id="filter-country" className={`mt-2 ${selectClass}`}>
+              <select
+                id="filter-country"
+                value={countryFilter}
+                onChange={(e) => setCountryFilter(e.target.value)}
+                className={`mt-2 ${selectClass}`}
+              >
                 {FILTER_COUNTRY.map((option) => (
                   <option key={option}>{option}</option>
                 ))}
@@ -163,13 +211,18 @@ export default function AdminRequestsPage() {
 
             <div>
               <label
-                htmlFor="filter-recipient"
+                htmlFor="filter-asset"
                 className="text-sm font-semibold text-slate-500"
               >
-                Тип получателя
+                Криптоактив
               </label>
-              <select id="filter-recipient" className={`mt-2 ${selectClass}`}>
-                {FILTER_RECIPIENT.map((option) => (
+              <select
+                id="filter-asset"
+                value={assetFilter}
+                onChange={(e) => setAssetFilter(e.target.value)}
+                className={`mt-2 ${selectClass}`}
+              >
+                {FILTER_ASSET.map((option) => (
                   <option key={option}>{option}</option>
                 ))}
               </select>
@@ -200,6 +253,10 @@ export default function AdminRequestsPage() {
             </p>
           ) : requests.length === 0 ? (
             <p className="mt-6 text-sm text-slate-500">Заявок пока нет.</p>
+          ) : filtered.length === 0 ? (
+            <p className="mt-6 text-sm text-slate-500">
+              Ничего не найдено по заданным фильтрам.
+            </p>
           ) : (
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-sm">
@@ -216,7 +273,7 @@ export default function AdminRequestsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {requests.map((row) => {
+                  {filtered.map((row) => {
                     const meta = statusMeta(row.status);
                     return (
                       <tr key={row.id} className="text-slate-700">

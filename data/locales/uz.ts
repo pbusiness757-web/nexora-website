@@ -318,6 +318,7 @@ const uz = {
     currencyLabel: "Toʻlov valyutasi",
     autoLabel: "avto",
     payoutAmountLabel: "Toʻlov miqdori",
+    estimatedPayout: "Taxminiy toʻlov",
     recipientTypeLabel: "Qabul qiluvchi turi",
     payoutMethodLabel: "Toʻlov usuli",
     recipientTitle: "Qabul qiluvchi",

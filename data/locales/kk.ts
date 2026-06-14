@@ -318,6 +318,7 @@ const kk = {
     currencyLabel: "Төлем валютасы",
     autoLabel: "авто",
     payoutAmountLabel: "Төлем сомасы",
+    estimatedPayout: "Болжамды төлем",
     recipientTypeLabel: "Алушы түрі",
     payoutMethodLabel: "Төлем әдісі",
     recipientTitle: "Алушы",

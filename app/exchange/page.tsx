@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
 import {
@@ -41,27 +41,45 @@ export default function ExchangePage() {
   const [cryptoAsset, setCryptoAsset] = useState(CRYPTOCURRENCIES[0]);
   const [network, setNetwork] = useState(NETWORKS[0]);
   const [cryptoAmount, setCryptoAmount] = useState("");
-  const [payoutAmount, setPayoutAmount] = useState("");
   const payoutCurrency = getPayoutCurrency(country);
   const [recipientType, setRecipientType] = useState(0);
   const [payoutMethod, setPayoutMethod] = useState(0);
   const [recipientDetails, setRecipientDetails] = useState("");
 
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [requestNumber, setRequestNumber] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${API_BASE}/api/rates`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.rates) setRates(data.rates);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Estimate only — backend is the source of truth for the final payout amount.
+  const rate = payoutCurrency ? rates?.[payoutCurrency] : undefined;
+  const cryptoValueNum = Number(cryptoAmount);
+  const estimatedPayout =
+    rate && Number.isFinite(cryptoValueNum) && cryptoValueNum > 0
+      ? (cryptoValueNum * rate).toLocaleString("en-US", {
+          maximumFractionDigits: 2,
+        })
+      : "—";
 
   async function handleSubmit() {
     setError(null);
 
     const cryptoValue = Number(cryptoAmount);
-    const payoutValue = Number(payoutAmount);
     if (!cryptoValue || cryptoValue <= 0) {
       setError(t.errors.crypto);
-      return;
-    }
-    if (!payoutValue || payoutValue <= 0) {
-      setError(t.errors.payout);
       return;
     }
     if (!recipientDetails.trim()) {
@@ -72,6 +90,8 @@ export default function ExchangePage() {
     setLoading(true);
     try {
       const number = generateRequestNumber();
+      // payoutAmount is intentionally NOT sent — the backend computes it from
+      // the country-derived currency and server-side rate snapshot.
       const res = await fetch(`${API_BASE}/api/requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,8 +101,6 @@ export default function ExchangePage() {
           cryptoAsset,
           network,
           cryptoAmount: cryptoValue,
-          payoutCurrency,
-          payoutAmount: payoutValue,
           country,
         }),
       });
@@ -268,19 +286,15 @@ export default function ExchangePage() {
                     </div>
 
                     <div>
-                      <label htmlFor="payout-amount" className={labelClass}>
-                        {t.payoutAmountLabel}
-                      </label>
-                      <input
-                        id="payout-amount"
-                        type="number"
-                        inputMode="decimal"
-                        min={0}
-                        value={payoutAmount}
-                        onChange={(e) => setPayoutAmount(e.target.value)}
-                        placeholder="0.00"
-                        className={inputClass}
-                      />
+                      <span className={labelClass}>{t.estimatedPayout}</span>
+                      <div className="mt-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-blue-900 px-4 py-4">
+                        <span className="text-base font-bold text-white">
+                          {estimatedPayout}
+                        </span>
+                        <span className="text-xs font-medium text-blue-100">
+                          {payoutCurrency}
+                        </span>
+                      </div>
                     </div>
 
                     <div>

@@ -310,6 +310,7 @@ const en = {
     currencyLabel: "Payout currency",
     autoLabel: "auto",
     payoutAmountLabel: "Payout amount",
+    estimatedPayout: "Estimated payout",
     recipientTypeLabel: "Recipient type",
     payoutMethodLabel: "Payout method",
     recipientTitle: "Recipient",

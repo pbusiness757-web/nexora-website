@@ -322,6 +322,7 @@ const ru = {
     currencyLabel: "Валюта выплаты",
     autoLabel: "авто",
     payoutAmountLabel: "Сумма выплаты",
+    estimatedPayout: "Ожидаемая выплата",
     recipientTypeLabel: "Тип получателя",
     payoutMethodLabel: "Способ выплаты",
     recipientTitle: "Получатель",

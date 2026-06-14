@@ -317,6 +317,7 @@ const ky = {
     currencyLabel: "Төлөм валютасы",
     autoLabel: "авто",
     payoutAmountLabel: "Төлөм суммасы",
+    estimatedPayout: "Болжолдуу төлөм",
     recipientTypeLabel: "Алуучунун түрү",
     payoutMethodLabel: "Төлөм ыкмасы",
     recipientTitle: "Алуучу",

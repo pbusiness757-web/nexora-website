@@ -318,6 +318,7 @@ const az = {
     currencyLabel: "Ödəniş valyutası",
     autoLabel: "avto",
     payoutAmountLabel: "Ödəniş məbləği",
+    estimatedPayout: "Təxmini ödəniş",
     recipientTypeLabel: "Alıcı növü",
     payoutMethodLabel: "Ödəniş üsulu",
     recipientTitle: "Alıcı",

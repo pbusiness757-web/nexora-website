@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 type NavItem = {
   label: string;
@@ -17,11 +17,24 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Клиенты', href: '/admin/clients' },
   { label: 'Партнёры и ликвидность', href: '/admin/partners' },
   { label: 'Отчёты', href: '/admin/reports' },
+  { label: 'Финансы', href: '/admin/finance' },
   { label: 'Журнал действий', href: '/admin/audit-logs' },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+    await fetch(`${apiBase}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    router.replace('/admin/login');
+    router.refresh();
+  }
 
   return (
     <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:block">
@@ -57,7 +70,15 @@ export default function AdminSidebar() {
           })}
         </nav>
 
-        <div className="mt-auto rounded-2xl bg-slate-50 p-4">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-auto rounded-2xl border border-slate-200 px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+        >
+          Выйти
+        </button>
+
+        <div className="mt-4 rounded-2xl bg-slate-50 p-4">
           <p className="text-sm font-semibold text-slate-950">
             Операционный центр
           </p>
