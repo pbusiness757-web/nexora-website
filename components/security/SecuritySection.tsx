@@ -39,7 +39,7 @@ export default function SecuritySection() {
           </div>
 
           <SmartImage
-            src="/images/security/security-main.jpg"
+            src="/images/security/nexora-security-compliance.webp"
             alt={t.title}
             sizes="(min-width: 1024px) 600px, 100vw"
             className="h-80 w-full rounded-[2rem] border border-slate-200 shadow-2xl shadow-slate-200 lg:h-[28rem]"

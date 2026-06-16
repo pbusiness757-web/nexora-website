@@ -181,7 +181,7 @@ export default function HeroSection() {
 
       <div className="mx-auto max-w-7xl px-6 pb-16">
         <SmartImage
-          src="/images/hero/hero-main.jpg"
+          src="/images/hero/nexora-hero-main.webp"
           alt="Nexora"
           priority
           sizes="(min-width: 1280px) 1280px, 100vw"

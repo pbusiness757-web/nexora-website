@@ -42,7 +42,7 @@ export default function CountriesSection() {
               className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
             >
               <SmartImage
-                src={`/images/countries/${country.key.toLowerCase()}.jpg`}
+                src={`/images/countries/${country.key.toLowerCase()}.webp`}
                 alt={t.names[country.key]}
                 sizes="(min-width: 1280px) 256px, (min-width: 640px) 50vw, 100vw"
                 className="h-28 w-full"

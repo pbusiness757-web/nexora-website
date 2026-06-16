@@ -23,7 +23,7 @@ export default function BusinessSolutions() {
         </div>
 
         <SmartImage
-          src="/images/business/business-payments.jpg"
+          src="/images/business/nexora-business-payouts.webp"
           alt={t.title}
           sizes="(min-width: 1280px) 1280px, 100vw"
           className="mt-12 h-48 w-full rounded-[2rem] border border-slate-200 shadow-lg shadow-slate-200/60 md:h-64"
