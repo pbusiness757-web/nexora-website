@@ -42,16 +42,32 @@ export default function RequestsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-white">Мои заявки</h1>
-        {result && (
-          <span className="text-gray-500 text-sm">Всего: {result.total}</span>
-        )}
+        <div>
+          <h1 className="text-2xl font-semibold text-white">Мои заявки</h1>
+          {result && (
+            <p className="text-gray-500 text-sm mt-0.5">Всего: {result.total}</p>
+          )}
+        </div>
+        <Link
+          href="/cabinet/requests/new"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex-shrink-0"
+        >
+          + Создать заявку
+        </Link>
       </div>
 
       {loading ? (
         <div className="text-gray-400 text-sm text-center py-12">Загрузка...</div>
       ) : !result || result.data.length === 0 ? (
-        <div className="text-gray-500 text-sm text-center py-12">Заявок пока нет</div>
+        <div className="text-center py-12 border border-dashed border-gray-700 rounded-xl">
+          <p className="text-gray-500 text-sm mb-4">Заявок пока нет</p>
+          <Link
+            href="/cabinet/requests/new"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            Создать первую заявку
+          </Link>
+        </div>
       ) : (
         <>
           <div className="space-y-3 mb-6">
@@ -74,9 +90,7 @@ export default function RequestsPage() {
                       → {req.payoutAmount} {req.payoutCurrency} · {formatDate(req.createdAt)}
                     </div>
                   </div>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${STATUS_COLORS[req.status] ?? "bg-gray-700 text-gray-200"}`}
-                  >
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${STATUS_COLORS[req.status] ?? "bg-gray-700 text-gray-200"}`}>
                     {STATUS_LABELS[req.status] ?? req.status}
                   </span>
                 </div>

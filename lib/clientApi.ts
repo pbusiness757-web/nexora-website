@@ -27,6 +27,14 @@ export interface RequestDetail extends MyRequest {
 }
 export interface Notification { id: string; message: string; isRead: boolean; createdAt: string; requestId: string | null }
 export interface PageResult<T> { data: T[]; total: number; page: number; limit: number }
+export interface RatesSnapshot { rates: Record<string, number>; updatedAt: string }
+
+export interface CreateRequestBody {
+  cryptoAsset: string;
+  network: string;
+  cryptoAmount: number;
+  country: string;
+}
 
 export const clientApi = {
   register: (email: string, password: string) =>
@@ -39,6 +47,11 @@ export const clientApi = {
     }),
   logout: () => apiFetch<void>("/api/client-auth/logout", { method: "POST" }),
   me: () => apiFetch<ClientUser>("/api/client-auth/me"),
+  getRates: () => apiFetch<RatesSnapshot>("/api/rates"),
+  createRequest: (body: CreateRequestBody) =>
+    apiFetch<MyRequest>("/api/client-requests", {
+      method: "POST", body: JSON.stringify(body),
+    }),
   getRequests: (page = 1, limit = 20) =>
     apiFetch<PageResult<MyRequest>>(`/api/client-requests?page=${page}&limit=${limit}`),
   getRequest: (id: string) => apiFetch<RequestDetail>(`/api/client-requests/${id}`),
@@ -47,8 +60,7 @@ export const clientApi = {
       const reader = new FileReader();
       reader.onload = async () => {
         try {
-          const dataUrl = reader.result as string;
-          const base64 = dataUrl.split(",")[1];
+          const base64 = (reader.result as string).split(",")[1];
           await apiFetch<void>(`/api/client-requests/${id}/upload`, {
             method: "POST",
             body: JSON.stringify({ originalName: file.name, mimeType: file.type, data: base64 }),
@@ -59,7 +71,6 @@ export const clientApi = {
       reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsDataURL(file);
     }),
-  /** Authenticated file download — returns a Blob */
   downloadProof: async (requestId: string, uploadId: string): Promise<{ blob: Blob; filename: string }> => {
     const res = await fetch(`${BASE_URL}/api/client-requests/${requestId}/uploads/${uploadId}`, {
       credentials: "include",
