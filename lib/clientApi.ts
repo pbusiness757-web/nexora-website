@@ -25,15 +25,14 @@ export interface RequestDetail extends MyRequest {
   payout: { id: string; payoutNumber: string; status: string; amount: string; currency: string } | null;
   proofUploads: { id: string; originalName: string; mimeType: string; size: number; uploadedAt: string }[];
 }
+export interface StatusHistoryEntry {
+  id: string; fromStatus: string; toStatus: string; changedBy: string; createdAt: string;
+}
 export interface Notification { id: string; message: string; isRead: boolean; createdAt: string; requestId: string | null }
 export interface PageResult<T> { data: T[]; total: number; page: number; limit: number }
 export interface RatesSnapshot { rates: Record<string, number>; updatedAt: string }
-
 export interface CreateRequestBody {
-  cryptoAsset: string;
-  network: string;
-  cryptoAmount: number;
-  country: string;
+  cryptoAsset: string; network: string; cryptoAmount: number; country: string;
 }
 
 export const clientApi = {
@@ -55,6 +54,8 @@ export const clientApi = {
   getRequests: (page = 1, limit = 20) =>
     apiFetch<PageResult<MyRequest>>(`/api/client-requests?page=${page}&limit=${limit}`),
   getRequest: (id: string) => apiFetch<RequestDetail>(`/api/client-requests/${id}`),
+  getStatusHistory: (id: string) =>
+    apiFetch<StatusHistoryEntry[]>(`/api/client-requests/${id}/status-history`),
   uploadProof: (id: string, file: File) =>
     new Promise<void>((resolve, reject) => {
       const reader = new FileReader();
