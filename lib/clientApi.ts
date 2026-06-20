@@ -22,6 +22,7 @@ export interface MyRequest {
 export interface RequestDetail extends MyRequest {
   rateSnapshot: string | null; nexoraFeePercent: string; nexoraFeeAmount: string | null;
   partnerFeePercent: string; partnerFeeAmount: string | null; netPayoutAmount: string | null;
+  amlStatus: string;
   payout: { id: string; payoutNumber: string; status: string; amount: string; currency: string } | null;
   proofUploads: { id: string; originalName: string; mimeType: string; size: number; uploadedAt: string }[];
 }

@@ -101,6 +101,18 @@ export default function RequestDetailPage() {
         <p className="text-gray-400 text-sm mt-0.5">Создана {formatDate(req.createdAt)}</p>
       </div>
 
+      {/* AML status display (read-only) */}
+      {req.amlStatus === "PASSED" && (
+        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-900/40 border border-emerald-700 px-3 py-1 text-xs font-semibold text-emerald-400">
+          ✓ AML пройдена
+        </div>
+      )}
+      {req.amlStatus === "REJECTED" && (
+        <div className="mb-4 rounded-lg border border-red-700 bg-red-900/30 px-4 py-3 text-sm text-red-300">
+          AML проверка не пройдена. Обратитесь в поддержку.
+        </div>
+      )}
+
       {/* Status timeline */}
       {isOnHold ? (
         <div className="mb-8 bg-red-900/30 border border-red-800 rounded-lg p-4 text-red-300 text-sm">
