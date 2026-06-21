@@ -3,7 +3,7 @@
 import { useLocale } from '../../lib/locale-context';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  default: 'rgba(240,185,11,1)',
+  default: 'rgba(37,99,235,1)',
 };
 
 export default function NewsSection() {
@@ -38,7 +38,7 @@ export default function NewsSection() {
                 style={{
                   background: 'var(--color-brand-dim)',
                   color: 'var(--color-brand)',
-                  border: '1px solid rgba(240,185,11,0.25)',
+                  border: '1px solid rgba(37,99,235,0.25)',
                 }}
               >
                 {item.category}

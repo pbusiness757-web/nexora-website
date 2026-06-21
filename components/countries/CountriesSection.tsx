@@ -53,7 +53,7 @@ export default function CountriesSection() {
                     style={{
                       background: 'var(--color-brand-dim)',
                       color: 'var(--color-brand)',
-                      border: '1px solid rgba(240,185,11,0.25)',
+                      border: '1px solid rgba(37,99,235,0.25)',
                     }}
                   >
                     {country.currency}

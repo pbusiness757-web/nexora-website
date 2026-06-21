@@ -8,17 +8,17 @@ const ShieldSVG = () => (
   <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
     <path
       d="M32 4L8 14v18c0 13.3 10.3 25.7 24 29 13.7-3.3 24-15.7 24-29V14L32 4z"
-      fill="rgba(240,185,11,0.15)"
-      stroke="#f0b90b"
+      fill="rgba(37,99,235,0.15)"
+      stroke="#2563eb"
       strokeWidth="2"
     />
     <path
       d="M32 12L14 20v12c0 8.8 6.8 17 18 19.3C43.2 49 50 40.8 50 32V20L32 12z"
-      fill="rgba(240,185,11,0.08)"
+      fill="rgba(37,99,235,0.08)"
     />
     <path
       d="M26 32l4 4 8-8"
-      stroke="#f0b90b"
+      stroke="#2563eb"
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -83,7 +83,7 @@ export default function SecuritySection() {
               className="nexora-card relative w-full max-w-sm p-8"
               style={{
                 background: 'var(--color-bg-elevated)',
-                boxShadow: '0 0 80px rgba(240,185,11,0.06), var(--shadow-card)',
+                boxShadow: '0 0 80px rgba(37,99,235,0.06), var(--shadow-card)',
               }}
             >
               {/* Grid bg */}
@@ -100,8 +100,8 @@ export default function SecuritySection() {
                 <div
                   className="flex h-20 w-20 items-center justify-center rounded-2xl mb-4"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(240,185,11,0.15) 0%, rgba(240,185,11,0.05) 100%)',
-                    border: '1px solid rgba(240,185,11,0.3)',
+                    background: 'linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(37,99,235,0.05) 100%)',
+                    border: '1px solid rgba(37,99,235,0.3)',
                   }}
                 >
                   <ShieldSVG />

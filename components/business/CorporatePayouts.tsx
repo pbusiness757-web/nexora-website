@@ -74,7 +74,7 @@ export default function CorporatePayouts() {
                   className="flex items-center gap-2 rounded-xl px-4 py-2 font-bold"
                   style={{
                     background: 'var(--color-brand-dim)',
-                    border: '1px solid rgba(240,185,11,0.25)',
+                    border: '1px solid rgba(37,99,235,0.25)',
                     color: 'var(--color-brand)',
                   }}
                 >

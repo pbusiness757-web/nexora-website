@@ -24,14 +24,14 @@ type PayoutRow = {
 type PageResult = { data: PayoutRow[]; total: number; page: number; limit: number };
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  PROCESSING: { label: "В обработке",  color: "#f0b90b", bg: "rgba(240,185,11,0.12)" },
+  PROCESSING: { label: "В обработке",  color: "#d97706", bg: "rgba(217,119,6,0.1)" },
   COMPLETED:  { label: "Завершено",    color: "#03a66d", bg: "rgba(3,166,109,0.12)"  },
   FAILED:     { label: "Ошибка",       color: "#f6465d", bg: "rgba(246,70,93,0.12)"  },
-  ON_HOLD:    { label: "Удержание",    color: "#848e9c", bg: "rgba(132,142,156,0.12)" },
+  ON_HOLD:    { label: "Удержание",    color: "#64748b", bg: "rgba(100,116,139,0.1)" },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const m = STATUS_META[status] ?? { label: status, color: "#848e9c", bg: "rgba(132,142,156,0.12)" };
+  const m = STATUS_META[status] ?? { label: status, color: "#64748b", bg: "rgba(100,116,139,0.1)" };
   return (
     <span className="rounded-full px-2.5 py-1 text-xs font-bold"
       style={{ color: m.color, background: m.bg }}>
@@ -96,7 +96,7 @@ export default function AdminPayoutsPage() {
             className="rounded-xl px-4 py-2 text-xs font-bold transition-all"
             style={{
               background: statusFilter === s ? "var(--color-brand)" : "var(--color-bg-elevated)",
-              color: statusFilter === s ? "#0b0e11" : "var(--color-text-secondary)",
+              color: statusFilter === s ? "#ffffff" : "var(--color-text-secondary)",
               border: "1px solid " + (statusFilter === s ? "var(--color-brand)" : "var(--color-border)"),
             }}
           >

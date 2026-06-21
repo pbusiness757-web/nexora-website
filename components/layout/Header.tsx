@@ -27,21 +27,20 @@ export default function Header() {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled
-          ? 'rgba(11,14,17,0.92)'
-          : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(43,48,64,0.8)' : '1px solid transparent',
+        background: scrolled ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.8)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid transparent',
+        boxShadow: scrolled ? '0 1px 12px rgba(0,0,0,0.06)' : 'none',
       }}
     >
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center justify-between">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-black"
-              style={{ background: 'var(--color-brand)', color: '#0b0e11' }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-black text-white"
+              style={{ background: 'var(--color-brand)' }}
             >
               N
             </div>
@@ -59,8 +58,8 @@ export default function Header() {
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
                 style={{ color: 'var(--color-text-secondary)' }}
                 onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
-                  (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-elevated)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';
+                  (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-dim)';
                 }}
                 onMouseLeave={e => {
                   (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
@@ -80,15 +79,13 @@ export default function Header() {
               onChange={e => setLocale(e.target.value as typeof locale)}
               className="hidden sm:block rounded-lg px-2 py-1.5 text-xs font-semibold outline-none cursor-pointer transition-all"
               style={{
-                background: 'var(--color-bg-elevated)',
+                background: 'var(--color-bg-surface)',
                 color: 'var(--color-text-secondary)',
                 border: '1px solid var(--color-border)',
               }}
             >
               {supportedLocales.map(l => (
-                <option key={l} value={l} style={{ background: 'var(--color-bg-surface)' }}>
-                  {l.toUpperCase()}
-                </option>
+                <option key={l} value={l}>{l.toUpperCase()}</option>
               ))}
             </select>
 
@@ -101,10 +98,9 @@ export default function Header() {
               style={{
                 color: 'var(--color-text-secondary)',
                 border: '1px solid var(--color-border)',
-                background: 'transparent',
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(240,185,11,0.4)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(37,99,235,0.3)';
                 (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';
                 (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-dim)';
               }}
@@ -133,8 +129,8 @@ export default function Header() {
 
             {/* Mobile burger */}
             <button
-              className="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg"
-              style={{ background: 'var(--color-bg-elevated)' }}
+              className="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg transition-colors"
+              style={{ background: mobileOpen ? 'var(--color-brand-dim)' : 'var(--color-bg-elevated)' }}
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Menu"
             >
@@ -165,7 +161,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block px-4 py-3 rounded-xl text-sm font-medium"
+                className="block px-4 py-3 rounded-xl text-sm font-medium transition-colors"
                 style={{ color: 'var(--color-text-secondary)' }}
               >
                 {dict.nav?.[link.dictKey] ?? link.fallback}
@@ -179,9 +175,7 @@ export default function Header() {
                 style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
               >
                 {supportedLocales.map(l => (
-                  <option key={l} value={l} style={{ background: 'var(--color-bg-surface)' }}>
-                    {l.toUpperCase()}
-                  </option>
+                  <option key={l} value={l}>{l.toUpperCase()}</option>
                 ))}
               </select>
               <Link

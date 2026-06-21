@@ -81,7 +81,7 @@ export default function AdminAuditLogsPage() {
         <button
           onClick={() => { setSearch(inputVal); setPage(1); }}
           className="rounded-xl px-5 py-2.5 text-sm font-bold"
-          style={{ background: "var(--color-brand)", color: "#0b0e11" }}
+          style={{ background: "var(--color-brand)", color: "#ffffff" }}
         >
           Найти
         </button>

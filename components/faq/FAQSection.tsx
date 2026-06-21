@@ -32,7 +32,7 @@ export default function FAQSection() {
                 className="nexora-card overflow-hidden transition-all duration-300"
                 style={{
                   background: 'var(--color-bg-surface)',
-                  borderColor: isOpen ? 'rgba(240,185,11,0.3)' : 'var(--color-border)',
+                  borderColor: isOpen ? 'rgba(37,99,235,0.3)' : 'var(--color-border)',
                 }}
               >
                 <button

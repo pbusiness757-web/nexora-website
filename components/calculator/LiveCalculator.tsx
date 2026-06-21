@@ -204,8 +204,8 @@ export default function LiveCalculator() {
           <div
             className="mt-5 rounded-xl p-5 flex items-center justify-between"
             style={{
-              background: 'linear-gradient(135deg, rgba(240,185,11,0.12) 0%, rgba(240,185,11,0.04) 100%)',
-              border: '1px solid rgba(240,185,11,0.25)',
+              background: 'linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(37,99,235,0.04) 100%)',
+              border: '1px solid rgba(37,99,235,0.25)',
             }}
           >
             <div>
@@ -218,7 +218,7 @@ export default function LiveCalculator() {
             </div>
             <div
               className="hidden sm:flex h-14 w-14 items-center justify-center rounded-full text-2xl"
-              style={{ background: 'var(--color-brand)', color: '#0b0e11' }}
+              style={{ background: 'var(--color-brand)', color: '#ffffff' }}
             >
               ↓
             </div>

@@ -4,7 +4,7 @@ import { useLocale } from '../../lib/locale-context';
 
 const ICONS = ['🏭', '👥', '🏛️', '🧾'];
 const ICON_COLORS = [
-  'rgba(240,185,11,1)',
+  'rgba(37,99,235,1)',
   'rgba(24,144,255,1)',
   'rgba(3,166,109,1)',
   'rgba(246,70,93,1)',
@@ -33,14 +33,14 @@ export default function BusinessSolutions() {
         <div
           className="mt-12 h-48 w-full rounded-2xl overflow-hidden relative md:h-56"
           style={{
-            background: 'linear-gradient(135deg, #0b0e11 0%, #1a1200 40%, #0b0e11 100%)',
+            background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #eff6ff 100%)',
             border: '1px solid var(--color-border)',
           }}
         >
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: 'linear-gradient(rgba(240,185,11,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(240,185,11,0.06) 1px, transparent 1px)',
+              backgroundImage: 'linear-gradient(rgba(37,99,235,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px)',
               backgroundSize: '40px 40px',
             }}
           />
@@ -60,7 +60,7 @@ export default function BusinessSolutions() {
           </div>
           <div
             className="absolute inset-0"
-            style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(240,185,11,0.05) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(37,99,235,0.05) 0%, transparent 70%)' }}
           />
         </div>
 
@@ -107,8 +107,8 @@ export default function BusinessSolutions() {
         <div
           className="mt-14 flex flex-col items-center gap-6 rounded-2xl overflow-hidden px-8 py-12 text-center md:flex-row md:justify-between md:text-left"
           style={{
-            background: 'linear-gradient(135deg, rgba(240,185,11,0.12) 0%, rgba(240,185,11,0.04) 100%)',
-            border: '1px solid rgba(240,185,11,0.25)',
+            background: 'linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(37,99,235,0.04) 100%)',
+            border: '1px solid rgba(37,99,235,0.25)',
           }}
         >
           <div>

@@ -18,7 +18,7 @@ type PageResult = { data: ClientRow[]; total: number; page: number; limit: numbe
 
 const RISK_META: Record<string, { label: string; color: string; bg: string }> = {
   LOW:      { label: "Низкий",     color: "#03a66d", bg: "rgba(3,166,109,0.12)"  },
-  MEDIUM:   { label: "Средний",    color: "#f0b90b", bg: "rgba(240,185,11,0.12)" },
+  MEDIUM:   { label: "Средний",    color: "#d97706", bg: "rgba(217,119,6,0.1)" },
   HIGH:     { label: "Высокий",    color: "#f6465d", bg: "rgba(246,70,93,0.12)"  },
   CRITICAL: { label: "Критичный",  color: "#f6465d", bg: "rgba(246,70,93,0.2)"   },
 };
@@ -107,7 +107,7 @@ export default function AdminClientsPage() {
                 <tr><td colSpan={6} className="px-4 py-12 text-center text-sm"
                   style={{ color: "var(--color-text-muted)" }}>Клиенты не найдены</td></tr>
               ) : rows.map(row => {
-                const risk = RISK_META[row.riskLevel] ?? { label: row.riskLevel, color: "#848e9c", bg: "rgba(132,142,156,0.1)" };
+                const risk = RISK_META[row.riskLevel] ?? { label: row.riskLevel, color: "#64748b", bg: "rgba(100,116,139,0.1)" };
                 return (
                   <tr key={row.id} style={{ borderBottom: "1px solid var(--color-border)" }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--color-bg-elevated)"}

@@ -16,14 +16,14 @@ export default function ContactCTA() {
         <div
           className="relative overflow-hidden rounded-2xl px-8 py-16 text-center sm:px-16"
           style={{
-            background: 'linear-gradient(135deg, rgba(240,185,11,0.1) 0%, rgba(240,185,11,0.03) 50%, rgba(24,144,255,0.06) 100%)',
-            border: '1px solid rgba(240,185,11,0.2)',
+            background: 'linear-gradient(135deg, rgba(37,99,235,0.1) 0%, rgba(37,99,235,0.03) 50%, rgba(24,144,255,0.06) 100%)',
+            border: '1px solid rgba(37,99,235,0.2)',
           }}
         >
           {/* Decorative glows */}
           <div
             className="absolute -right-16 -top-16 h-64 w-64 rounded-full blur-3xl pointer-events-none"
-            style={{ background: 'rgba(240,185,11,0.08)' }}
+            style={{ background: 'rgba(37,99,235,0.08)' }}
           />
           <div
             className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full blur-3xl pointer-events-none"
@@ -46,8 +46,8 @@ export default function ContactCTA() {
                   key={point}
                   className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
                   style={{
-                    background: 'rgba(240,185,11,0.1)',
-                    border: '1px solid rgba(240,185,11,0.2)',
+                    background: 'rgba(37,99,235,0.1)',
+                    border: '1px solid rgba(37,99,235,0.2)',
                     color: 'var(--color-text-primary)',
                   }}
                 >

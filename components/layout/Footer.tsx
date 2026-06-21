@@ -23,7 +23,7 @@ export default function Footer() {
             <Link href="/" className="flex items-center gap-2">
               <div
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-black"
-                style={{ background: 'var(--color-brand)', color: '#0b0e11' }}
+                style={{ background: 'var(--color-brand)', color: '#ffffff' }}
               >
                 N
               </div>
@@ -59,7 +59,7 @@ export default function Footer() {
                     color: 'var(--color-text-secondary)',
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(240,185,11,0.4)';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(37,99,235,0.4)';
                     (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';
                   }}
                   onMouseLeave={e => {

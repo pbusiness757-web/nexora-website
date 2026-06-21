@@ -4,10 +4,10 @@ import { useLocale } from '../../lib/locale-context';
 
 const STEP_ICONS = ['📤', '⚡', '🔒', '✅'];
 const STEP_COLORS = [
-  'rgba(240,185,11,1)',
-  'rgba(24,144,255,1)',
-  'rgba(3,166,109,1)',
-  'rgba(240,185,11,1)',
+  'rgba(37,99,235,1)',
+  'rgba(14,165,233,1)',
+  'rgba(5,150,105,1)',
+  'rgba(37,99,235,1)',
 ];
 
 export default function HowItWorks() {
