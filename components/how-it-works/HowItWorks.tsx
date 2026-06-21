@@ -2,42 +2,85 @@
 
 import { useLocale } from '../../lib/locale-context';
 
-const NUMBERS = ['01', '02', '03', '04'];
+const STEP_ICONS = ['📤', '⚡', '🔒', '✅'];
+const STEP_COLORS = [
+  'rgba(240,185,11,1)',
+  'rgba(24,144,255,1)',
+  'rgba(3,166,109,1)',
+  'rgba(240,185,11,1)',
+];
 
 export default function HowItWorks() {
   const { dict } = useLocale();
   const t = dict.howItWorks;
 
   return (
-    <section className="bg-slate-50 py-24">
+    <section
+      id="how-it-works"
+      className="py-24 nexora-section-glow"
+      style={{ background: 'var(--color-bg-base)' }}
+    >
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            {t.badge}
-          </div>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
+          <div className="nexora-badge mb-4">{t.badge}</div>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
             {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
+          <p className="mt-4 text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t.subtitle}</p>
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {t.steps.map((step, index) => (
             <div
               key={step.title}
-              className="group relative rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
+              className="nexora-card group relative p-8 transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'var(--color-bg-surface)' }}
             >
-              <span className="text-5xl font-bold text-slate-100 transition group-hover:text-blue-100">
-                {NUMBERS[index]}
-              </span>
+              {/* Step number */}
+              <div
+                className="mb-4 text-6xl font-black select-none"
+                style={{ color: 'var(--color-border)', lineHeight: 1 }}
+              >
+                {String(index + 1).padStart(2, '0')}
+              </div>
 
-              <h3 className="mt-6 text-xl font-bold text-slate-950">
+              {/* Icon */}
+              <div
+                className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl text-xl transition-all duration-300 group-hover:scale-110"
+                style={{
+                  background: STEP_COLORS[index] + '18',
+                  border: `1px solid ${STEP_COLORS[index]}30`,
+                }}
+              >
+                {STEP_ICONS[index]}
+              </div>
+
+              <h3
+                className="text-lg font-bold mb-3"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 {step.title}
               </h3>
-
-              <p className="mt-3 text-base leading-7 text-slate-600">
+              <p
+                className="text-sm leading-7"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 {step.description}
               </p>
+
+              {/* Connector line (not last) */}
+              {index < t.steps.length - 1 && (
+                <div
+                  className="absolute -right-3 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-1"
+                  style={{ zIndex: 1 }}
+                >
+                  <div className="h-px w-6" style={{ background: 'var(--color-border)' }} />
+                  <div
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: 'var(--color-brand)' }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

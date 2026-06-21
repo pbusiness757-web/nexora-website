@@ -1,46 +1,209 @@
 @import "tailwindcss";
 
+/* ============================================================
+   NEXORA — Dark Crypto Design System (Binance-style)
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core palette */
+  --color-bg-base:     #0b0e11;
+  --color-bg-surface:  #161a1e;
+  --color-bg-elevated: #1e2329;
+  --color-border:      #2b3040;
+  --color-border-soft: #1e2329;
+
+  /* Brand */
+  --color-brand:       #f0b90b;
+  --color-brand-hover: #d4a500;
+  --color-brand-dim:   rgba(240, 185, 11, 0.12);
+  --color-brand-glow:  rgba(240, 185, 11, 0.25);
+
+  /* Text */
+  --color-text-primary:   #eaecef;
+  --color-text-secondary: #848e9c;
+  --color-text-muted:     #474d57;
+
+  /* Status */
+  --color-green:  #03a66d;
+  --color-green-dim: rgba(3, 166, 109, 0.12);
+  --color-red:    #f6465d;
+  --color-blue:   #1890ff;
+  --color-blue-dim: rgba(24, 144, 255, 0.12);
+
+  /* Shadows */
+  --shadow-card:  0 4px 32px rgba(0,0,0,0.45);
+  --shadow-brand: 0 0 32px rgba(240,185,11,0.18);
+  --shadow-glow:  0 0 64px rgba(240,185,11,0.08);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  min-height: 100vh;
 }
 
+/* ── Selection ────────────────────────────────────────────── */
+::selection {
+  background: var(--color-brand-dim);
+  color: var(--color-brand);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg-surface); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ── Utility classes ──────────────────────────────────────── */
+.nexora-gradient-text {
+  background: linear-gradient(135deg, #f0b90b 0%, #ffd460 50%, #f0b90b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nexora-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.nexora-card:hover {
+  border-color: rgba(240,185,11,0.3);
+  box-shadow: var(--shadow-card), 0 0 24px rgba(240,185,11,0.06);
+}
+
+.nexora-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-brand-dim);
+  border: 1px solid rgba(240,185,11,0.3);
+  color: var(--color-brand);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nexora-btn-primary {
+  background: var(--color-brand);
+  color: #0b0e11;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  padding: 0.85rem 2rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 24px rgba(240,185,11,0.3);
+  border: none;
+  cursor: pointer;
+}
+
+.nexora-btn-primary:hover {
+  background: var(--color-brand-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(240,185,11,0.4);
+}
+
+.nexora-btn-secondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.85rem 2rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.nexora-btn-secondary:hover {
+  border-color: rgba(240,185,11,0.4);
+  color: var(--color-brand);
+  background: var(--color-brand-dim);
+}
+
+.nexora-input {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.nexora-input:focus {
+  border-color: rgba(240,185,11,0.5);
+  box-shadow: 0 0 0 3px rgba(240,185,11,0.08);
+}
+
+.nexora-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Animations ───────────────────────────────────────────── */
 @keyframes nexora-float {
-  0%,
-  100% {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes nexora-pulse-brand {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes nexora-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes nexora-shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position:  1000px 0; }
+}
+
+@keyframes nexora-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-8px);
-  }
 }
 
-.nexora-float {
-  animation: nexora-float 5s ease-in-out infinite;
-}
+.animate-float       { animation: nexora-float 4s ease-in-out infinite; }
+.animate-pulse-brand { animation: nexora-pulse-brand 2s ease-in-out infinite; }
+.animate-spin-slow   { animation: nexora-spin-slow 20s linear infinite; }
+.animate-fade-up     { animation: nexora-fade-up 0.6s ease both; }
 
-@media (prefers-reduced-motion: reduce) {
-  .nexora-float {
-    animation: none;
-  }
+/* ── Section defaults ─────────────────────────────────────── */
+section { position: relative; }
+
+/* Subtle radial gradient accent behind sections */
+.nexora-section-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(240,185,11,0.04) 0%, transparent 70%);
+  pointer-events: none;
 }

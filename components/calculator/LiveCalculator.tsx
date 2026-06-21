@@ -8,17 +8,16 @@ import {
 } from '../../lib/countryCurrency';
 import { useLocale } from '../../lib/locale-context';
 
-const CRYPTO_ASSETS: { code: string; usd: number }[] = [
-  { code: 'USDT', usd: 1 },
-  { code: 'BTC', usd: 64250 },
-  { code: 'ETH', usd: 3120.5 },
-  { code: 'TON', usd: 6.74 },
-  { code: 'TRX', usd: 0.118 },
-  { code: 'USDC', usd: 1 },
-  { code: 'LTC', usd: 84.2 },
+const CRYPTO_ASSETS: { code: string; usd: number; icon: string }[] = [
+  { code: 'USDT', usd: 1,       icon: '💵' },
+  { code: 'BTC',  usd: 64250,   icon: '₿' },
+  { code: 'ETH',  usd: 3120.5,  icon: '⬡' },
+  { code: 'TON',  usd: 6.74,    icon: '💎' },
+  { code: 'TRX',  usd: 0.118,   icon: '⚡' },
+  { code: 'USDC', usd: 1,       icon: '🔵' },
+  { code: 'LTC',  usd: 84.2,    icon: '🌐' },
 ];
 
-// Local currency units per 1 USD.
 const FIAT_PER_USD: Record<string, number> = {
   RUB: 92.4,
   KZT: 478.5,
@@ -27,13 +26,23 @@ const FIAT_PER_USD: Record<string, number> = {
   KGS: 89.2,
 };
 
-const FEE_RATE = 0.01; // 1% network fee
+const FEE_RATE = 0.01;
 
-const formatNumber = (value: number, fractionDigits = 2) =>
-  value.toLocaleString('en-US', {
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  });
+const fmt = (v: number, d = 2) =>
+  v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+const FIELD_STYLE: React.CSSProperties = {
+  background: 'var(--color-bg-elevated)',
+  border: '1px solid var(--color-border)',
+  borderRadius: '0.75rem',
+  color: 'var(--color-text-primary)',
+  outline: 'none',
+  width: '100%',
+  padding: '0.9rem 1.1rem',
+  fontSize: '1.05rem',
+  fontWeight: 700,
+  transition: 'border-color 0.2s',
+};
 
 export default function LiveCalculator() {
   const { dict } = useLocale();
@@ -42,55 +51,58 @@ export default function LiveCalculator() {
 
   const [amount, setAmount] = useState('10000');
   const [asset, setAsset] = useState(CRYPTO_ASSETS[0].code);
-  const [country, setCountry] = useState<PayoutCountry>(
-    supportedPayoutCountries[0]
-  );
+  const [country, setCountry] = useState<PayoutCountry>(supportedPayoutCountries[0]);
 
   const payoutCurrency = getPayoutCurrency(country);
 
   const { send, fee, receive, rate } = useMemo(() => {
     const parsed = Math.max(0, Number(amount) || 0);
-    const usd = CRYPTO_ASSETS.find((a) => a.code === asset)?.usd ?? 1;
+    const usd = CRYPTO_ASSETS.find(a => a.code === asset)?.usd ?? 1;
     const fiatPerUsd = FIAT_PER_USD[payoutCurrency] ?? FIAT_PER_USD.RUB;
     const feeValue = parsed * FEE_RATE;
     const net = parsed - feeValue;
     const oneAssetInFiat = usd * fiatPerUsd;
-    return {
-      send: parsed,
-      fee: feeValue,
-      receive: net * oneAssetInFiat,
-      rate: oneAssetInFiat,
-    };
+    return { send: parsed, fee: feeValue, receive: net * oneAssetInFiat, rate: oneAssetInFiat };
   }, [amount, asset, payoutCurrency]);
 
+  const selectedIcon = CRYPTO_ASSETS.find(a => a.code === asset)?.icon ?? '💵';
+
   return (
-    <section className="bg-white py-24">
+    <section
+      className="py-24 nexora-section-glow"
+      style={{ background: 'var(--color-bg-base)' }}
+      id="calculator"
+    >
       <div className="mx-auto max-w-3xl px-6">
+        {/* Header */}
         <div className="mb-10 text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            {t.badge}
-          </div>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
+          <div className="nexora-badge mb-4">{t.badge}</div>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
             {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
+          <p className="mt-4 text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t.subtitle}</p>
         </div>
 
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-200 sm:p-8">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {/* Card */}
+        <div
+          className="nexora-card p-6 sm:p-8"
+          style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}
+        >
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Asset */}
             <div>
-              <label htmlFor="asset" className="text-sm font-semibold text-slate-500">
+              <label className="block mb-2 text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--color-text-muted)' }}>
                 {t.sendLabel}
               </label>
-              <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">{selectedIcon}</span>
                 <select
-                  id="asset"
                   value={asset}
-                  onChange={(e) => setAsset(e.target.value)}
-                  className="w-full cursor-pointer bg-transparent py-4 text-2xl font-bold text-slate-950 outline-none"
+                  onChange={e => setAsset(e.target.value)}
+                  style={{ ...FIELD_STYLE, paddingLeft: '2.5rem', cursor: 'pointer' }}
                 >
-                  {CRYPTO_ASSETS.map((a) => (
-                    <option key={a.code} value={a.code}>
+                  {CRYPTO_ASSETS.map(a => (
+                    <option key={a.code} value={a.code} style={{ background: 'var(--color-bg-elevated)' }}>
                       {a.code}
                     </option>
                   ))}
@@ -98,98 +110,133 @@ export default function LiveCalculator() {
               </div>
             </div>
 
+            {/* Amount */}
             <div>
-              <label htmlFor="amount" className="text-sm font-semibold text-slate-500">
+              <label className="block mb-2 text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--color-text-muted)' }}>
                 {t.amountLabel}
               </label>
-              <div className="mt-2 flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
+              <div
+                className="flex items-center gap-2"
+                style={{ ...FIELD_STYLE, padding: 0, overflow: 'hidden' }}
+              >
                 <input
-                  id="amount"
                   type="number"
                   inputMode="decimal"
                   min={0}
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-transparent py-4 text-2xl font-bold text-slate-950 outline-none"
+                  onChange={e => setAmount(e.target.value)}
+                  style={{
+                    flex: 1, background: 'transparent', outline: 'none',
+                    color: 'var(--color-text-primary)', fontWeight: 700,
+                    fontSize: '1.05rem', padding: '0.9rem 0 0.9rem 1.1rem',
+                  }}
                   placeholder="0"
                 />
-                <span className="ml-2 text-sm font-semibold text-slate-500">
+                <span
+                  className="pr-4 text-sm font-bold"
+                  style={{ color: 'var(--color-brand)', flexShrink: 0 }}
+                >
                   {asset}
                 </span>
               </div>
             </div>
 
+            {/* Country */}
             <div>
-              <label htmlFor="country" className="text-sm font-semibold text-slate-500">
+              <label className="block mb-2 text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--color-text-muted)' }}>
                 {t.countryLabel}
               </label>
-              <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
-                <select
-                  id="country"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value as PayoutCountry)}
-                  className="w-full cursor-pointer bg-transparent py-4 text-2xl font-bold text-slate-950 outline-none"
-                >
-                  {supportedPayoutCountries.map((c) => (
-                    <option key={c} value={c}>
-                      {countryNames[c]}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={country}
+                onChange={e => setCountry(e.target.value as PayoutCountry)}
+                style={{ ...FIELD_STYLE, cursor: 'pointer' }}
+              >
+                {supportedPayoutCountries.map(c => (
+                  <option key={c} value={c} style={{ background: 'var(--color-bg-elevated)' }}>
+                    {countryNames[c]}
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* Currency auto */}
             <div>
-              <span className="text-sm font-semibold text-slate-500">
+              <label className="block mb-2 text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--color-text-muted)' }}>
                 {t.currencyLabel}
-              </span>
-              <div className="mt-2 flex items-center rounded-2xl border border-slate-200 bg-slate-100 px-4 py-4">
-                <span className="text-2xl font-bold text-slate-950">
+              </label>
+              <div
+                className="flex items-center gap-2"
+                style={{ ...FIELD_STYLE, background: 'var(--color-bg-base)', cursor: 'default' }}
+              >
+                <span className="text-lg font-black" style={{ color: 'var(--color-brand)' }}>
                   {payoutCurrency}
                 </span>
-                <span className="ml-2 text-xs font-medium text-slate-400">
+                <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                   {t.autoLabel} · {countryNames[country]}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 space-y-3 rounded-2xl bg-slate-50 p-5 text-sm">
-            <div className="flex items-center justify-between text-slate-600">
-              <span>{t.summarySend}</span>
-              <span className="font-semibold text-slate-900">
-                {formatNumber(send)} {asset}
-              </span>
+          {/* Summary */}
+          <div
+            className="mt-6 rounded-xl p-4 space-y-3 text-sm"
+            style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border)' }}
+          >
+            {[
+              { label: t.summarySend, value: `${fmt(send)} ${asset}` },
+              { label: t.summaryFee,  value: `${fmt(fee)} ${asset}`, accent: true },
+              { label: t.summaryRate, value: `1 ${asset} = ${fmt(rate)} ${payoutCurrency}` },
+            ].map(row => (
+              <div key={row.label} className="flex items-center justify-between">
+                <span style={{ color: 'var(--color-text-secondary)' }}>{row.label}</span>
+                <span
+                  className="font-semibold"
+                  style={{ color: row.accent ? 'var(--color-red)' : 'var(--color-text-primary)' }}
+                >
+                  {row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Result */}
+          <div
+            className="mt-5 rounded-xl p-5 flex items-center justify-between"
+            style={{
+              background: 'linear-gradient(135deg, rgba(240,185,11,0.12) 0%, rgba(240,185,11,0.04) 100%)',
+              border: '1px solid rgba(240,185,11,0.25)',
+            }}
+          >
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--color-brand)' }}>
+                {t.receiveLabel}
+              </p>
+              <p className="text-3xl font-black sm:text-4xl" style={{ color: 'var(--color-text-primary)' }}>
+                {fmt(receive)} <span style={{ color: 'var(--color-brand)' }}>{payoutCurrency}</span>
+              </p>
             </div>
-            <div className="flex items-center justify-between text-slate-600">
-              <span>{t.summaryFee}</span>
-              <span className="font-semibold text-slate-900">
-                {formatNumber(fee)} {asset}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-slate-600">
-              <span>{t.summaryRate}</span>
-              <span className="font-semibold text-slate-900">
-                1 {asset} = {formatNumber(rate)} {payoutCurrency}
-              </span>
+            <div
+              className="hidden sm:flex h-14 w-14 items-center justify-center rounded-full text-2xl"
+              style={{ background: 'var(--color-brand)', color: '#0b0e11' }}
+            >
+              ↓
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-blue-900 p-6 text-white">
-            <p className="text-sm text-blue-100">{t.receiveLabel}</p>
-            <p className="mt-2 text-3xl font-bold sm:text-4xl">
-              {formatNumber(receive)} {payoutCurrency}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="mt-6 w-full rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20"
+          {/* CTA */}
+          <a
+            href="/exchange"
+            className="nexora-btn-primary mt-5 w-full flex items-center justify-center gap-2 text-base"
           >
             {t.button}
-          </button>
-
-          <p className="mt-4 text-center text-xs text-slate-400">{t.footnote}</p>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </a>
+          <p className="mt-3 text-center text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            {t.footnote}
+          </p>
         </div>
       </div>
     </section>

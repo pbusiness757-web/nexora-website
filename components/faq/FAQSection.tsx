@@ -9,46 +9,61 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="bg-white py-24">
+    <section
+      className="py-24 nexora-section-glow"
+      style={{ background: 'var(--color-bg-base)' }}
+      id="faq"
+    >
       <div className="mx-auto max-w-3xl px-6">
         <div className="text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            {t.badge}
-          </div>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
+          <div className="nexora-badge mb-4">{t.badge}</div>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
             {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
+          <p className="mt-4 text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t.subtitle}</p>
         </div>
 
-        <div className="mt-12 space-y-4">
+        <div className="mt-12 space-y-3">
           {t.items.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
               <div
                 key={faq.question}
-                className="rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-200"
+                className="nexora-card overflow-hidden transition-all duration-300"
+                style={{
+                  background: 'var(--color-bg-surface)',
+                  borderColor: isOpen ? 'rgba(240,185,11,0.3)' : 'var(--color-border)',
+                }}
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
-                  aria-expanded={isOpen ? 'true' : 'false'}
+                  aria-expanded={isOpen}
                 >
-                  <span className="text-base font-semibold text-slate-950">
+                  <span
+                    className="text-sm font-semibold sm:text-base"
+                    style={{ color: isOpen ? 'var(--color-brand)' : 'var(--color-text-primary)' }}
+                  >
                     {faq.question}
                   </span>
                   <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-lg font-bold text-blue-900 transition ${
-                      isOpen ? 'rotate-45' : ''
-                    }`}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-lg font-bold transition-all duration-300"
+                    style={{
+                      background: isOpen ? 'var(--color-brand-dim)' : 'var(--color-bg-elevated)',
+                      color: isOpen ? 'var(--color-brand)' : 'var(--color-text-secondary)',
+                      transform: isOpen ? 'rotate(45deg)' : 'none',
+                    }}
                   >
                     +
                   </span>
                 </button>
 
                 {isOpen && (
-                  <p className="px-6 pb-5 text-base leading-7 text-slate-600">
+                  <p
+                    className="px-6 pb-5 text-sm leading-7 sm:text-base"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
                     {faq.answer}
                   </p>
                 )}

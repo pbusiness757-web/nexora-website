@@ -1,56 +1,100 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
-import SmartImage from '../ui/SmartImage';
 
 const ICONS = ['🏭', '👥', '🏛️', '🧾'];
+const ICON_COLORS = [
+  'rgba(240,185,11,1)',
+  'rgba(24,144,255,1)',
+  'rgba(3,166,109,1)',
+  'rgba(246,70,93,1)',
+];
 
 export default function BusinessSolutions() {
   const { dict } = useLocale();
   const t = dict.businessSolutions;
 
   return (
-    <section className="bg-slate-50 py-24">
+    <section
+      className="py-24 nexora-section-glow"
+      style={{ background: 'var(--color-bg-surface)' }}
+      id="business"
+    >
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            {t.badge}
-          </div>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
+          <div className="nexora-badge mb-4">{t.badge}</div>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
             {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
+          <p className="mt-4 text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t.subtitle}</p>
         </div>
 
-        <SmartImage
-          src="/images/business/nexora-business-payouts.webp"
-          alt={t.title}
-          sizes="(min-width: 1280px) 1280px, 100vw"
-          className="mt-12 h-48 w-full rounded-[2rem] border border-slate-200 shadow-lg shadow-slate-200/60 md:h-64"
-        />
+        {/* Decorative gradient banner */}
+        <div
+          className="mt-12 h-48 w-full rounded-2xl overflow-hidden relative md:h-56"
+          style={{
+            background: 'linear-gradient(135deg, #0b0e11 0%, #1a1200 40%, #0b0e11 100%)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'linear-gradient(rgba(240,185,11,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(240,185,11,0.06) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center gap-8 sm:gap-16">
+            {['USDT', 'BTC', 'ETH', '→', 'RUB', 'KZT', 'UZS'].map((label, i) => (
+              <span
+                key={i}
+                className="text-lg font-black sm:text-2xl"
+                style={{
+                  color: label === '→' ? 'var(--color-brand)' : i < 3 ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                  opacity: label === '→' ? 1 : 0.8,
+                }}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <div
+            className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(240,185,11,0.05) 0%, transparent 70%)' }}
+          />
+        </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {t.items.map((solution, index) => (
             <div
               key={solution.title}
-              className="group flex flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
+              className="nexora-card group flex flex-col p-7 transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'var(--color-bg-elevated)' }}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl transition group-hover:bg-blue-900 group-hover:text-white">
-                <span>{ICONS[index]}</span>
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl transition-all duration-300 group-hover:scale-110"
+                style={{
+                  background: ICON_COLORS[index] + '18',
+                  border: '1px solid ' + ICON_COLORS[index] + '30',
+                }}
+              >
+                {ICONS[index]}
               </div>
 
-              <h3 className="mt-6 text-xl font-bold text-slate-950">
+              <h3 className="mt-5 text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 {solution.title}
               </h3>
-
-              <p className="mt-3 text-base leading-7 text-slate-600">
+              <p className="mt-2 text-sm leading-7" style={{ color: 'var(--color-text-secondary)' }}>
                 {solution.description}
               </p>
 
-              <ul className="mt-6 space-y-3 border-t border-slate-100 pt-6 text-sm text-slate-600">
-                {solution.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2">
-                    <span className="text-blue-900">✓</span>
+              <ul
+                className="mt-5 space-y-2 pt-5 text-xs"
+                style={{ borderTop: '1px solid var(--color-border)' }}
+              >
+                {solution.features.map(feature => (
+                  <li key={feature} className="flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
+                    <span style={{ color: 'var(--color-green)' }}>✓</span>
                     {feature}
                   </li>
                 ))}
@@ -59,18 +103,28 @@ export default function BusinessSolutions() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center gap-6 rounded-[2rem] bg-blue-900 px-8 py-12 text-center text-white md:flex-row md:justify-between md:text-left">
+        {/* CTA Banner */}
+        <div
+          className="mt-14 flex flex-col items-center gap-6 rounded-2xl overflow-hidden px-8 py-12 text-center md:flex-row md:justify-between md:text-left"
+          style={{
+            background: 'linear-gradient(135deg, rgba(240,185,11,0.12) 0%, rgba(240,185,11,0.04) 100%)',
+            border: '1px solid rgba(240,185,11,0.25)',
+          }}
+        >
           <div>
-            <h3 className="text-2xl font-bold">{t.ctaTitle}</h3>
-            <p className="mt-2 max-w-2xl text-blue-100">{t.ctaText}</p>
+            <h3 className="text-2xl font-black" style={{ color: 'var(--color-text-primary)' }}>
+              {t.ctaTitle}
+            </h3>
+            <p className="mt-2 max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
+              {t.ctaText}
+            </p>
           </div>
-
-          <button
-            type="button"
-            className="shrink-0 rounded-2xl bg-white px-7 py-4 text-base font-semibold text-blue-900 shadow-lg shadow-blue-950/20 transition hover:bg-slate-100"
+          <a
+            href="/exchange"
+            className="nexora-btn-primary shrink-0 text-sm"
           >
             {t.ctaButton}
-          </button>
+          </a>
         </div>
       </div>
     </section>

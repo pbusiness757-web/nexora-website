@@ -1,7 +1,6 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
-import SmartImage from '../ui/SmartImage';
 
 const ICONS = ['🏛️', '🏭', '👥', '🧾'];
 const CURRENCIES = ['RUB', 'KZT', 'UZS', 'AZN', 'KGS'];
@@ -11,92 +10,109 @@ export default function CorporatePayouts() {
   const t = dict.corporatePayouts;
 
   return (
-    <section className="bg-white py-24">
+    <section
+      className="py-24 nexora-section-glow"
+      style={{ background: 'var(--color-bg-base)' }}
+    >
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            {t.badge}
-          </div>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
-            {t.title}
-          </h2>
-          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
-        </div>
+        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+          <div>
+            <div className="nexora-badge mb-4">{t.badge}</div>
+            <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
+              {t.title}
+            </h2>
+            <p className="mt-4 text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t.subtitle}</p>
 
-        <SmartImage
-          src="/images/business/nexora-business-payouts.webp"
-          alt={t.title}
-          sizes="(min-width: 1280px) 1280px, 100vw"
-          className="mt-12 h-48 w-full rounded-[2rem] border border-slate-200 shadow-lg shadow-slate-200/60 md:h-64"
-        />
-
-        <div className="mt-12 grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {t.features.map((feature, index) => (
-              <div
-                key={feature.title}
-                className="group rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl transition group-hover:bg-blue-900 group-hover:text-white">
-                  <span>{ICONS[index]}</span>
+            <div className="mt-8 space-y-4">
+              {t.features.map((feature: { title: string; description: string }, index: number) => (
+                <div
+                  key={feature.title}
+                  className="nexora-card flex gap-4 p-5 transition-all duration-300 hover:-translate-y-0.5"
+                  style={{ background: 'var(--color-bg-surface)' }}
+                >
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
+                    style={{ background: 'var(--color-brand-dim)' }}
+                  >
+                    {ICONS[index] ?? '⚡'}
+                  </div>
+                  <div>
+                    <h3 className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{feature.title}</h3>
+                    <p className="mt-1 text-sm leading-6" style={{ color: 'var(--color-text-secondary)' }}>{feature.description}</p>
+                  </div>
                 </div>
-                <h3 className="mt-6 text-lg font-bold text-slate-950">
-                  {feature.title}
-                </h3>
-                <p className="mt-3 text-base leading-7 text-slate-600">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200">
-            <span className="text-sm font-semibold text-slate-500">
-              {t.flowLabel}
-            </span>
+          {/* Visual */}
+          <div
+            className="nexora-card relative overflow-hidden p-8"
+            style={{
+              background: 'var(--color-bg-surface)',
+              minHeight: '400px',
+            }}
+          >
+            {/* Grid bg */}
+            <div
+              className="absolute inset-0 opacity-5"
+              style={{
+                backgroundImage: 'linear-gradient(var(--color-brand) 1px, transparent 1px), linear-gradient(90deg, var(--color-brand) 1px, transparent 1px)',
+                backgroundSize: '28px 28px',
+              }}
+            />
 
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">{t.stepLabel} 1</p>
-                <p className="mt-1 text-xl font-bold text-slate-950">
-                  {t.step1}
-                </p>
-              </div>
+            <h3 className="relative z-10 text-lg font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>
+              {t.currenciesTitle ?? 'Поддерживаемые валюты'}
+            </h3>
 
-              <div className="flex justify-center text-2xl text-cyan-500">↓</div>
-
-              <div className="rounded-2xl bg-blue-900 p-5 text-white">
-                <p className="text-sm text-blue-100">{t.stepLabel} 2</p>
-                <p className="mt-1 text-xl font-bold">{t.step2}</p>
-              </div>
-
-              <div className="flex justify-center text-2xl text-cyan-500">↓</div>
-
-              <div className="rounded-2xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-500">{t.stepLabel} 3</p>
-                <p className="mt-1 text-xl font-bold text-slate-950">
-                  {t.step3}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-100 pt-6">
-              {CURRENCIES.map((currency) => (
-                <span
+            {/* Currency chips */}
+            <div className="relative z-10 flex flex-wrap gap-3 mb-8">
+              {CURRENCIES.map(currency => (
+                <div
                   key={currency}
-                  className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700"
+                  className="flex items-center gap-2 rounded-xl px-4 py-2 font-bold"
+                  style={{
+                    background: 'var(--color-brand-dim)',
+                    border: '1px solid rgba(240,185,11,0.25)',
+                    color: 'var(--color-brand)',
+                  }}
                 >
                   {currency}
-                </span>
+                </div>
               ))}
             </div>
 
-            <button
-              type="button"
-              className="mt-6 w-full rounded-2xl bg-blue-900 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-blue-900/20 transition hover:bg-blue-950"
-            >
-              {t.button}
-            </button>
+            {/* Live payout animation */}
+            <div className="relative z-10 space-y-3">
+              {[
+                { from: 'BTC 0.5', to: 'RUB 2,950,000', status: 'completed' },
+                { from: 'ETH 12.0', to: 'KZT 18,500,000', status: 'processing' },
+                { from: 'USDT 50k', to: 'UZS 633M', status: 'pending' },
+              ].map((tx, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-xl p-3 text-xs"
+                  style={{
+                    background: 'var(--color-bg-elevated)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                >
+                  <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{tx.from}</span>
+                  <span style={{ color: 'var(--color-text-muted)' }}>→</span>
+                  <span className="font-semibold" style={{ color: 'var(--color-brand)' }}>{tx.to}</span>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-xs font-bold"
+                    style={{
+                      background: tx.status === 'completed' ? 'var(--color-green-dim)' : tx.status === 'processing' ? 'var(--color-brand-dim)' : 'rgba(100,100,100,0.15)',
+                      color: tx.status === 'completed' ? 'var(--color-green)' : tx.status === 'processing' ? 'var(--color-brand)' : 'var(--color-text-muted)',
+                    }}
+                  >
+                    {tx.status}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

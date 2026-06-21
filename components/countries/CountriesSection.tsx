@@ -1,21 +1,15 @@
 'use client';
 
 import { useLocale } from '../../lib/locale-context';
-import SmartImage from '../ui/SmartImage';
 
-type CountryKey =
-  | 'Russia'
-  | 'Kazakhstan'
-  | 'Uzbekistan'
-  | 'Azerbaijan'
-  | 'Kyrgyzstan';
+type CountryKey = 'Russia' | 'Kazakhstan' | 'Uzbekistan' | 'Azerbaijan' | 'Kyrgyzstan';
 
-const COUNTRIES: { key: CountryKey; currency: string; flag: string }[] = [
-  { key: 'Russia', currency: 'RUB', flag: '🇷🇺' },
-  { key: 'Kazakhstan', currency: 'KZT', flag: '🇰🇿' },
-  { key: 'Uzbekistan', currency: 'UZS', flag: '🇺🇿' },
-  { key: 'Azerbaijan', currency: 'AZN', flag: '🇦🇿' },
-  { key: 'Kyrgyzstan', currency: 'KGS', flag: '🇰🇬' },
+const COUNTRIES: { key: CountryKey; currency: string; flag: string; color: string }[] = [
+  { key: 'Russia',     currency: 'RUB', flag: '🇷🇺', color: 'rgba(220,38,38,0.15)' },
+  { key: 'Kazakhstan', currency: 'KZT', flag: '🇰🇿', color: 'rgba(5,150,105,0.15)' },
+  { key: 'Uzbekistan', currency: 'UZS', flag: '🇺🇿', color: 'rgba(30,64,175,0.15)' },
+  { key: 'Azerbaijan', currency: 'AZN', flag: '🇦🇿', color: 'rgba(37,99,235,0.15)' },
+  { key: 'Kyrgyzstan', currency: 'KGS', flag: '🇰🇬', color: 'rgba(126,34,206,0.15)' },
 ];
 
 export default function CountriesSection() {
@@ -23,57 +17,74 @@ export default function CountriesSection() {
   const t = dict.countries;
 
   return (
-    <section className="bg-white py-24">
+    <section
+      id="countries"
+      className="py-24 nexora-section-glow"
+      style={{ background: 'var(--color-bg-base)' }}
+    >
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            {t.badge}
-          </div>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
+          <div className="nexora-badge mb-4">{t.badge}</div>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
             {t.title}
           </h2>
-          <p className="mt-4 text-lg text-slate-600">{t.subtitle}</p>
+          <p className="mt-4 text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t.subtitle}</p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {COUNTRIES.map((country) => (
             <div
               key={country.key}
-              className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-lg shadow-slate-200/60 transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-900/10"
+              className="nexora-card group overflow-hidden transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'var(--color-bg-surface)' }}
             >
-              <SmartImage
-                src={`/images/countries/${country.key.toLowerCase()}.webp`}
-                alt={t.names[country.key]}
-                sizes="(min-width: 1280px) 256px, (min-width: 640px) 50vw, 100vw"
-                className="h-28 w-full"
+              {/* Color top strip */}
+              <div
+                className="h-1.5 w-full"
+                style={{ background: 'var(--color-brand)' }}
               />
 
-              <div className="p-8">
-              <div className="flex items-center justify-between">
-                <span className="text-4xl">{country.flag}</span>
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-900">
-                  {country.currency}
-                </span>
-              </div>
+              <div className="p-6">
+                {/* Flag + currency */}
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-4xl">{country.flag}</span>
+                  <span
+                    className="rounded-full px-3 py-1 text-xs font-black"
+                    style={{
+                      background: 'var(--color-brand-dim)',
+                      color: 'var(--color-brand)',
+                      border: '1px solid rgba(240,185,11,0.25)',
+                    }}
+                  >
+                    {country.currency}
+                  </span>
+                </div>
 
-              <h3 className="mt-6 text-xl font-bold text-slate-950">
-                {t.names[country.key]}
-              </h3>
+                <h3
+                  className="text-lg font-bold mb-3"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  {t.names[country.key]}
+                </h3>
 
-              <ul className="mt-4 space-y-3 border-t border-slate-100 pt-4 text-sm text-slate-600">
-                {t.methods.map((method) => (
-                  <li key={method} className="flex items-center gap-2">
-                    <span className="text-blue-900">✓</span>
-                    {method}
-                  </li>
-                ))}
-              </ul>
+                <ul className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+                  {t.methods.map((method) => (
+                    <li
+                      key={method}
+                      className="flex items-center gap-2 text-xs"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      <span style={{ color: 'var(--color-green)' }}>✓</span>
+                      {method}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           ))}
         </div>
 
-        <p className="mt-12 text-center text-sm font-medium text-slate-500">
+        <p className="mt-12 text-center text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
           {t.note}
         </p>
       </div>
