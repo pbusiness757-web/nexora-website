@@ -6,10 +6,21 @@ import { useParams } from "next/navigation";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 type ApiPayout = {
+  id: string;
   payoutNumber: string;
   status: string;
   amount: string;
   currency: string;
+  partnerId: string | null;
+};
+
+type ApiPartner = {
+  id: string;
+  name: string;
+  country: string;
+  currency: string;
+  feePercent: string;
+  reserve: string;
 };
 
 type ApiClient = {
@@ -59,16 +70,25 @@ const STATUS_META: Record<string, { label: string; style: string }> = {
   CRYPTO_RECEIVED:  { label: "Крипто получено",   style: "bg-blue-50 text-blue-700" },
   AML_REVIEW:       { label: "AML-проверка",      style: "bg-cyan-50 text-cyan-700" },
   READY_FOR_PAYOUT: { label: "Готово к выплате",  style: "bg-indigo-50 text-indigo-700" },
-  PROCESSING:       { label: "В обработке",        style: "bg-amber-50 text-amber-600" },
+  PROCESSING:       { label: "В обработке",       style: "bg-amber-50 text-amber-600" },
   COMPLETED:        { label: "Завершено",          style: "bg-emerald-50 text-emerald-600" },
   ON_HOLD:          { label: "На удержании",       style: "bg-rose-50 text-rose-600" },
 };
 
+const PAYOUT_STATUS_META: Record<string, { label: string; style: string }> = {
+  PENDING:    { label: "Ожидает",      style: "bg-slate-100 text-slate-600" },
+  READY:      { label: "Готово",       style: "bg-indigo-50 text-indigo-700" },
+  PROCESSING: { label: "В обработке", style: "bg-amber-50 text-amber-600" },
+  COMPLETED:  { label: "Выполнено",   style: "bg-emerald-50 text-emerald-700" },
+  FAILED:     { label: "Ошибка",      style: "bg-rose-50 text-rose-700" },
+  ON_HOLD:    { label: "Удержание",   style: "bg-rose-50 text-rose-600" },
+};
+
 const AML_META: Record<string, { label: string; style: string }> = {
-  PENDING:  { label: "Ожидает",        style: "bg-slate-100 text-slate-600" },
-  PASSED:   { label: "Пройдена",       style: "bg-emerald-50 text-emerald-700" },
-  REVIEW:   { label: "На проверке",   style: "bg-amber-50 text-amber-700" },
-  REJECTED: { label: "Отклонена",     style: "bg-rose-50 text-rose-700" },
+  PENDING:  { label: "Ожидает",       style: "bg-slate-100 text-slate-600" },
+  PASSED:   { label: "Пройдена",      style: "bg-emerald-50 text-emerald-700" },
+  REVIEW:   { label: "На проверке",  style: "bg-amber-50 text-amber-700" },
+  REJECTED: { label: "Отклонена",    style: "bg-rose-50 text-rose-700" },
 };
 
 const TIMELINE_ORDER = [
@@ -81,20 +101,23 @@ const TIMELINE_ORDER = [
   "COMPLETED",
 ];
 
-// Statuses blocked by AML REJECTED
 const AML_BLOCKED = new Set(["READY_FOR_PAYOUT", "PROCESSING", "COMPLETED"]);
 
 const STATUS_ACTIONS: { label: string; targetStatus: string; primary?: boolean }[] = [
   { label: "Начать AML-проверку",    targetStatus: "AML_REVIEW",       primary: true },
-  { label: "Крипто получено",         targetStatus: "CRYPTO_RECEIVED" },
-  { label: "Готово к выплате",        targetStatus: "READY_FOR_PAYOUT" },
-  { label: "В обработке",            targetStatus: "PROCESSING" },
-  { label: "Завершить заявку",        targetStatus: "COMPLETED",        primary: true },
-  { label: "Поставить на удержание",  targetStatus: "ON_HOLD" },
+  { label: "Крипто получено",        targetStatus: "CRYPTO_RECEIVED" },
+  { label: "Готово к выплате",       targetStatus: "READY_FOR_PAYOUT" },
+  { label: "В обработке",           targetStatus: "PROCESSING" },
+  { label: "Завершить заявку",       targetStatus: "COMPLETED",        primary: true },
+  { label: "Поставить на удержание", targetStatus: "ON_HOLD" },
 ];
 
 function statusMeta(status: string) {
   return STATUS_META[status] ?? { label: status, style: "bg-slate-100 text-slate-500" };
+}
+
+function payoutStatusMeta(status: string) {
+  return PAYOUT_STATUS_META[status] ?? { label: status, style: "bg-slate-100 text-slate-500" };
 }
 
 function amlMeta(status: string) {
@@ -147,14 +170,16 @@ export default function AdminRequestDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
-  const [request, setRequest]     = useState<ApiRequest | null>(null);
-  const [history, setHistory]     = useState<HistoryEntry[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
-  const [updating, setUpdating]   = useState(false);
-  const [amlSaving, setAmlSaving] = useState(false);
-  const [toast, setToast]         = useState<{ text: string; ok: boolean } | null>(null);
-  const [amlForm, setAmlForm]     = useState<AmlForm>({
+  const [request, setRequest]       = useState<ApiRequest | null>(null);
+  const [history, setHistory]       = useState<HistoryEntry[]>([]);
+  const [partnerData, setPartnerData] = useState<ApiPartner | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState<string | null>(null);
+  const [updating, setUpdating]     = useState(false);
+  const [amlSaving, setAmlSaving]   = useState(false);
+  const [assigning, setAssigning]   = useState(false);
+  const [toast, setToast]           = useState<{ text: string; ok: boolean } | null>(null);
+  const [amlForm, setAmlForm]       = useState<AmlForm>({
     amlStatus: "PENDING",
     riskScore: "",
     amlComment: "",
@@ -164,6 +189,19 @@ export default function AdminRequestDetailsPage() {
     setToast({ text, ok });
     setTimeout(() => setToast(null), 3500);
   };
+
+  // Resolve partner name from partnerId by fetching the partners list
+  async function resolvePartner(partnerId: string): Promise<ApiPartner | null> {
+    try {
+      const res = await fetch(`${API_BASE}/api/partners?limit=100`, { credentials: "include" });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const list: ApiPartner[] = Array.isArray(data) ? data : (data.data ?? []);
+      return list.find((p) => p.id === partnerId) ?? null;
+    } catch {
+      return null;
+    }
+  }
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -180,13 +218,18 @@ export default function AdminRequestDetailsPage() {
       setRequest(reqData);
       setHistory(Array.isArray(histData) ? histData : []);
       setError(null);
-      // Sync AML form with loaded data
       setAmlForm({
         amlStatus: reqData.amlStatus ?? "PENDING",
         riskScore: reqData.riskScore !== null && reqData.riskScore !== undefined
           ? String(reqData.riskScore) : "",
         amlComment: reqData.amlComment ?? "",
       });
+      // Resolve partner if payout exists with a partnerId
+      if (reqData.payout?.partnerId) {
+        resolvePartner(reqData.payout.partnerId).then((p) => setPartnerData(p));
+      } else {
+        setPartnerData(null);
+      }
     } catch {
       setError("Не удалось загрузить заявку.");
     } finally {
@@ -211,7 +254,7 @@ export default function AdminRequestDetailsPage() {
         showToast(body.error ?? "Ошибка при обновлении статуса", false);
         return;
       }
-      showToast(`Статус изменён → «${statusMeta(targetStatus).label}»`, true);
+      showToast("Статус изменён -> " + statusMeta(targetStatus).label, true);
       await load();
     } catch {
       showToast("Сетевая ошибка при обновлении статуса", false);
@@ -240,7 +283,7 @@ export default function AdminRequestDetailsPage() {
         showToast(errBody.error ?? "Ошибка при обновлении AML", false);
         return;
       }
-      showToast(`AML обновлена → «${amlMeta(amlForm.amlStatus).label}»`, true);
+      showToast("AML обновлена -> " + amlMeta(amlForm.amlStatus).label, true);
       await load();
     } catch {
       showToast("Сетевая ошибка при обновлении AML", false);
@@ -249,11 +292,43 @@ export default function AdminRequestDetailsPage() {
     }
   }
 
+  async function handleAssignPartner() {
+    if (!request || assigning) return;
+    setAssigning(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/requests/${request.id}/assign-partner`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        // Surface specific backend error messages
+        showToast(body.error ?? "Не удалось назначить партнёра", false);
+        return;
+      }
+      // Capture partner directly from the response (name available here)
+      if (body.partner) {
+        setPartnerData(body.partner as ApiPartner);
+      }
+      showToast(
+        "Партнёр назначен: " + (body.partner?.name ?? "") +
+        " — выплата #" + (body.payout?.payoutNumber ?? ""),
+        true
+      );
+      await load();
+    } catch {
+      showToast("Сетевая ошибка при назначении партнёра", false);
+    } finally {
+      setAssigning(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="px-6 py-16">
         <div className="mx-auto max-w-7xl">
-          <p className="text-sm text-slate-500">Загрузка заявки…</p>
+          <p className="text-sm text-slate-500">Загрузка заявки...</p>
         </div>
       </div>
     );
@@ -275,6 +350,7 @@ export default function AdminRequestDetailsPage() {
   const meta         = statusMeta(request.status);
   const amlBadge     = amlMeta(request.amlStatus ?? "PENDING");
   const amlRejected  = request.amlStatus === "REJECTED";
+  const canAssign    = request.status === "READY_FOR_PAYOUT" && !request.payout && !amlRejected;
 
   const clientRows = request.client
     ? [
@@ -287,18 +363,18 @@ export default function AdminRequestDetailsPage() {
   const cryptoRows = [
     { label: "Актив",   value: request.cryptoAsset },
     { label: "Сеть",    value: request.network },
-    { label: "Сумма",   value: `${formatNumber(request.cryptoAmount)} ${request.cryptoAsset}` },
+    { label: "Сумма",   value: formatNumber(request.cryptoAmount) + " " + request.cryptoAsset },
     { label: "Создана", value: request.createdAt.slice(0, 10) },
   ];
 
   const payoutRows = request.payout
     ? [
         { label: "Номер выплаты", value: request.payout.payoutNumber, mono: true },
-        { label: "Статус",        value: statusMeta(request.payout.status).label },
-        { label: "Сумма",         value: `${formatNumber(request.payout.amount)} ${request.payout.currency}` },
+        { label: "Статус",        value: payoutStatusMeta(request.payout.status).label },
+        { label: "Сумма",         value: formatNumber(request.payout.amount) + " " + request.payout.currency },
       ]
     : [
-        { label: "Сумма",   value: `${formatNumber(request.payoutAmount)} ${request.payoutCurrency}` },
+        { label: "Сумма",   value: formatNumber(request.payoutAmount) + " " + request.payoutCurrency },
         { label: "Валюта",  value: request.payoutCurrency },
         { label: "Выплата", value: "Ещё не создана" },
       ];
@@ -308,9 +384,10 @@ export default function AdminRequestDetailsPage() {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed right-6 top-6 z-50 rounded-2xl px-5 py-3 text-sm font-semibold shadow-xl ${
-            toast.ok ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
-          }`}
+          className={
+            "fixed right-6 top-6 z-50 rounded-2xl px-5 py-3 text-sm font-semibold shadow-xl " +
+            (toast.ok ? "bg-emerald-600 text-white" : "bg-rose-600 text-white")
+          }
         >
           {toast.text}
         </div>
@@ -323,10 +400,10 @@ export default function AdminRequestDetailsPage() {
             <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
               Заявка {request.requestNumber}
             </h1>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${meta.style}`}>
+            <span className={"rounded-full px-3 py-1 text-xs font-semibold " + meta.style}>
               {meta.label}
             </span>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${amlBadge.style}`}>
+            <span className={"rounded-full px-3 py-1 text-xs font-semibold " + amlBadge.style}>
               AML: {amlBadge.label}
             </span>
           </div>
@@ -337,7 +414,7 @@ export default function AdminRequestDetailsPage() {
         {amlRejected && (
           <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4">
             <p className="text-sm font-semibold text-rose-700">
-              AML отклонена — переход в статусы «Готово к выплате», «В обработке» и «Завершено» заблокирован.
+              AML отклонена — переход в статусы Готово к выплате, В обработке и Завершено заблокирован.
               Измените AML-статус, чтобы разблокировать прогресс.
             </p>
           </div>
@@ -352,18 +429,18 @@ export default function AdminRequestDetailsPage() {
               {history.map((entry) => (
                 <li key={entry.id} className="flex gap-4">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blue-900 bg-blue-900 text-xs font-bold text-white">
-                    ✓
+                    OK
                   </span>
                   <div className="flex flex-1 flex-col justify-center">
                     <p className="font-semibold text-slate-950">
                       {statusMeta(entry.fromStatus).label}
-                      <span className="mx-2 text-slate-400">→</span>
+                      <span className="mx-2 text-slate-400">-&gt;</span>
                       {statusMeta(entry.toStatus).label}
                     </p>
                     <p className="text-xs text-slate-500">
                       {formatTs(entry.createdAt)}
                       {entry.changedBy && entry.changedBy !== "unknown"
-                        ? ` · ${entry.changedBy}`
+                        ? " · " + entry.changedBy
                         : ""}
                     </p>
                   </div>
@@ -371,7 +448,7 @@ export default function AdminRequestDetailsPage() {
               ))}
               <li className="flex gap-4">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-cyan-500 bg-cyan-50 text-xs font-bold text-cyan-700">
-                  →
+                  NOW
                 </span>
                 <div className="flex flex-1 flex-col justify-center">
                   <p className="font-semibold text-slate-950">
@@ -396,19 +473,23 @@ export default function AdminRequestDetailsPage() {
                   <li key={step} className="relative flex gap-4">
                     {!isLast && (
                       <span
-                        className={`absolute left-5 top-10 h-[calc(100%-0.5rem)] w-px ${
-                          state === "done" ? "bg-blue-900" : "bg-slate-200"
-                        }`}
+                        className={
+                          "absolute left-5 top-10 h-[calc(100%-0.5rem)] w-px " +
+                          (state === "done" ? "bg-blue-900" : "bg-slate-200")
+                        }
                         aria-hidden="true"
                       />
                     )}
                     <span
-                      className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${markerStyles[state]}`}
+                      className={
+                        "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-bold " +
+                        markerStyles[state]
+                      }
                     >
-                      {state === "done" ? "✓" : index + 1}
+                      {state === "done" ? "OK" : index + 1}
                     </span>
                     <div className="flex flex-1 items-center pt-2">
-                      <p className={`font-semibold ${state === "pending" ? "text-slate-400" : "text-slate-950"}`}>
+                      <p className={"font-semibold " + (state === "pending" ? "text-slate-400" : "text-slate-950")}>
                         {statusMeta(step).label}
                       </p>
                     </div>
@@ -450,7 +531,7 @@ export default function AdminRequestDetailsPage() {
                         : "rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:text-blue-900 disabled:opacity-50"
                     }
                   >
-                    {updating ? "…" : action.label}
+                    {updating ? "..." : action.label}
                   </button>
                 );
               })}
@@ -481,11 +562,104 @@ export default function AdminRequestDetailsPage() {
           </section>
         </div>
 
+        {/* Partner Assignment Card */}
+        <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-lg font-bold text-slate-950">Партнёр выплаты</h2>
+              {request.payout && (
+                <span className={"rounded-full px-3 py-1 text-xs font-semibold " + payoutStatusMeta(request.payout.status).style}>
+                  {payoutStatusMeta(request.payout.status).label}
+                </span>
+              )}
+            </div>
+
+            {/* Assign-partner button: only when READY_FOR_PAYOUT, no existing payout, AML not rejected */}
+            {canAssign && (
+              <button
+                type="button"
+                disabled={assigning}
+                onClick={handleAssignPartner}
+                className="rounded-2xl bg-indigo-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {assigning ? "Поиск партнёра..." : "Назначить партнёра"}
+              </button>
+            )}
+
+            {/* Can't assign because AML rejected */}
+            {request.status === "READY_FOR_PAYOUT" && !request.payout && amlRejected && (
+              <span className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-600">
+                Недоступно — AML отклонена
+              </span>
+            )}
+          </div>
+
+          {/* Payout + partner details */}
+          {request.payout ? (
+            <dl className="mt-6 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-slate-50 px-4">
+              {partnerData && (
+                <div className="flex items-center justify-between gap-4 py-4">
+                  <dt className="text-sm text-slate-600">Партнёр</dt>
+                  <dd className="text-right font-semibold text-slate-950">{partnerData.name}</dd>
+                </div>
+              )}
+              {partnerData && (
+                <div className="flex items-center justify-between gap-4 py-4">
+                  <dt className="text-sm text-slate-600">Страна / валюта</dt>
+                  <dd className="text-right font-semibold text-slate-950">
+                    {partnerData.country} / {partnerData.currency}
+                  </dd>
+                </div>
+              )}
+              {partnerData && (
+                <div className="flex items-center justify-between gap-4 py-4">
+                  <dt className="text-sm text-slate-600">Комиссия партнёра</dt>
+                  <dd className="text-right font-semibold text-slate-950">{Number(partnerData.feePercent).toFixed(2)}%</dd>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-4 py-4">
+                <dt className="text-sm text-slate-600">Номер выплаты</dt>
+                <dd className="text-right font-mono text-sm font-semibold text-slate-500">
+                  {request.payout.payoutNumber}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-4 py-4">
+                <dt className="text-sm text-slate-600">Сумма выплаты</dt>
+                <dd className="text-right font-semibold text-slate-950">
+                  {formatNumber(request.payout.amount)} {request.payout.currency}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-4 py-4">
+                <dt className="text-sm text-slate-600">Статус выплаты</dt>
+                <dd className="text-right">
+                  <span className={"rounded-full px-2.5 py-0.5 text-xs font-semibold " + payoutStatusMeta(request.payout.status).style}>
+                    {payoutStatusMeta(request.payout.status).label}
+                  </span>
+                </dd>
+              </div>
+              {!partnerData && request.payout.partnerId && (
+                <div className="flex items-center justify-between gap-4 py-4">
+                  <dt className="text-sm text-slate-600">ID партнёра</dt>
+                  <dd className="text-right font-mono text-xs text-slate-400">{request.payout.partnerId}</dd>
+                </div>
+              )}
+            </dl>
+          ) : (
+            <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 px-5 py-5">
+              <p className="text-sm text-slate-500">
+                {request.status === "READY_FOR_PAYOUT"
+                  ? "Заявка готова к выплате. Нажмите кнопку выше, чтобы автоматически выбрать лучшего партнёра."
+                  : "Выплата будет создана после перехода заявки в статус Готово к выплате."}
+              </p>
+            </div>
+          )}
+        </section>
+
         {/* AML Card */}
         <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-lg font-bold text-slate-950">AML Проверка</h2>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${amlBadge.style}`}>
+            <span className={"rounded-full px-3 py-1 text-xs font-semibold " + amlBadge.style}>
               {amlBadge.label}
             </span>
           </div>
@@ -510,7 +684,7 @@ export default function AdminRequestDetailsPage() {
                   <dt className="text-sm text-slate-600">Проверил</dt>
                   <dd className="text-sm font-medium text-slate-800">
                     {request.amlReviewedBy}
-                    {request.amlReviewedAt ? ` · ${formatTs(request.amlReviewedAt)}` : ""}
+                    {request.amlReviewedAt ? " · " + formatTs(request.amlReviewedAt) : ""}
                   </dd>
                 </div>
               )}
@@ -539,7 +713,7 @@ export default function AdminRequestDetailsPage() {
 
             <div>
               <label htmlFor="risk-score" className="block text-xs font-medium text-slate-500 mb-1">
-                Риск-балл (0–100, необязательно)
+                Риск-балл (0-100, необязательно)
               </label>
               <input
                 id="risk-score"
@@ -575,7 +749,7 @@ export default function AdminRequestDetailsPage() {
               disabled={amlSaving}
               className="w-full rounded-2xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-950 disabled:opacity-50 sm:w-auto"
             >
-              {amlSaving ? "Сохранение…" : "Сохранить AML"}
+              {amlSaving ? "Сохранение..." : "Сохранить AML"}
             </button>
           </form>
         </section>
