@@ -1,219 +1,261 @@
-type KpiCard = {
-  label: string;
-  value: string;
-};
+"use client";
 
-const KPIS: KpiCard[] = [
-  { label: "Ожидают проверки", value: "7" },
-  { label: "Пройдено сегодня", value: "21" },
-  { label: "Высокий риск", value: "2" },
-  { label: "Отклонено", value: "1" },
-];
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+/* ── Types ───────────────────────────────────────────────── */
 type AmlRow = {
   id: string;
-  client: string;
-  wallet: string;
-  asset: string;
-  amount: string;
-  score: string;
-  level: string;
-  status: string;
-  decision: string;
+  requestNumber: string;
+  cryptoAsset: string;
+  cryptoAmount: number | string;
+  country: string | null;
+  amlStatus: string;
+  riskLevel: string;
+  riskScore: number | null;
+  amlComment: string | null;
+  amlReviewedAt: string | null;
+  createdAt: string;
+  client: { id: string; companyName: string | null } | null;
 };
 
-const REVIEWS: AmlRow[] = [
-  {
-    id: "NX-2026-0001",
-    client: "Alpha Trade LLC",
-    wallet: "TQ9...8K2",
-    asset: "USDT",
-    amount: "10,000",
-    score: "18",
-    level: "Низкий",
-    status: "Пройдено",
-    decision: "Одобрено",
-  },
-  {
-    id: "NX-2026-0003",
-    client: "UzMarket Group",
-    wallet: "0xA3...91F",
-    asset: "ETH",
-    amount: "18,000",
-    score: "42",
-    level: "Средний",
-    status: "Ручная проверка",
-    decision: "Ожидает",
-  },
-  {
-    id: "NX-2026-0005",
-    client: "Частный клиент",
-    wallet: "bc1q...7xz",
-    asset: "BTC",
-    amount: "1.2",
-    score: "79",
-    level: "Высокий",
-    status: "Требует проверки",
-    decision: "Удержание",
-  },
+const AML_META: Record<string, { label: string; color: string; bg: string }> = {
+  PENDING:   { label: "Ожидает",   color: "#d97706", bg: "rgba(217,119,6,0.1)"   },
+  APPROVED:  { label: "Одобрено",  color: "#059669", bg: "rgba(5,150,105,0.1)"   },
+  REJECTED:  { label: "Отклонено", color: "#ef4444", bg: "rgba(239,68,68,0.1)"   },
+  REVIEW:    { label: "Проверка",  color: "#2563eb", bg: "rgba(37,99,235,0.08)"  },
+};
+
+const RISK_META: Record<string, { label: string; color: string; bg: string }> = {
+  LOW:      { label: "Низкий",   color: "#059669", bg: "rgba(5,150,105,0.1)"   },
+  MEDIUM:   { label: "Средний",  color: "#d97706", bg: "rgba(217,119,6,0.1)"   },
+  HIGH:     { label: "Высокий",  color: "#ef4444", bg: "rgba(239,68,68,0.1)"   },
+  CRITICAL: { label: "Критич.",  color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
+};
+
+const AML_FILTERS = [
+  { value: "",         label: "Все"       },
+  { value: "PENDING",  label: "Ожидают"   },
+  { value: "REVIEW",   label: "Проверка"  },
+  { value: "APPROVED", label: "Одобрено"  },
+  { value: "REJECTED", label: "Отклонено" },
 ];
 
-const RISK_LEVELS = ["Низкий", "Средний", "Высокий", "Критический"];
+function fmt(v: number | string) {
+  return Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
 
-const levelStyles: Record<string, string> = {
-  Низкий: "bg-emerald-50 text-emerald-600",
-  Средний: "bg-amber-50 text-amber-600",
-  Высокий: "bg-rose-50 text-rose-600",
-  Критический: "bg-red-100 text-red-700",
-};
+/* ── Component ───────────────────────────────────────────── */
+export default function AmlPage() {
+  const [rows, setRows]           = useState<AmlRow[]>([]);
+  const [total, setTotal]         = useState(0);
+  const [page, setPage]           = useState(1);
+  const [amlFilter, setAmlFilter] = useState("");
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
 
-const decisionStyles: Record<string, string> = {
-  Одобрено: "bg-emerald-50 text-emerald-600",
-  Ожидает: "bg-cyan-50 text-cyan-700",
-  Удержание: "bg-orange-50 text-orange-600",
-  Отклонено: "bg-rose-50 text-rose-600",
-};
+  const LIMIT = 15;
 
-const ACTIONS = [
-  { label: "Одобрить", primary: true },
-  { label: "Удержать", primary: false },
-  { label: "Запросить документы", primary: false },
-  { label: "Отклонить", primary: false },
-];
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(LIMIT),
+      });
+      if (amlFilter) params.set("amlStatus", amlFilter);
 
-const thClass = "pb-3 font-semibold";
-const tdClass = "py-4";
+      const res = await fetch(`${API_BASE}/api/requests?${params}`);
+      if (!res.ok) throw new Error("requests");
+      const data = await res.json();
+      setRows(data.data ?? []);
+      setTotal(data.total ?? 0);
+    } catch {
+      setError("Не удалось загрузить данные AML.");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, amlFilter]);
 
-export default function AdminAmlPage() {
+  useEffect(() => { load(); }, [load]);
+
+  // Reset to page 1 when filter changes
+  function applyFilter(f: string) {
+    setAmlFilter(f);
+    setPage(1);
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+
+  // KPI counts from current data (approximate — based on full total from last filter)
+  const pending  = rows.filter(r => r.amlStatus === "PENDING").length;
+  const review   = rows.filter(r => r.amlStatus === "REVIEW").length;
+  const rejected = rows.filter(r => r.amlStatus === "REJECTED").length;
+  const highRisk = rows.filter(r => r.riskLevel === "HIGH" || r.riskLevel === "CRITICAL").length;
+
   return (
-    <main className="bg-slate-50 py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              AML и оценка рисков
-            </h1>
-            <p className="text-lg text-slate-600">
-              Контроль рисков транзакций, проверок кошельков и комплаенс-решений.
-            </p>
-          </div>
+    <main style={{ background: "var(--color-bg-surface)" }} className="py-16">
+      <div className="mx-auto max-w-7xl px-6">
 
-          <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {KPIS.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
-              >
-                <p className="text-sm font-medium text-slate-500">
-                  {card.label}
-                </p>
-                <p className="mt-3 text-3xl font-bold text-slate-950">
-                  {card.value}
-                </p>
-              </div>
-            ))}
-          </section>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: "var(--color-text-primary)" }}>
+            AML-мониторинг
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            Заявки с AML-статусами и уровнями риска
+          </p>
+        </div>
 
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">AML-проверка</h2>
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[1000px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>ID заявки</th>
-                    <th className={thClass}>Клиент</th>
-                    <th className={thClass}>Кошелёк</th>
-                    <th className={thClass}>Актив</th>
-                    <th className={thClass}>Сумма</th>
-                    <th className={thClass}>Балл риска</th>
-                    <th className={thClass}>Уровень риска</th>
-                    <th className={thClass}>Статус</th>
-                    <th className={thClass}>Решение</th>
+        {/* KPI strip */}
+        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { label: "Ожидают проверки", value: pending,  color: "var(--color-amber)" },
+            { label: "На проверке",      value: review,   color: "var(--color-brand)" },
+            { label: "Высокий риск",     value: highRisk, color: "var(--color-red)"   },
+            { label: "Отклонено",        value: rejected, color: "var(--color-red)"   },
+          ].map(k => (
+            <div key={k.label} className="nexora-card p-5" style={{ background: "var(--color-bg-base)" }}>
+              <p className="text-xs font-medium mb-1" style={{ color: "var(--color-text-muted)" }}>{k.label}</p>
+              <p className="text-3xl font-bold" style={{ color: k.color }}>{k.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <div className="mb-5 flex flex-wrap gap-2">
+          {AML_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => applyFilter(f.value)}
+              className="rounded-xl px-4 py-2 text-sm font-semibold transition-all"
+              style={{
+                background: amlFilter === f.value ? "var(--color-brand)" : "var(--color-bg-base)",
+                color:      amlFilter === f.value ? "#ffffff"            : "var(--color-text-secondary)",
+                border:     `1px solid ${amlFilter === f.value ? "var(--color-brand)" : "var(--color-border)"}`,
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+          <span className="ml-auto text-sm self-center" style={{ color: "var(--color-text-muted)" }}>
+            Всего: {total}
+          </span>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <p className="mb-5 rounded-2xl px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.08)", color: "var(--color-red)" }}>
+            {error}
+          </p>
+        )}
+
+        {/* Table */}
+        <div className="nexora-card overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[860px] text-sm">
+              <thead>
+                <tr style={{ background: "var(--color-bg-surface)", borderBottom: "1px solid var(--color-border)" }}>
+                  {["Заявка", "Клиент", "Актив", "Сумма", "Страна", "AML-статус", "Риск", "Оценка", "Дата"].map(h => (
+                    <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={9} className="px-5 py-10 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
+                      Загрузка…
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {REVIEWS.map((row) => (
-                    <tr key={row.id} className="text-slate-700">
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.id}
-                      </td>
-                      <td className={tdClass}>{row.client}</td>
-                      <td className={`${tdClass} font-mono text-slate-500`}>
-                        {row.wallet}
-                      </td>
-                      <td className={tdClass}>{row.asset}</td>
-                      <td className={tdClass}>{row.amount}</td>
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.score}
-                      </td>
-                      <td className={tdClass}>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            levelStyles[row.level] ??
-                            "bg-slate-100 text-slate-500"
-                          }`}
+                ) : rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-5 py-10 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
+                      Нет заявок по выбранному фильтру.
+                    </td>
+                  </tr>
+                ) : rows.map(row => {
+                  const aml  = AML_META[row.amlStatus]  ?? { label: row.amlStatus,  color: "#64748b", bg: "rgba(100,116,139,0.1)" };
+                  const risk = RISK_META[row.riskLevel]  ?? { label: row.riskLevel,  color: "#64748b", bg: "rgba(100,116,139,0.1)" };
+
+                  return (
+                    <tr
+                      key={row.id}
+                      style={{ borderBottom: "1px solid var(--color-border-soft)" }}
+                    >
+                      <td className="px-5 py-3.5">
+                        <Link
+                          href={`/admin/requests/${row.id}`}
+                          className="font-semibold hover:underline"
+                          style={{ color: "var(--color-brand)" }}
                         >
-                          {row.level}
+                          {row.requestNumber}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3.5" style={{ color: "var(--color-text-secondary)" }}>
+                        {row.client?.companyName ?? "—"}
+                      </td>
+                      <td className="px-5 py-3.5 font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                        {row.cryptoAsset}
+                      </td>
+                      <td className="px-5 py-3.5" style={{ color: "var(--color-text-primary)" }}>
+                        {fmt(row.cryptoAmount)}
+                      </td>
+                      <td className="px-5 py-3.5" style={{ color: "var(--color-text-secondary)" }}>
+                        {row.country ?? "—"}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ color: aml.color, background: aml.bg }}>
+                          {aml.label}
                         </span>
                       </td>
-                      <td className={tdClass}>{row.status}</td>
-                      <td className={tdClass}>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            decisionStyles[row.decision] ??
-                            "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {row.decision}
+                      <td className="px-5 py-3.5">
+                        <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ color: risk.color, background: risk.bg }}>
+                          {risk.label}
                         </span>
+                      </td>
+                      <td className="px-5 py-3.5 font-mono text-sm" style={{ color: row.riskScore != null && row.riskScore >= 70 ? "var(--color-red)" : "var(--color-text-secondary)" }}>
+                        {row.riskScore != null ? row.riskScore : "—"}
+                      </td>
+                      <td className="px-5 py-3.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        {new Date(row.createdAt).toLocaleDateString("ru-RU")}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8 lg:col-span-2">
-              <h2 className="text-lg font-bold text-slate-950">
-                Легенда уровней риска
-              </h2>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {RISK_LEVELS.map((level) => (
-                  <span
-                    key={level}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      levelStyles[level] ?? "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {level}
-                  </span>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-              <h2 className="text-lg font-bold text-slate-950">
-                Действия оператора
-              </h2>
-              <div className="mt-6 flex flex-col gap-3">
-                {ACTIONS.map((action) => (
-                  <button
-                    key={action.label}
-                    type="button"
-                    className={
-                      action.primary
-                        ? "rounded-2xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-950"
-                        : "rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:text-blue-900"
-                    }
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            </section>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-4" style={{ borderTop: "1px solid var(--color-border)" }}>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="nexora-btn-secondary !py-1.5 !px-4 text-xs disabled:opacity-40"
+              >
+                ← Назад
+              </button>
+              <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                Стр. {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="nexora-btn-secondary !py-1.5 !px-4 text-xs disabled:opacity-40"
+              >
+                Далее →
+              </button>
+            </div>
+          )}
         </div>
+      </div>
     </main>
   );
 }

@@ -1,239 +1,263 @@
-type KpiCard = {
-  label: string;
-  value: string;
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+type FiatRates = Record<string, number>;
+
+type RatesSnapshot = {
+  base: string;
+  rates: FiatRates;
+  source: "live" | "fallback";
+  updatedAt: string;
 };
 
-const KPIS: KpiCard[] = [
-  { label: "Последнее обновление", value: "30 сек назад" },
-  { label: "Активные пары", value: "12" },
-  { label: "Средняя маржа", value: "2.8%" },
-  { label: "Ручные изменения", value: "1" },
+const CURRENCIES = [
+  { code: "RUB", flag: "🇷🇺", name: "Российский рубль" },
+  { code: "KZT", flag: "🇰🇿", name: "Казахстанский тенге" },
+  { code: "UZS", flag: "🇺🇿", name: "Узбекский сум" },
+  { code: "AZN", flag: "🇦🇿", name: "Азербайджанский манат" },
+  { code: "KGS", flag: "🇰🇬", name: "Кыргызский сом" },
 ];
 
-type CryptoRow = {
-  asset: string;
-  market: string;
-  client: string;
-  margin: string;
-  source: string;
-  status: string;
-};
+export default function RatesPage() {
+  const [snapshot, setSnapshot]   = useState<RatesSnapshot | null>(null);
+  const [edits, setEdits]         = useState<FiatRates>({});
+  const [editing, setEditing]     = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saved, setSaved]         = useState(false);
 
-const CRYPTO_RATES: CryptoRow[] = [
-  {
-    asset: "USDT",
-    market: "1.00 USD",
-    client: "0.975 USD",
-    margin: "2.5%",
-    source: "Binance",
-    status: "Активна",
-  },
-  {
-    asset: "BTC",
-    market: "67,500 USD",
-    client: "65,475 USD",
-    margin: "3.0%",
-    source: "Binance",
-    status: "Активна",
-  },
-  {
-    asset: "ETH",
-    market: "3,450 USD",
-    client: "3,346 USD",
-    margin: "3.0%",
-    source: "Binance",
-    status: "Активна",
-  },
-  {
-    asset: "TON",
-    market: "7.20 USD",
-    client: "6.98 USD",
-    margin: "3.0%",
-    source: "CoinGecko",
-    status: "Активна",
-  },
-];
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/rates`);
+      if (!res.ok) throw new Error("rates");
+      const data: RatesSnapshot = await res.json();
+      setSnapshot(data);
+      setEdits({ ...data.rates });
+    } catch {
+      setError("Не удалось загрузить курсы.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-type FiatRow = {
-  currency: string;
-  country: string;
-  market: string;
-  client: string;
-  margin: string;
-  status: string;
-};
+  useEffect(() => { load(); }, [load]);
 
-const FIAT_RATES: FiatRow[] = [
-  {
-    currency: "RUB",
-    country: "Россия",
-    market: "92.50",
-    client: "90.18",
-    margin: "2.5%",
-    status: "Активна",
-  },
-  {
-    currency: "KZT",
-    country: "Казахстан",
-    market: "450.00",
-    client: "438.75",
-    margin: "2.5%",
-    status: "Активна",
-  },
-  {
-    currency: "UZS",
-    country: "Узбекистан",
-    market: "12650.00",
-    client: "12333.75",
-    margin: "2.5%",
-    status: "Активна",
-  },
-  {
-    currency: "AZN",
-    country: "Азербайджан",
-    market: "1.70",
-    client: "1.66",
-    margin: "2.5%",
-    status: "Активна",
-  },
-  {
-    currency: "KGS",
-    country: "Кыргызстан",
-    market: "89.00",
-    client: "86.78",
-    margin: "2.5%",
-    status: "Активна",
-  },
-];
+  async function save() {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const token = document.cookie.match(/admin_token=([^;]+)/)?.[1] ?? "";
+      const body: Record<string, number> = {};
+      for (const { code } of CURRENCIES) {
+        const v = edits[code];
+        if (v !== undefined && v > 0) body[code] = v;
+      }
+      const res = await fetch(`${API_BASE}/api/rates`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "save failed");
+      }
+      const data: RatesSnapshot = await res.json();
+      setSnapshot(data);
+      setEdits({ ...data.rates });
+      setEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: unknown) {
+      setSaveError(e instanceof Error ? e.message : "Ошибка сохранения");
+    } finally {
+      setSaving(false);
+    }
+  }
 
-const MARGIN_RULES = [
-  { label: "Частные клиенты", value: "2% - 5%" },
-  { label: "Бизнес-клиенты", value: "1% - 3%" },
-  { label: "VIP-клиенты", value: "Индивидуально" },
-];
+  function cancel() {
+    setEdits(snapshot ? { ...snapshot.rates } : {});
+    setEditing(false);
+    setSaveError(null);
+  }
 
-const statusBadge =
-  "rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600";
-const thClass = "pb-3 font-semibold";
-const tdClass = "py-4";
-
-export default function AdminRatesPage() {
   return (
-    <main className="bg-slate-50 py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Курсы и маржа
+    <main style={{ background: "var(--color-bg-surface)" }} className="py-16">
+      <div className="mx-auto max-w-4xl px-6">
+
+        {/* Header */}
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight" style={{ color: "var(--color-text-primary)" }}>
+              Управление курсами
             </h1>
-            <p className="text-lg text-slate-600">
-              Контроль рыночных курсов, клиентских курсов и сервисной маржи.
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Фиатные курсы к USDT · база: {snapshot?.base ?? "USDT"}
             </p>
           </div>
-
-          <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {KPIS.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
+          <div className="flex items-center gap-3">
+            {!editing ? (
+              <button
+                onClick={() => setEditing(true)}
+                disabled={loading || !!error}
+                className="nexora-btn-primary !py-2.5 !px-5 text-sm"
               >
-                <p className="text-sm font-medium text-slate-500">
-                  {card.label}
-                </p>
-                <p className="mt-3 text-3xl font-bold text-slate-950">
-                  {card.value}
+                ✏️ Редактировать
+              </button>
+            ) : (
+              <>
+                <button onClick={cancel} className="nexora-btn-secondary !py-2.5 !px-5 text-sm">
+                  Отмена
+                </button>
+                <button
+                  onClick={save}
+                  disabled={saving}
+                  className="nexora-btn-primary !py-2.5 !px-5 text-sm"
+                >
+                  {saving ? "Сохранение…" : "💾 Сохранить"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Status bar */}
+        {snapshot && !loading && (
+          <div
+            className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl px-5 py-3 text-sm"
+            style={{ background: "var(--color-bg-base)", border: "1px solid var(--color-border)" }}
+          >
+            <span style={{ color: "var(--color-text-muted)" }}>
+              Обновлено: {new Date(snapshot.updatedAt).toLocaleString("ru-RU")}
+            </span>
+            <span
+              className="rounded-full px-3 py-0.5 font-semibold"
+              style={{
+                color: snapshot.source === "live" ? "var(--color-green)" : "var(--color-text-muted)",
+                background: snapshot.source === "live" ? "var(--color-green-dim)" : "var(--color-bg-elevated)",
+              }}
+            >
+              {snapshot.source === "live" ? "● Живые данные" : "● Резервные данные"}
+            </span>
+            {saved && (
+              <span className="font-semibold" style={{ color: "var(--color-green)" }}>
+                ✓ Курсы обновлены
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Error / loading */}
+        {loading && (
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Загрузка курсов…</p>
+        )}
+        {error && (
+          <p className="rounded-2xl px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.08)", color: "var(--color-red)" }}>
+            {error}
+          </p>
+        )}
+
+        {/* Rates table */}
+        {!loading && !error && snapshot && (
+          <div className="nexora-card overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ background: "var(--color-bg-surface)", borderBottom: "1px solid var(--color-border)" }}>
+                  <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                    Валюта
+                  </th>
+                  <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                    Единиц за 1 USDT
+                  </th>
+                  {editing && (
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                      Новое значение
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {CURRENCIES.map(({ code, flag, name }) => {
+                  const current = snapshot.rates[code] ?? 0;
+                  const editVal = edits[code] ?? current;
+                  const changed = editing && editVal !== current;
+
+                  return (
+                    <tr
+                      key={code}
+                      style={{
+                        borderBottom: "1px solid var(--color-border-soft)",
+                        background: changed ? "rgba(37,99,235,0.03)" : "transparent",
+                      }}
+                    >
+                      {/* Currency */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{flag}</span>
+                          <div>
+                            <div className="font-bold" style={{ color: "var(--color-text-primary)" }}>{code}</div>
+                            <div className="text-xs" style={{ color: "var(--color-text-muted)" }}>{name}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Current rate */}
+                      <td className="px-6 py-4">
+                        <span className="text-lg font-bold" style={{ color: "var(--color-brand)" }}>
+                          {current.toLocaleString("ru-RU")}
+                        </span>
+                      </td>
+
+                      {/* Edit input */}
+                      {editing && (
+                        <td className="px-6 py-4">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            value={editVal}
+                            onChange={e => setEdits(prev => ({ ...prev, [code]: Number(e.target.value) }))}
+                            className="nexora-input !py-2 !px-3 w-36 text-sm font-semibold"
+                            style={{ color: changed ? "var(--color-brand)" : "var(--color-text-primary)" }}
+                          />
+                          {changed && (
+                            <span className="ml-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                              ({current.toLocaleString("ru-RU")} → {editVal.toLocaleString("ru-RU")})
+                            </span>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* Save error */}
+            {saveError && (
+              <div className="px-6 pb-4">
+                <p className="rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.08)", color: "var(--color-red)" }}>
+                  {saveError}
                 </p>
               </div>
-            ))}
-          </section>
+            )}
+          </div>
+        )}
 
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Курсы криптовалют</h2>
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Актив</th>
-                    <th className={thClass}>Рыночный курс</th>
-                    <th className={thClass}>Клиентский курс</th>
-                    <th className={thClass}>Маржа</th>
-                    <th className={thClass}>Источник</th>
-                    <th className={thClass}>Статус</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {CRYPTO_RATES.map((row) => (
-                    <tr key={row.asset} className="text-slate-700">
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.asset}
-                      </td>
-                      <td className={tdClass}>{row.market}</td>
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.client}
-                      </td>
-                      <td className={tdClass}>{row.margin}</td>
-                      <td className={tdClass}>{row.source}</td>
-                      <td className={tdClass}>
-                        <span className={statusBadge}>{row.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">
-              Курсы фиатных выплат
-            </h2>
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Валюта</th>
-                    <th className={thClass}>Страна</th>
-                    <th className={thClass}>Рыночный курс</th>
-                    <th className={thClass}>Клиентский курс</th>
-                    <th className={thClass}>Маржа</th>
-                    <th className={thClass}>Статус</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {FIAT_RATES.map((row) => (
-                    <tr key={row.currency} className="text-slate-700">
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.currency}
-                      </td>
-                      <td className={tdClass}>{row.country}</td>
-                      <td className={tdClass}>{row.market}</td>
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.client}
-                      </td>
-                      <td className={tdClass}>{row.margin}</td>
-                      <td className={tdClass}>
-                        <span className={statusBadge}>{row.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Правила маржи</h2>
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {MARGIN_RULES.map((rule) => (
-                <div key={rule.label} className="rounded-2xl bg-slate-50 p-5">
-                  <p className="text-sm text-slate-500">{rule.label}</p>
-                  <p className="mt-1 text-xl font-bold text-blue-900">
-                    {rule.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
+        {/* Note */}
+        <p className="mt-6 text-xs" style={{ color: "var(--color-text-muted)" }}>
+          Изменения сохраняются в память сервера до следующего перезапуска. Для постоянных курсов настройте RATES_PROVIDER_URL в .env.
+        </p>
+      </div>
     </main>
   );
 }

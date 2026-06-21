@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
+/* ── Types ───────────────────────────────────────────────── */
 type Stats = {
   totalRequests: number;
   createdRequests: number;
@@ -17,87 +19,57 @@ type Stats = {
   totalClients: number;
 };
 
-function formatNumber(value: number | string) {
-  return Number(value).toLocaleString("en-US");
-}
-
 type RequestRow = {
   id: string;
-  country: string;
+  requestNumber: string;
+  country: string | null;
   recipientType: string;
-  amount: string;
+  cryptoAmount: number | string;
+  cryptoAsset: string;
   status: string;
+  createdAt: string;
 };
 
-const REQUESTS: RequestRow[] = [
-  {
-    id: "NX-2026-0042",
-    country: "Россия",
-    recipientType: "Бизнес",
-    amount: "10,000 USDT",
-    status: "Ожидание оплаты",
-  },
-  {
-    id: "NX-2026-0041",
-    country: "Казахстан",
-    recipientType: "Физлицо",
-    amount: "2,500 USDT",
-    status: "AML-проверка",
-  },
-  {
-    id: "NX-2026-0040",
-    country: "Узбекистан",
-    recipientType: "Бизнес",
-    amount: "18,000 USDT",
-    status: "Готово к выплате",
-  },
-  {
-    id: "NX-2026-0039",
-    country: "Азербайджан",
-    recipientType: "Физлицо",
-    amount: "4,200 USDT",
-    status: "В обработке",
-  },
-  {
-    id: "NX-2026-0038",
-    country: "Кыргызстан",
-    recipientType: "Бизнес",
-    amount: "9,800 USDT",
-    status: "Завершено",
-  },
-];
-
-const statusStyles: Record<string, string> = {
-  "Ожидание оплаты": "bg-slate-100 text-slate-600",
-  "AML-проверка": "bg-cyan-50 text-cyan-700",
-  "Готово к выплате": "bg-blue-50 text-blue-900",
-  "В обработке": "bg-amber-50 text-amber-600",
-  Завершено: "bg-emerald-50 text-emerald-600",
+const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
+  CREATED:           { label: "Создана",          color: "#475569", bg: "rgba(71,85,105,0.08)"  },
+  WAITING_PAYMENT:   { label: "Ожидает оплаты",   color: "#d97706", bg: "rgba(217,119,6,0.1)"   },
+  CRYPTO_RECEIVED:   { label: "Крипта получена",  color: "#2563eb", bg: "rgba(37,99,235,0.08)"  },
+  AML_REVIEW:        { label: "AML проверка",     color: "#0891b2", bg: "rgba(8,145,178,0.08)"  },
+  READY_FOR_PAYOUT:  { label: "Готово к выплате", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
+  PROCESSING:        { label: "В обработке",      color: "#d97706", bg: "rgba(217,119,6,0.1)"   },
+  COMPLETED:         { label: "Завершена",         color: "#059669", bg: "rgba(5,150,105,0.1)"   },
+  ON_HOLD:           { label: "Приостановлена",   color: "#64748b", bg: "rgba(100,116,139,0.1)" },
 };
+
+function fmt(v: number | string) {
+  return Number(v).toLocaleString("en-US");
+}
 
 const LIQUIDITY = ["RUB", "KZT", "UZS", "AZN", "KGS"];
 
-const QUICK_ACTIONS = [
-  { label: "Новая заявка", primary: true },
-  { label: "AML-проверка", primary: false },
-  { label: "Управление курсами", primary: false },
-  { label: "Просмотр отчётов", primary: false },
-];
-
+/* ── Component ───────────────────────────────────────────── */
 export default function AdminPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats]       = useState<Stats | null>(null);
+  const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
     async function load() {
       try {
-        const res = await fetch(`${API_BASE}/api/dashboard/stats`);
-        if (!res.ok) throw new Error("stats");
-        const data = await res.json();
-        if (active) setStats(data);
+        const [statsRes, reqRes] = await Promise.all([
+          fetch(`${API_BASE}/api/dashboard/stats`),
+          fetch(`${API_BASE}/api/requests?limit=5&page=1`),
+        ]);
+        if (!statsRes.ok) throw new Error("stats");
+        const statsData = await statsRes.json();
+        const reqData   = reqRes.ok ? await reqRes.json() : { data: [] };
+        if (active) {
+          setStats(statsData);
+          setRequests(reqData.data ?? []);
+        }
       } catch {
         if (active) setError("Не удалось загрузить статистику.");
       } finally {
@@ -106,159 +78,179 @@ export default function AdminPage() {
     }
 
     load();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   const cards = stats
     ? [
-        { label: "Всего заявок", value: formatNumber(stats.totalRequests) },
-        { label: "Активные заявки", value: formatNumber(stats.activeRequests) },
-        { label: "Завершено", value: formatNumber(stats.completedRequests) },
-        { label: "Всего клиентов", value: formatNumber(stats.totalClients) },
-        { label: "Всего партнёров", value: formatNumber(stats.totalPartners) },
-        { label: "Активные партнёры", value: formatNumber(stats.activePartners) },
-        {
-          label: "Объём крипто",
-          value: `${formatNumber(stats.totalCryptoVolume)} USDT`,
-        },
-        {
-          label: "Объём выплат",
-          value: formatNumber(stats.totalPayoutVolume),
-        },
+        { label: "Всего заявок",       value: fmt(stats.totalRequests),       icon: "📋" },
+        { label: "Активные заявки",    value: fmt(stats.activeRequests),       icon: "⚡" },
+        { label: "Завершено",          value: fmt(stats.completedRequests),    icon: "✅" },
+        { label: "Всего клиентов",     value: fmt(stats.totalClients),         icon: "👥" },
+        { label: "Активные партнёры",  value: fmt(stats.activePartners),       icon: "🤝" },
+        { label: "Всего партнёров",    value: fmt(stats.totalPartners),        icon: "🏢" },
+        { label: "Объём крипто",       value: `${fmt(stats.totalCryptoVolume)} USDT`, icon: "💎" },
+        { label: "Объём выплат",       value: fmt(stats.totalPayoutVolume),    icon: "💸" },
       ]
     : [];
 
   return (
-    <main className="bg-slate-50 py-16">
+    <main style={{ background: "var(--color-bg-surface)" }} className="py-16">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "var(--color-text-primary)" }}>
             Операционная панель
           </h1>
-          <p className="text-lg text-slate-600">
+          <p className="text-lg" style={{ color: "var(--color-text-secondary)" }}>
             Контроль заявок, выплат и активности платформы.
           </p>
         </div>
 
+        {/* KPI cards */}
         {loading ? (
-          <p className="mt-10 text-sm text-slate-500">Загрузка статистики…</p>
+          <p className="mt-10 text-sm" style={{ color: "var(--color-text-muted)" }}>Загрузка статистики…</p>
         ) : error ? (
-          <p className="mt-10 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+          <p className="mt-10 rounded-2xl px-4 py-3 text-sm font-medium" style={{ background: "rgba(239,68,68,0.08)", color: "var(--color-red)" }}>
             {error}
           </p>
         ) : (
-          <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((kpi) => (
               <div
                 key={kpi.label}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
+                className="nexora-card p-6"
+                style={{ background: "var(--color-bg-base)" }}
               >
-                <p className="text-sm font-medium text-slate-500">
-                  {kpi.label}
-                </p>
-                <p className="mt-3 text-3xl font-bold text-slate-950">
-                  {kpi.value}
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>{kpi.label}</p>
+                  <span className="text-xl">{kpi.icon}</span>
+                </div>
+                <p className="text-3xl font-bold" style={{ color: "var(--color-text-primary)" }}>{kpi.value}</p>
               </div>
             ))}
           </section>
         )}
 
-        <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Recent requests */}
           <section className="lg:col-span-2">
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-              <h2 className="text-lg font-bold text-slate-950">
-                Последние заявки
-              </h2>
-
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full min-w-[680px] text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-500">
-                      <th className="pb-3 font-semibold">ID</th>
-                      <th className="pb-3 font-semibold">Страна</th>
-                      <th className="pb-3 font-semibold">Тип получателя</th>
-                      <th className="pb-3 font-semibold">Сумма</th>
-                      <th className="pb-3 font-semibold">Статус</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {REQUESTS.map((row) => (
-                      <tr key={row.id} className="text-slate-700">
-                        <td className="py-4 font-semibold text-slate-950">
-                          {row.id}
-                        </td>
-                        <td className="py-4">{row.country}</td>
-                        <td className="py-4">{row.recipientType}</td>
-                        <td className="py-4">{row.amount}</td>
-                        <td className="py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              statusStyles[row.status] ??
-                              "bg-slate-100 text-slate-500"
-                            }`}
-                          >
-                            {row.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="nexora-card p-6 sm:p-8" style={{ background: "var(--color-bg-base)" }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+                  Последние заявки
+                </h2>
+                <Link
+                  href="/admin/requests"
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--color-brand)" }}
+                >
+                  Все заявки →
+                </Link>
               </div>
+
+              {requests.length === 0 && !loading ? (
+                <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Заявок пока нет.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[600px] text-left text-sm">
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                        {["Номер", "Страна", "Тип", "Сумма", "Статус"].map(h => (
+                          <th key={h} className="pb-3 font-semibold text-xs uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {requests.map((row) => {
+                        const meta = STATUS_META[row.status] ?? { label: row.status, color: "#64748b", bg: "rgba(100,116,139,0.1)" };
+                        return (
+                          <tr
+                            key={row.id}
+                            style={{ borderBottom: "1px solid var(--color-border-soft)" }}
+                          >
+                            <td className="py-3.5">
+                              <Link
+                                href={`/admin/requests/${row.id}`}
+                                className="font-semibold hover:underline"
+                                style={{ color: "var(--color-brand)" }}
+                              >
+                                {row.requestNumber}
+                              </Link>
+                            </td>
+                            <td className="py-3.5" style={{ color: "var(--color-text-secondary)" }}>
+                              {row.country ?? "—"}
+                            </td>
+                            <td className="py-3.5" style={{ color: "var(--color-text-secondary)" }}>
+                              {row.recipientType}
+                            </td>
+                            <td className="py-3.5 font-medium" style={{ color: "var(--color-text-primary)" }}>
+                              {fmt(row.cryptoAmount)} {row.cryptoAsset}
+                            </td>
+                            <td className="py-3.5">
+                              <span
+                                className="rounded-full px-3 py-1 text-xs font-semibold"
+                                style={{ color: meta.color, background: meta.bg }}
+                              >
+                                {meta.label}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </section>
 
+          {/* Right column */}
           <div className="flex flex-col gap-6">
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-950">
-                  Обзор ликвидности
+            {/* Liquidity */}
+            <section className="nexora-card p-6 sm:p-8" style={{ background: "var(--color-bg-base)" }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+                  Ликвидность
                 </h2>
-                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-                  <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                  В норме
+                <span
+                  className="rounded-full px-3 py-1 text-xs font-semibold"
+                  style={{ color: "var(--color-green)", background: "var(--color-green-dim)" }}
+                >
+                  ● В норме
                 </span>
               </div>
-
-              <ul className="mt-6 space-y-3">
-                {LIQUIDITY.map((currency) => (
+              <ul className="space-y-2">
+                {LIQUIDITY.map((cur) => (
                   <li
-                    key={currency}
-                    className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"
+                    key={cur}
+                    className="flex items-center justify-between rounded-xl px-4 py-3"
+                    style={{ background: "var(--color-bg-surface)" }}
                   >
-                    <span className="font-semibold text-slate-950">
-                      {currency}
-                    </span>
-                    <span className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600">
-                      <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                      Норма
-                    </span>
+                    <span className="font-semibold" style={{ color: "var(--color-text-primary)" }}>{cur}</span>
+                    <span className="text-xs font-medium" style={{ color: "var(--color-green)" }}>● Норма</span>
                   </li>
                 ))}
               </ul>
             </section>
 
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-              <h2 className="text-lg font-bold text-slate-950">
+            {/* Quick actions */}
+            <section className="nexora-card p-6 sm:p-8" style={{ background: "var(--color-bg-base)" }}>
+              <h2 className="text-lg font-bold mb-5" style={{ color: "var(--color-text-primary)" }}>
                 Быстрые действия
               </h2>
-              <div className="mt-6 flex flex-col gap-3">
-                {QUICK_ACTIONS.map((action) => (
-                  <button
-                    key={action.label}
-                    type="button"
-                    className={
-                      action.primary
-                        ? "rounded-2xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-950"
-                        : "rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:text-blue-900"
-                    }
-                  >
-                    {action.label}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-3">
+                <Link href="/admin/requests" className="nexora-btn-primary !py-2.5 text-sm text-center">
+                  Заявки
+                </Link>
+                <Link href="/admin/aml" className="nexora-btn-secondary !py-2.5 text-sm text-center">
+                  AML-проверка
+                </Link>
+                <Link href="/admin/rates" className="nexora-btn-secondary !py-2.5 text-sm text-center">
+                  Управление курсами
+                </Link>
+                <Link href="/admin/reports" className="nexora-btn-secondary !py-2.5 text-sm text-center">
+                  Отчёты
+                </Link>
               </div>
             </section>
           </div>
