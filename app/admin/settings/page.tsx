@@ -3,9 +3,6 @@ import { useEffect, useState } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-function getToken() {
-  return document.cookie.match(/admin_token=([^;]+)/)?.[1] ?? "";
-}
 
 type RatesSnapshot = {
   base: string;
@@ -79,7 +76,7 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetch(`${API_BASE}/api/rates`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
+      credentials: "include",
     })
       .then(r => r.ok ? r.json() : null)
       .then(setRates)

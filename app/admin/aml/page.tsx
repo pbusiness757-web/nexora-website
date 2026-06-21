@@ -68,7 +68,7 @@ export default function AmlPage() {
       });
       if (amlFilter) params.set("amlStatus", amlFilter);
 
-      const res = await fetch(`${API_BASE}/api/requests?${params}`);
+      const res = await fetch(`${API_BASE}/api/requests?${params}`, { credentials: "include" });
       if (!res.ok) throw new Error("requests");
       const data = await res.json();
       setRows(data.data ?? []);

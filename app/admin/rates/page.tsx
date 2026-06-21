@@ -53,7 +53,6 @@ export default function RatesPage() {
     setSaving(true);
     setSaveError(null);
     try {
-      const token = document.cookie.match(/admin_token=([^;]+)/)?.[1] ?? "";
       const body: Record<string, number> = {};
       for (const { code } of CURRENCIES) {
         const v = edits[code];
@@ -61,10 +60,8 @@ export default function RatesPage() {
       }
       const res = await fetch(`${API_BASE}/api/rates`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(body),
       });
       if (!res.ok) {

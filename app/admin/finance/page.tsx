@@ -44,7 +44,7 @@ export default function AdminFinancePage() {
 
   useEffect(() => {
     let active = true;
-    fetch(`${API_BASE}/api/admin/finance/summary`, { credentials: "include" })
+    fetch(`${API_BASE}/api/finance/summary`, { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("finance");
         return res.json();

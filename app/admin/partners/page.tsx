@@ -71,7 +71,7 @@ export default function AdminPartnersPage() {
 
     async function load() {
       try {
-        const res = await fetch(`${API_BASE}/api/partners`);
+        const res = await fetch(`${API_BASE}/api/partners`, { credentials: "include" });
         if (!res.ok) throw new Error("partners");
         const data = await res.json();
         if (active) setPartners(data);

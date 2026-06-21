@@ -3,9 +3,6 @@ import { useEffect, useState } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-function getToken() {
-  return document.cookie.match(/admin_token=([^;]+)/)?.[1] ?? "";
-}
 
 type Stats = {
   totalRequests: number;
@@ -44,7 +41,7 @@ export default function AdminReportsPage() {
 
   useEffect(() => {
     fetch(`${API_BASE}/api/dashboard/stats`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
+      credentials: "include",
     })
       .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
       .then(setStats)

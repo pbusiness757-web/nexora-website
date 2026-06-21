@@ -60,8 +60,8 @@ export default function AdminPage() {
     async function load() {
       try {
         const [statsRes, reqRes] = await Promise.all([
-          fetch(`${API_BASE}/api/dashboard/stats`),
-          fetch(`${API_BASE}/api/requests?limit=5&page=1`),
+          fetch(`${API_BASE}/api/dashboard/stats`, { credentials: "include" }),
+          fetch(`${API_BASE}/api/requests?limit=5&page=1`, { credentials: "include" }),
         ]);
         if (!statsRes.ok) throw new Error("stats");
         const statsData = await statsRes.json();
