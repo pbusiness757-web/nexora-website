@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://nexoraexample.pro";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -86,5 +86,4 @@ export const clientApi = {
   },
   getNotifications: () => apiFetch<Notification[]>("/api/client-requests/notifications"),
   markNotificationsRead: () =>
-    apiFetch<void>("/api/client-requests/notifications/read", { method: "POST" }),
-};
+    apiFetch<void>("/api/client-requests/notifications/read", { m

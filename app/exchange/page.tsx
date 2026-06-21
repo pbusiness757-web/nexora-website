@@ -14,7 +14,7 @@ const CRYPTOCURRENCIES = ["USDT", "BTC", "ETH", "TON", "TRX", "USDC", "LTC"];
 const NETWORKS = ["TRC20", "ERC20", "TON", "Bitcoin", "Litecoin"];
 const STEP_NUMBERS = ["01", "02", "03"];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 // Static test client until client selection / auth is implemented.
 const CLIENT_ID = process.env.NEXT_PUBLIC_TEST_CLIENT_ID ?? "test-client";
 

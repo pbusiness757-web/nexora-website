@@ -27,7 +27,7 @@ export default function AdminSidebar() {
 
   async function handleLogout() {
     const apiBase =
-      process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+      process.env.NEXT_PUBLIC_API_URL ?? '';
     await fetch(`${apiBase}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',

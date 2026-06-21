@@ -16,7 +16,7 @@ type ApiRequest = {
   clientId: string;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 const STATUS_META: Record<string, { label: string; style: string }> = {
   CREATED: { label: "Создана", style: "bg-slate-100 text-slate-600" },
