@@ -1,275 +1,197 @@
-type KpiCard = {
-  label: string;
-  value: string;
-};
+"use client";
 
-const KPIS: KpiCard[] = [
-  { label: "Ожидают выплаты", value: "9" },
-  { label: "В обработке", value: "6" },
-  { label: "Завершено сегодня", value: "18" },
-  { label: "Ошибки / Удержания", value: "2" },
-];
+import { useEffect, useState, useCallback } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type PayoutRow = {
   id: string;
-  requestId: string;
-  recipient: string;
-  recipientType: string;
-  country: string;
-  currency: string;
-  amount: string;
-  method: string;
+  payoutNumber: string;
   status: string;
-  operator: string;
+  amount: string;
+  currency: string;
+  createdAt: string;
+  request: {
+    requestNumber: string;
+    cryptoAsset: string;
+    payoutCurrency: string;
+    country: string | null;
+    client: { email: string } | null;
+  } | null;
+  partner: { name: string; country: string } | null;
 };
 
-const PAYOUTS: PayoutRow[] = [
-  {
-    id: "PO-2026-0001",
-    requestId: "NX-2026-0001",
-    recipient: "Alpha Trade LLC",
-    recipientType: "Организация",
-    country: "Россия",
-    currency: "RUB",
-    amount: "925,000",
-    method: "Корпоративный счёт",
-    status: "В обработке",
-    operator: "Анна",
-  },
-  {
-    id: "PO-2026-0002",
-    requestId: "NX-2026-0002",
-    recipient: "Частный клиент",
-    recipientType: "Физлицо",
-    country: "Казахстан",
-    currency: "KZT",
-    amount: "1,125,000",
-    method: "Банковская карта",
-    status: "Ожидает",
-    operator: "Иван",
-  },
-  {
-    id: "PO-2026-0003",
-    requestId: "NX-2026-0003",
-    recipient: "UzMarket Group",
-    recipientType: "Организация",
-    country: "Узбекистан",
-    currency: "UZS",
-    amount: "228,000,000",
-    method: "Корпоративный счёт",
-    status: "Готово",
-    operator: "Марина",
-  },
-  {
-    id: "PO-2026-0004",
-    requestId: "NX-2026-0004",
-    recipient: "Подрядчик",
-    recipientType: "Физлицо",
-    country: "Азербайджан",
-    currency: "AZN",
-    amount: "6,800",
-    method: "Личный счёт",
-    status: "Завершено",
-    operator: "Анна",
-  },
-];
+type PageResult = { data: PayoutRow[]; total: number; page: number; limit: number };
 
-const STATUSES = [
-  "Ожидает",
-  "Готово",
-  "В обработке",
-  "Завершено",
-  "Ошибка",
-  "Удержание",
-];
-
-const statusStyles: Record<string, string> = {
-  Ожидает: "bg-slate-100 text-slate-600",
-  Готово: "bg-indigo-50 text-indigo-700",
-  "В обработке": "bg-amber-50 text-amber-600",
-  Завершено: "bg-emerald-50 text-emerald-600",
-  Ошибка: "bg-rose-50 text-rose-600",
-  Удержание: "bg-orange-50 text-orange-600",
+const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
+  PROCESSING: { label: "В обработке",  color: "#f0b90b", bg: "rgba(240,185,11,0.12)" },
+  COMPLETED:  { label: "Завершено",    color: "#03a66d", bg: "rgba(3,166,109,0.12)"  },
+  FAILED:     { label: "Ошибка",       color: "#f6465d", bg: "rgba(246,70,93,0.12)"  },
+  ON_HOLD:    { label: "Удержание",    color: "#848e9c", bg: "rgba(132,142,156,0.12)" },
 };
 
-const FILTER_COUNTRY = [
-  "Все страны",
-  "Россия",
-  "Казахстан",
-  "Узбекистан",
-  "Азербайджан",
-  "Кыргызстан",
-];
-const FILTER_METHOD = [
-  "Все способы",
-  "Корпоративный счёт",
-  "Личный счёт",
-  "Банковская карта",
-];
-const FILTER_STATUS = ["Все статусы", ...STATUSES];
-
-const fieldClass =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100";
+function StatusBadge({ status }: { status: string }) {
+  const m = STATUS_META[status] ?? { label: status, color: "#848e9c", bg: "rgba(132,142,156,0.12)" };
+  return (
+    <span className="rounded-full px-2.5 py-1 text-xs font-bold"
+      style={{ color: m.color, background: m.bg }}>
+      {m.label}
+    </span>
+  );
+}
 
 export default function AdminPayoutsPage() {
+  const [rows, setRows]       = useState<PayoutRow[]>([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const limit = 20;
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+      if (statusFilter) qs.set("status", statusFilter);
+      const res = await fetch(`${API_BASE}/api/payouts?${qs}`, { credentials: "include" });
+      if (!res.ok) throw new Error(await res.text());
+      const body: PageResult = await res.json();
+      setRows(body.data); setTotal(body.total);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Ошибка загрузки");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, statusFilter]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  const cardStyle = {
+    background: "var(--color-bg-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "1rem",
+  };
+
   return (
-    <main className="bg-slate-50 py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Управление выплатами
-            </h1>
-            <p className="text-lg text-slate-600">
-              Отслеживание и управление выплатами в национальной валюте физлицам,
-              компаниям и на корпоративные счета.
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>
+          Выплаты
+        </h1>
+        <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Все исходящие банковские выплаты партнёров
+        </p>
+      </div>
 
-          <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {KPIS.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
-              >
-                <p className="text-sm font-medium text-slate-500">
-                  {card.label}
-                </p>
-                <p className="mt-3 text-3xl font-bold text-slate-950">
-                  {card.value}
-                </p>
-              </div>
-            ))}
-          </section>
+      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        {["", "PROCESSING", "COMPLETED", "FAILED", "ON_HOLD"].map(s => (
+          <button
+            key={s}
+            onClick={() => { setStatusFilter(s); setPage(1); }}
+            className="rounded-xl px-4 py-2 text-xs font-bold transition-all"
+            style={{
+              background: statusFilter === s ? "var(--color-brand)" : "var(--color-bg-elevated)",
+              color: statusFilter === s ? "#0b0e11" : "var(--color-text-secondary)",
+              border: "1px solid " + (statusFilter === s ? "var(--color-brand)" : "var(--color-border)"),
+            }}
+          >
+            {s === "" ? "Все" : STATUS_META[s]?.label ?? s}
+          </button>
+        ))}
+        <button onClick={load} className="ml-auto rounded-xl px-4 py-2 text-xs font-bold"
+          style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+          ↻ Обновить
+        </button>
+      </div>
 
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <label
-                  htmlFor="search-id"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Поиск по ID выплаты
-                </label>
-                <input
-                  id="search-id"
-                  type="text"
-                  placeholder="напр. PO-2026-0001"
-                  className={`mt-2 ${fieldClass}`}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="filter-country"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Страна
-                </label>
-                <select id="filter-country" className={`mt-2 ${fieldClass}`}>
-                  {FILTER_COUNTRY.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="filter-method"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Способ
-                </label>
-                <select id="filter-method" className={`mt-2 ${fieldClass}`}>
-                  {FILTER_METHOD.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="filter-status"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Статус
-                </label>
-                <select id="filter-status" className={`mt-2 ${fieldClass}`}>
-                  {FILTER_STATUS.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Выплаты</h2>
-
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[1100px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className="pb-3 font-semibold">ID выплаты</th>
-                    <th className="pb-3 font-semibold">ID заявки</th>
-                    <th className="pb-3 font-semibold">Получатель</th>
-                    <th className="pb-3 font-semibold">Тип получателя</th>
-                    <th className="pb-3 font-semibold">Страна</th>
-                    <th className="pb-3 font-semibold">Валюта</th>
-                    <th className="pb-3 font-semibold">Сумма</th>
-                    <th className="pb-3 font-semibold">Способ</th>
-                    <th className="pb-3 font-semibold">Статус</th>
-                    <th className="pb-3 font-semibold">Оператор</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {PAYOUTS.map((row) => (
-                    <tr key={row.id} className="text-slate-700">
-                      <td className="py-4 font-semibold text-slate-950">
-                        {row.id}
-                      </td>
-                      <td className="py-4">{row.requestId}</td>
-                      <td className="py-4">{row.recipient}</td>
-                      <td className="py-4">{row.recipientType}</td>
-                      <td className="py-4">{row.country}</td>
-                      <td className="py-4">{row.currency}</td>
-                      <td className="py-4 font-semibold text-slate-950">
-                        {row.amount}
-                      </td>
-                      <td className="py-4">{row.method}</td>
-                      <td className="py-4">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            statusStyles[row.status] ??
-                            "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {row.status}
-                        </span>
-                      </td>
-                      <td className="py-4">{row.operator}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Легенда статусов</h2>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {STATUSES.map((status) => (
-                <span
-                  key={status}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    statusStyles[status] ?? "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  {status}
-                </span>
-              ))}
-            </div>
-          </section>
+      {error && (
+        <div className="rounded-xl p-4 text-sm font-medium"
+          style={{ background: "rgba(246,70,93,0.1)", color: "#f6465d", border: "1px solid rgba(246,70,93,0.2)" }}>
+          {error}
         </div>
-    </main>
+      )}
+
+      {/* Total */}
+      <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+        Итого: <strong style={{ color: "var(--color-text-primary)" }}>{total}</strong>
+      </p>
+
+      {/* Table */}
+      <div style={{ ...cardStyle, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                {["№ выплаты", "Заявка", "Клиент", "Партнёр", "Сумма", "Страна", "Дата", "Статус"].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-sm"
+                  style={{ color: "var(--color-text-muted)" }}>Загрузка...</td></tr>
+              ) : rows.length === 0 ? (
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-sm"
+                  style={{ color: "var(--color-text-muted)" }}>Выплаты не найдены</td></tr>
+              ) : rows.map(row => (
+                <tr key={row.id}
+                  style={{ borderBottom: "1px solid var(--color-border)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--color-bg-elevated)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
+                  <td className="px-4 py-3 font-mono text-xs" style={{ color: "var(--color-brand)" }}>
+                    {row.payoutNumber}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    {row.request?.requestNumber ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-primary)" }}>
+                    {row.request?.client?.email ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    {row.partner?.name ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 font-bold text-xs" style={{ color: "var(--color-text-primary)" }}>
+                    {parseFloat(row.amount).toLocaleString("ru-RU")} {row.currency}
+                  </td>
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    {row.request?.country ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    {new Date(row.createdAt).toLocaleDateString("ru-RU")}
+                  </td>
+                  <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-40"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            ← Назад
+          </button>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+            {page} / {totalPages}
+          </span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+            className="rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-40"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            Вперёд →
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

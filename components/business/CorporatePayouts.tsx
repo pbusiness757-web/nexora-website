@@ -63,7 +63,7 @@ export default function CorporatePayouts() {
             />
 
             <h3 className="relative z-10 text-lg font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>
-              {t.currenciesTitle ?? 'Поддерживаемые валюты'}
+              {'Поддерживаемые валюты'}
             </h3>
 
             {/* Currency chips */}

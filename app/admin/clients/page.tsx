@@ -1,276 +1,161 @@
-type KpiCard = {
-  label: string;
-  value: string;
-};
+"use client";
 
-const KPIS: KpiCard[] = [
-  { label: "Всего клиентов", value: "248" },
-  { label: "Бизнес-клиенты", value: "64" },
-  { label: "Частные клиенты", value: "184" },
-  { label: "Крупные клиенты", value: "17" },
-];
+import { useEffect, useState, useCallback } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type ClientRow = {
   id: string;
-  name: string;
-  type: string;
+  email: string;
+  companyName: string | null;
   country: string;
-  volume: string;
-  requests: string;
-  risk: string;
-  status: string;
+  riskLevel: string;
+  createdAt: string;
+  _count: { requests: number };
 };
 
-const CLIENTS: ClientRow[] = [
-  {
-    id: "CL-0001",
-    name: "Alpha Trade LLC",
-    type: "Бизнес",
-    country: "Россия",
-    volume: "125,000 USDT",
-    requests: "14",
-    risk: "Низкий",
-    status: "Активен",
-  },
-  {
-    id: "CL-0002",
-    name: "Частный клиент",
-    type: "Физлицо",
-    country: "Казахстан",
-    volume: "18,500 USDT",
-    requests: "6",
-    risk: "Средний",
-    status: "Активен",
-  },
-  {
-    id: "CL-0003",
-    name: "UzMarket Group",
-    type: "Бизнес",
-    country: "Узбекистан",
-    volume: "240,000 USDT",
-    requests: "22",
-    risk: "Низкий",
-    status: "VIP",
-  },
-  {
-    id: "CL-0004",
-    name: "Подрядчик",
-    type: "Физлицо",
-    country: "Азербайджан",
-    volume: "9,200 USDT",
-    requests: "3",
-    risk: "Низкий",
-    status: "Активен",
-  },
-];
+type PageResult = { data: ClientRow[]; total: number; page: number; limit: number };
 
-const riskStyles: Record<string, string> = {
-  Низкий: "bg-emerald-50 text-emerald-600",
-  Средний: "bg-amber-50 text-amber-600",
-  Высокий: "bg-rose-50 text-rose-600",
+const RISK_META: Record<string, { label: string; color: string; bg: string }> = {
+  LOW:      { label: "Низкий",     color: "#03a66d", bg: "rgba(3,166,109,0.12)"  },
+  MEDIUM:   { label: "Средний",    color: "#f0b90b", bg: "rgba(240,185,11,0.12)" },
+  HIGH:     { label: "Высокий",    color: "#f6465d", bg: "rgba(246,70,93,0.12)"  },
+  CRITICAL: { label: "Критичный",  color: "#f6465d", bg: "rgba(246,70,93,0.2)"   },
 };
-
-const statusStyles: Record<string, string> = {
-  Активен: "bg-emerald-50 text-emerald-600",
-  VIP: "bg-indigo-50 text-indigo-700",
-  Заблокирован: "bg-rose-50 text-rose-600",
-};
-
-const CLIENT_TYPES = ["Физлицо", "Бизнес", "VIP"];
-
-const typeStyles: Record<string, string> = {
-  Физлицо: "bg-slate-100 text-slate-600",
-  Бизнес: "bg-blue-50 text-blue-700",
-  VIP: "bg-indigo-50 text-indigo-700",
-};
-
-const FILTER_TYPE = ["Все типы", "Физлицо", "Бизнес", "VIP"];
-const FILTER_COUNTRY = [
-  "Все страны",
-  "Россия",
-  "Казахстан",
-  "Узбекистан",
-  "Азербайджан",
-  "Кыргызстан",
-];
-const FILTER_RISK = ["Все уровни", "Низкий", "Средний", "Высокий"];
-
-const fieldClass =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100";
-const thClass = "pb-3 font-semibold";
-const tdClass = "py-4";
 
 export default function AdminClientsPage() {
+  const [rows, setRows]       = useState<ClientRow[]>([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState<string | null>(null);
+  const limit = 50;
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+      const res = await fetch(`${API_BASE}/api/clients?${qs}`, { credentials: "include" });
+      if (!res.ok) throw new Error(await res.text());
+      const body: PageResult = await res.json();
+      setRows(body.data); setTotal(body.total);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Ошибка загрузки");
+    } finally { setLoading(false); }
+  }, [page]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const totalPages = Math.ceil(total / limit);
+  const cardStyle = { background: "var(--color-bg-surface)", border: "1px solid var(--color-border)", borderRadius: "1rem" };
+
   return (
-    <main className="bg-slate-50 py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Управление клиентами
-            </h1>
-            <p className="text-lg text-slate-600">
-              Просмотр частных и бизнес-клиентов, объёмов и уровней риска.
-            </p>
-          </div>
-
-          <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {KPIS.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
-              >
-                <p className="text-sm font-medium text-slate-500">
-                  {card.label}
-                </p>
-                <p className="mt-3 text-3xl font-bold text-slate-950">
-                  {card.value}
-                </p>
-              </div>
-            ))}
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <label
-                  htmlFor="search-name"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Поиск по названию
-                </label>
-                <input
-                  id="search-name"
-                  type="text"
-                  placeholder="напр. Alpha Trade LLC"
-                  className={`mt-2 ${fieldClass}`}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="filter-type"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Тип клиента
-                </label>
-                <select id="filter-type" className={`mt-2 ${fieldClass}`}>
-                  {FILTER_TYPE.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="filter-country"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Страна
-                </label>
-                <select id="filter-country" className={`mt-2 ${fieldClass}`}>
-                  {FILTER_COUNTRY.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="filter-risk"
-                  className="text-sm font-semibold text-slate-500"
-                >
-                  Уровень риска
-                </label>
-                <select id="filter-risk" className={`mt-2 ${fieldClass}`}>
-                  {FILTER_RISK.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Клиенты</h2>
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[920px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>ID клиента</th>
-                    <th className={thClass}>Название</th>
-                    <th className={thClass}>Тип</th>
-                    <th className={thClass}>Страна</th>
-                    <th className={thClass}>Общий объём</th>
-                    <th className={thClass}>Заявки</th>
-                    <th className={thClass}>Уровень риска</th>
-                    <th className={thClass}>Статус</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {CLIENTS.map((row) => (
-                    <tr key={row.id} className="text-slate-700">
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.id}
-                      </td>
-                      <td className={tdClass}>{row.name}</td>
-                      <td className={tdClass}>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            typeStyles[row.type] ?? "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {row.type}
-                        </span>
-                      </td>
-                      <td className={tdClass}>{row.country}</td>
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.volume}
-                      </td>
-                      <td className={tdClass}>{row.requests}</td>
-                      <td className={tdClass}>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            riskStyles[row.risk] ?? "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {row.risk}
-                        </span>
-                      </td>
-                      <td className={tdClass}>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            statusStyles[row.status] ??
-                            "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {row.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">
-              Легенда типов клиентов
-            </h2>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {CLIENT_TYPES.map((type) => (
-                <span
-                  key={type}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    typeStyles[type] ?? "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  {type}
-                </span>
-              ))}
-            </div>
-          </section>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>Клиенты</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            Все зарегистрированные клиенты платформы
+          </p>
         </div>
-    </main>
+        <div className="flex gap-3">
+          <button onClick={load} className="rounded-xl px-4 py-2 text-xs font-bold"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            ↻ Обновить
+          </button>
+        </div>
+      </div>
+
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { label: "Всего клиентов", value: total },
+          { label: "С заявками", value: rows.filter(r => r._count.requests > 0).length },
+          { label: "Высокий риск", value: rows.filter(r => r.riskLevel === "HIGH" || r.riskLevel === "CRITICAL").length },
+          { label: "Загружено", value: rows.length },
+        ].map(k => (
+          <div key={k.label} style={{ ...cardStyle, padding: "1rem" }}>
+            <div className="text-2xl font-black" style={{ color: "var(--color-brand)" }}>{k.value}</div>
+            <div className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {error && (
+        <div className="rounded-xl p-4 text-sm font-medium"
+          style={{ background: "rgba(246,70,93,0.1)", color: "#f6465d", border: "1px solid rgba(246,70,93,0.2)" }}>
+          {error}
+        </div>
+      )}
+
+      <div style={{ ...cardStyle, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                {["Email", "Компания", "Страна", "Заявки", "Риск", "Дата регистрации"].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-sm"
+                  style={{ color: "var(--color-text-muted)" }}>Загрузка...</td></tr>
+              ) : rows.length === 0 ? (
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-sm"
+                  style={{ color: "var(--color-text-muted)" }}>Клиенты не найдены</td></tr>
+              ) : rows.map(row => {
+                const risk = RISK_META[row.riskLevel] ?? { label: row.riskLevel, color: "#848e9c", bg: "rgba(132,142,156,0.1)" };
+                return (
+                  <tr key={row.id} style={{ borderBottom: "1px solid var(--color-border)" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--color-bg-elevated)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
+                    <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-primary)" }}>
+                      {row.email}
+                    </td>
+                    <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                      {row.companyName ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                      {row.country}
+                    </td>
+                    <td className="px-4 py-3 text-xs font-bold" style={{ color: "var(--color-brand)" }}>
+                      {row._count.requests}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full px-2.5 py-1 text-xs font-bold"
+                        style={{ color: risk.color, background: risk.bg }}>
+                        {risk.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                      {new Date(row.createdAt).toLocaleDateString("ru-RU")}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-40"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            ← Назад
+          </button>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>{page} / {totalPages}</span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+            className="rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-40"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            Вперёд →
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

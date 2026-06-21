@@ -1,164 +1,173 @@
-type KpiCard = {
-  label: string;
-  value: string;
-};
+"use client";
 
-const KPIS: KpiCard[] = [
-  { label: "Действий сегодня", value: "86" },
-  { label: "Изменений статусов", value: "34" },
-  { label: "Обновлений курсов", value: "7" },
-  { label: "AML-решений", value: "12" },
-];
+import { useEffect, useState, useCallback } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type LogRow = {
-  time: string;
-  operator: string;
+  id: string;
   action: string;
-  entity: string;
-  oldValue: string;
-  newValue: string;
-  ip: string;
+  entityType: string | null;
+  entityId: string | null;
+  details: string | null;
+  createdAt: string;
+  admin: { email: string } | null;
 };
 
-const LOGS: LogRow[] = [
-  {
-    time: "12:44",
-    operator: "Анна",
-    action: "Изменён статус заявки",
-    entity: "NX-2026-0001",
-    oldValue: "AML-проверка",
-    newValue: "Готово к выплате",
-    ip: "192.168.1.12",
-  },
-  {
-    time: "12:32",
-    operator: "Иван",
-    action: "Обновлена маржа",
-    entity: "USDT/RUB",
-    oldValue: "2.5%",
-    newValue: "2.8%",
-    ip: "192.168.1.18",
-  },
-  {
-    time: "12:10",
-    operator: "Марина",
-    action: "AML-решение",
-    entity: "NX-2026-0003",
-    oldValue: "Ожидает",
-    newValue: "Одобрено",
-    ip: "192.168.1.21",
-  },
-  {
-    time: "11:58",
-    operator: "Анна",
-    action: "Выплата завершена",
-    entity: "PO-2026-0001",
-    oldValue: "В обработке",
-    newValue: "Завершено",
-    ip: "192.168.1.12",
-  },
-];
-
-const IMPORTANT_ACTIONS = [
-  "Завершение выплаты",
-  "AML-решения",
-  "Изменения курсов и маржи",
-  "Обновления уровня риска клиента",
-  "Изменения статуса партнёра",
-];
-
-const thClass = "pb-3 font-semibold";
-const tdClass = "py-4";
+type PageResult = { data: LogRow[]; total: number; page: number; limit: number };
 
 export default function AdminAuditLogsPage() {
+  const [rows, setRows]       = useState<LogRow[]>([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState<string | null>(null);
+  const [search, setSearch]   = useState("");
+  const [inputVal, setInputVal] = useState("");
+
+  const limit = 50;
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+      if (search) qs.set("action", search);
+      const res = await fetch(`${API_BASE}/api/audit-logs?${qs}`, { credentials: "include" });
+      if (!res.ok) throw new Error(await res.text());
+      const body: PageResult = await res.json();
+      setRows(body.data); setTotal(body.total);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Ошибка загрузки");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const cardStyle = {
+    background: "var(--color-bg-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "1rem",
+  };
+
+  const totalPages = Math.ceil(total / limit);
+
   return (
-    <div className="px-6 py-16">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-            Журнал действий
-          </h1>
-          <p className="text-lg text-slate-600">
-            Контроль критичных действий, изменений статусов, обновлений курсов и
-            решений операторов.
-          </p>
-        </div>
-
-        <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {KPIS.map((card) => (
-            <div
-              key={card.label}
-              className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
-            >
-              <p className="text-sm font-medium text-slate-500">{card.label}</p>
-              <p className="mt-3 text-3xl font-bold text-slate-950">
-                {card.value}
-              </p>
-            </div>
-          ))}
-        </section>
-
-        <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Журнал действий</h2>
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[920px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
-                  <th className={thClass}>Время</th>
-                  <th className={thClass}>Оператор</th>
-                  <th className={thClass}>Действие</th>
-                  <th className={thClass}>Объект</th>
-                  <th className={thClass}>Было</th>
-                  <th className={thClass}>Стало</th>
-                  <th className={thClass}>IP</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {LOGS.map((row, index) => (
-                  <tr key={`${row.time}-${index}`} className="text-slate-700">
-                    <td className={`${tdClass} font-semibold text-slate-950`}>
-                      {row.time}
-                    </td>
-                    <td className={tdClass}>{row.operator}</td>
-                    <td className={tdClass}>{row.action}</td>
-                    <td className={`${tdClass} font-semibold text-slate-950`}>
-                      {row.entity}
-                    </td>
-                    <td className={tdClass}>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                        {row.oldValue}
-                      </span>
-                    </td>
-                    <td className={tdClass}>
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-                        {row.newValue}
-                      </span>
-                    </td>
-                    <td className={`${tdClass} font-mono text-slate-500`}>
-                      {row.ip}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Важные действия</h2>
-          <ul className="mt-6 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
-            {IMPORTANT_ACTIONS.map((action) => (
-              <li
-                key={action}
-                className="flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3"
-              >
-                <span className="text-blue-900">✓</span>
-                {action}
-              </li>
-            ))}
-          </ul>
-        </section>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>
+          Журнал аудита
+        </h1>
+        <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Все действия операторов и системные события
+        </p>
       </div>
+
+      {/* Search */}
+      <div className="flex gap-3">
+        <input
+          type="text"
+          value={inputVal}
+          onChange={e => setInputVal(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { setSearch(inputVal); setPage(1); } }}
+          placeholder="Поиск по действию..."
+          className="rounded-xl px-4 py-2.5 text-sm outline-none"
+          style={{
+            background: "var(--color-bg-elevated)", color: "var(--color-text-primary)",
+            border: "1px solid var(--color-border)", minWidth: "260px",
+          }}
+        />
+        <button
+          onClick={() => { setSearch(inputVal); setPage(1); }}
+          className="rounded-xl px-5 py-2.5 text-sm font-bold"
+          style={{ background: "var(--color-brand)", color: "#0b0e11" }}
+        >
+          Найти
+        </button>
+        <button onClick={load} className="rounded-xl px-4 py-2.5 text-xs font-bold"
+          style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+          ↻
+        </button>
+      </div>
+
+      {error && (
+        <div className="rounded-xl p-4 text-sm font-medium"
+          style={{ background: "rgba(246,70,93,0.1)", color: "#f6465d", border: "1px solid rgba(246,70,93,0.2)" }}>
+          {error}
+        </div>
+      )}
+
+      <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+        Итого: <strong style={{ color: "var(--color-text-primary)" }}>{total}</strong>
+      </p>
+
+      <div style={{ ...cardStyle, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                {["Время", "Оператор", "Действие", "Сущность", "ID", "Детали"].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-sm"
+                  style={{ color: "var(--color-text-muted)" }}>Загрузка...</td></tr>
+              ) : rows.length === 0 ? (
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-sm"
+                  style={{ color: "var(--color-text-muted)" }}>Записи не найдены</td></tr>
+              ) : rows.map(row => (
+                <tr key={row.id}
+                  style={{ borderBottom: "1px solid var(--color-border)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--color-bg-elevated)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
+                  <td className="px-4 py-3 text-xs font-mono whitespace-nowrap" style={{ color: "var(--color-text-muted)" }}>
+                    {new Date(row.createdAt).toLocaleString("ru-RU")}
+                  </td>
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    {row.admin?.email ?? "system"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="rounded-lg px-2 py-0.5 text-xs font-bold font-mono"
+                      style={{ background: "var(--color-brand-dim)", color: "var(--color-brand)" }}>
+                      {row.action}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    {row.entityType ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs font-mono" style={{ color: "var(--color-text-muted)" }}>
+                    {row.entityId ? row.entityId.slice(0, 8) + "…" : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs max-w-xs truncate" style={{ color: "var(--color-text-secondary)" }}>
+                    {row.details ?? "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-40"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            ← Назад
+          </button>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>{page} / {totalPages}</span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+            className="rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-40"
+            style={{ background: "var(--color-bg-elevated)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}>
+            Вперёд →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
