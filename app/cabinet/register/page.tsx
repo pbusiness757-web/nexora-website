@@ -6,17 +6,17 @@ import { clientApi } from "@/lib/clientApi";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [confirm,  setConfirm]  = useState("");
+  const [error,    setError]    = useState<string | null>(null);
+  const [loading,  setLoading]  = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password !== confirm) { setError("Пароли не совпадают"); return; }
-    if (password.length < 8) { setError("Пароль должен быть не менее 8 символов"); return; }
+    if (password !== confirm)   { setError("Пароли не совпадают"); return; }
+    if (password.length < 8)    { setError("Пароль должен быть не менее 8 символов"); return; }
     setLoading(true);
     try {
       await clientApi.register(email, password);
@@ -29,74 +29,73 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4"
+         style={{ background: "var(--color-bg-surface)" }}>
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-white mb-1">Регистрация</h1>
-          <p className="text-gray-400 text-sm">Nexora Platform — личный кабинет</p>
+        <div className="text-center mb-8">
+          <div className="text-3xl font-black mb-2" style={{ color: "var(--color-brand)" }}>
+            Nexora
+          </div>
+          <h1 className="text-xl font-bold" style={{ color: "var(--color-text-primary)" }}>
+            Регистрация
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+            Nexora Platform — личный кабинет
+          </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="nexora-card p-6 space-y-4">
           {error && (
-            <div className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-3 py-2">
+            <div className="text-sm rounded-xl px-4 py-3"
+                 style={{
+                   background: "var(--color-red-dim)",
+                   border:     "1px solid rgba(239,68,68,0.25)",
+                   color:      "var(--color-red)",
+                 }}>
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-              placeholder="you@company.com"
-            />
+            <label className="block text-sm font-medium mb-1.5"
+                   style={{ color: "var(--color-text-secondary)" }}>
+              Email
+            </label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                   required autoComplete="email" placeholder="you@company.com"
+                   className="nexora-input" />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Пароль</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-              placeholder="Минимум 8 символов"
-            />
+            <label className="block text-sm font-medium mb-1.5"
+                   style={{ color: "var(--color-text-secondary)" }}>
+              Пароль
+            </label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                   required autoComplete="new-password" placeholder="Минимум 8 символов"
+                   className="nexora-input" />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Подтверждение пароля</label>
-            <input
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              autoComplete="new-password"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-              placeholder="••••••••"
-            />
+            <label className="block text-sm font-medium mb-1.5"
+                   style={{ color: "var(--color-text-secondary)" }}>
+              Подтверждение пароля
+            </label>
+            <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
+                   required autoComplete="new-password" placeholder="••••••••"
+                   className="nexora-input" />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 rounded-lg text-sm transition-colors"
-          >
-            {loading ? "Создание аккаунта..." : "Зарегистрироваться"}
+          <button type="submit" disabled={loading}
+                  className="nexora-btn-primary w-full justify-center"
+                  style={{ opacity: loading ? 0.6 : 1 }}>
+            {loading ? "Создание аккаунта…" : "Зарегистрироваться"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm mt-4" style={{ color: "var(--color-text-muted)" }}>
           Уже есть аккаунт?{" "}
-          <Link href="/cabinet/login" className="text-indigo-400 hover:text-indigo-300">
+          <Link href="/cabinet/login" style={{ color: "var(--color-brand)", fontWeight: 600 }}>
             Войти
           </Link>
         </p>

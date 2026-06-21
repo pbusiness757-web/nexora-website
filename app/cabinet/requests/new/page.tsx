@@ -5,21 +5,12 @@ import Link from "next/link";
 import { clientApi, RatesSnapshot } from "@/lib/clientApi";
 
 const CRYPTO_ASSETS = ["USDT", "BTC", "ETH"];
-
 const NETWORKS: Record<string, string[]> = {
   USDT: ["TRC20", "ERC20", "BEP20"],
   BTC:  ["BTC"],
   ETH:  ["ERC20"],
 };
-
-const COUNTRIES = [
-  "Russia",
-  "Kazakhstan",
-  "Uzbekistan",
-  "Azerbaijan",
-  "Kyrgyzstan",
-];
-
+const COUNTRIES = ["Russia", "Kazakhstan", "Uzbekistan", "Azerbaijan", "Kyrgyzstan"];
 const COUNTRY_LABELS: Record<string, string> = {
   Russia:     "Россия (RUB)",
   Kazakhstan: "Казахстан (KZT)",
@@ -27,7 +18,6 @@ const COUNTRY_LABELS: Record<string, string> = {
   Azerbaijan: "Азербайджан (AZN)",
   Kyrgyzstan: "Кыргызстан (KGS)",
 };
-
 const CURRENCY_FOR_COUNTRY: Record<string, string> = {
   Russia:     "RUB",
   Kazakhstan: "KZT",
@@ -36,57 +26,50 @@ const CURRENCY_FOR_COUNTRY: Record<string, string> = {
   Kyrgyzstan: "KGS",
 };
 
+const selectStyle = {
+  background: "var(--color-bg-surface)",
+  border:     "1px solid var(--color-border)",
+  color:      "var(--color-text-primary)",
+  borderRadius: "0.75rem",
+  padding:    "0.75rem 1rem",
+  fontSize:   "0.95rem",
+  outline:    "none",
+  width:      "100%",
+};
+
 export default function NewRequestPage() {
   const router = useRouter();
-
-  const [asset, setAsset]     = useState("USDT");
+  const [asset,   setAsset]   = useState("USDT");
   const [network, setNetwork] = useState("TRC20");
-  const [amount, setAmount]   = useState("");
+  const [amount,  setAmount]  = useState("");
   const [country, setCountry] = useState("Russia");
-  const [error, setError]     = useState<string | null>(null);
+  const [error,   setError]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rates,   setRates]   = useState<RatesSnapshot | null>(null);
+  const [ratesErr,setRatesErr]= useState(false);
 
-  const [rates, setRates]             = useState<RatesSnapshot | null>(null);
-  const [ratesError, setRatesError]   = useState(false);
-
-  // Reset network when asset changes
   useEffect(() => {
     const nets = NETWORKS[asset] ?? [];
     if (!nets.includes(network)) setNetwork(nets[0] ?? "");
   }, [asset]);
 
-  // Fetch rates for estimate
   useEffect(() => {
-    clientApi.getRates()
-      .then(setRates)
-      .catch(() => setRatesError(true));
+    clientApi.getRates().then(setRates).catch(() => setRatesErr(true));
   }, []);
 
   const numAmount = parseFloat(amount);
   const currency  = CURRENCY_FOR_COUNTRY[country] ?? "";
   const rate      = rates?.rates?.[currency] ?? null;
-  const estimate  = rate && Number.isFinite(numAmount) && numAmount > 0
-    ? numAmount * rate
-    : null;
+  const estimate  = rate && Number.isFinite(numAmount) && numAmount > 0 ? numAmount * rate : null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-
     const parsed = parseFloat(amount);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      setError("Введите корректную сумму");
-      return;
-    }
-
+    if (!Number.isFinite(parsed) || parsed <= 0) { setError("Введите корректную сумму"); return; }
     setLoading(true);
     try {
-      const req = await clientApi.createRequest({
-        cryptoAsset: asset,
-        network,
-        cryptoAmount: parsed,
-        country,
-      });
+      const req = await clientApi.createRequest({ cryptoAsset: asset, network, cryptoAmount: parsed, country });
       router.push(`/cabinet/request/${req.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка при создании заявки");
@@ -98,107 +81,97 @@ export default function NewRequestPage() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="mb-6">
-        <Link href="/cabinet/requests" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
+        <Link href="/cabinet/requests" className="text-sm font-medium"
+              style={{ color: "var(--color-text-muted)" }}>
           ← Мои заявки
         </Link>
-        <h1 className="text-xl font-semibold text-white mt-2">Создать заявку</h1>
-        <p className="text-gray-400 text-sm mt-0.5">Обмен крипты на фиат</p>
+        <h1 className="text-2xl font-black mt-2" style={{ color: "var(--color-text-primary)" }}>
+          Создать заявку
+        </h1>
+        <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+          Обмен крипты на фиат
+        </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5"
-      >
+      <form onSubmit={handleSubmit} className="nexora-card p-6 space-y-5">
         {error && (
-          <div className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-3 py-2">
+          <div className="text-sm rounded-xl px-4 py-3"
+               style={{
+                 background: "var(--color-red-dim)",
+                 border:     "1px solid rgba(239,68,68,0.25)",
+                 color:      "var(--color-red)",
+               }}>
             {error}
           </div>
         )}
 
-        {/* Crypto Asset */}
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Криптоактив</label>
-          <select
-            value={asset}
-            onChange={(e) => setAsset(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-          >
-            {CRYPTO_ASSETS.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
+          <label className="block text-sm font-medium mb-1.5"
+                 style={{ color: "var(--color-text-secondary)" }}>
+            Криптоактив
+          </label>
+          <select value={asset} onChange={e => setAsset(e.target.value)} style={selectStyle}>
+            {CRYPTO_ASSETS.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
 
-        {/* Network */}
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Сеть</label>
-          <select
-            value={network}
-            onChange={(e) => setNetwork(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-          >
-            {(NETWORKS[asset] ?? []).map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
+          <label className="block text-sm font-medium mb-1.5"
+                 style={{ color: "var(--color-text-secondary)" }}>
+            Сеть
+          </label>
+          <select value={network} onChange={e => setNetwork(e.target.value)} style={selectStyle}>
+            {(NETWORKS[asset] ?? []).map(n => <option key={n} value={n}>{n}</option>)}
           </select>
         </div>
 
-        {/* Amount */}
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Сумма ({asset})</label>
-          <input
-            type="number"
-            min="0"
-            step="any"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-            placeholder="0.00"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-          />
+          <label className="block text-sm font-medium mb-1.5"
+                 style={{ color: "var(--color-text-secondary)" }}>
+            Сумма ({asset})
+          </label>
+          <input type="number" min="0" step="any" value={amount} onChange={e => setAmount(e.target.value)}
+                 required placeholder="0.00" className="nexora-input" />
         </div>
 
-        {/* Payout Country */}
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Страна выплаты</label>
-          <select
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c} value={c}>{COUNTRY_LABELS[c] ?? c}</option>
-            ))}
+          <label className="block text-sm font-medium mb-1.5"
+                 style={{ color: "var(--color-text-secondary)" }}>
+            Страна выплаты
+          </label>
+          <select value={country} onChange={e => setCountry(e.target.value)} style={selectStyle}>
+            {COUNTRIES.map(c => <option key={c} value={c}>{COUNTRY_LABELS[c] ?? c}</option>)}
           </select>
         </div>
 
-        {/* Estimated payout */}
-        <div className="bg-gray-800/60 rounded-lg px-4 py-3">
+        {/* Estimate */}
+        <div className="rounded-xl px-4 py-3"
+             style={{ background: "var(--color-brand-dim)", border: "1px solid rgba(37,99,235,0.15)" }}>
           <div className="flex justify-between items-center">
-            <span className="text-gray-500 text-xs">Ориентировочная выплата</span>
+            <span className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
+              Ориентировочная выплата
+            </span>
             {estimate !== null ? (
-              <span className="text-white text-sm font-semibold">
+              <span className="text-sm font-bold" style={{ color: "var(--color-brand)" }}>
                 ≈ {estimate.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} {currency}
               </span>
-            ) : ratesError ? (
-              <span className="text-gray-500 text-xs">Курс недоступен</span>
+            ) : ratesErr ? (
+              <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Курс недоступен</span>
             ) : (
-              <span className="text-gray-500 text-xs">
-                {rates ? "Введите сумму" : "Загрузка..."}
+              <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                {rates ? "Введите сумму" : "Загрузка…"}
               </span>
             )}
           </div>
-          <p className="text-gray-600 text-xs mt-1">
+          <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
             Итоговая сумма рассчитывается с учётом комиссий
           </p>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
-        >
-          {loading ? "Создание..." : "Создать заявку"}
+        <button type="submit" disabled={loading}
+                className="nexora-btn-primary w-full justify-center"
+                style={{ opacity: loading ? 0.6 : 1 }}>
+          {loading ? "Создание…" : "Создать заявку"}
         </button>
       </form>
     </div>

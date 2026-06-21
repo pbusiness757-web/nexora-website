@@ -4,22 +4,50 @@ import Link from "next/link";
 import { clientApi, ClientUser, MyRequest } from "@/lib/clientApi";
 
 const STATUS_LABELS: Record<string, string> = {
-  CREATED: "Создана", WAITING_PAYMENT: "Ожидает оплаты",
-  CRYPTO_RECEIVED: "Крипта получена", AML_REVIEW: "AML проверка",
-  READY_FOR_PAYOUT: "Готово к выплате", PROCESSING: "В обработке",
-  COMPLETED: "Завершена", ON_HOLD: "Приостановлена",
+  CREATED:          "Создана",
+  WAITING_PAYMENT:  "Ожидает оплаты",
+  CRYPTO_RECEIVED:  "Крипта получена",
+  AML_REVIEW:       "AML проверка",
+  READY_FOR_PAYOUT: "Готово к выплате",
+  PROCESSING:       "В обработке",
+  COMPLETED:        "Завершена",
+  ON_HOLD:          "Приостановлена",
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  CREATED: "bg-gray-700 text-gray-200", WAITING_PAYMENT: "bg-yellow-900 text-yellow-300",
-  CRYPTO_RECEIVED: "bg-blue-900 text-blue-300", AML_REVIEW: "bg-orange-900 text-orange-300",
-  READY_FOR_PAYOUT: "bg-teal-900 text-teal-300", PROCESSING: "bg-indigo-900 text-indigo-300",
-  COMPLETED: "bg-green-900 text-green-300", ON_HOLD: "bg-red-900 text-red-300",
+type BadgeVariant = "brand" | "green" | "amber" | "red" | "muted";
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  CREATED:          "muted",
+  WAITING_PAYMENT:  "amber",
+  CRYPTO_RECEIVED:  "brand",
+  AML_REVIEW:       "amber",
+  READY_FOR_PAYOUT: "green",
+  PROCESSING:       "brand",
+  COMPLETED:        "green",
+  ON_HOLD:          "red",
 };
+
+const BADGE_STYLE: Record<BadgeVariant, { bg: string; color: string }> = {
+  brand: { bg: "var(--color-brand-dim)",  color: "var(--color-brand)" },
+  green: { bg: "var(--color-green-dim)",  color: "var(--color-green)" },
+  amber: { bg: "var(--color-amber-dim)",  color: "var(--color-amber)" },
+  red:   { bg: "var(--color-red-dim)",    color: "var(--color-red)"   },
+  muted: { bg: "var(--color-bg-elevated)", color: "var(--color-text-muted)" },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const v = STATUS_VARIANT[status] ?? "muted";
+  const s = BADGE_STYLE[v];
+  return (
+    <span className="text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
+          style={{ background: s.bg, color: s.color }}>
+      {STATUS_LABELS[status] ?? status}
+    </span>
+  );
+}
 
 export default function CabinetPage() {
-  const [user, setUser] = useState<ClientUser | null>(null);
-  const [recent, setRecent] = useState<MyRequest[]>([]);
+  const [user,    setUser]    = useState<ClientUser | null>(null);
+  const [recent,  setRecent]  = useState<MyRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,78 +58,85 @@ export default function CabinetPage() {
   }, []);
 
   if (loading) {
-    return <div className="text-gray-400 text-sm py-12 text-center">Загрузка...</div>;
+    return (
+      <div className="text-center py-16 text-sm" style={{ color: "var(--color-text-muted)" }}>
+        Загрузка…
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="flex items-start justify-between mb-8">
+      {/* Header row */}
+      <div className="flex items-start justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white mb-1">Добро пожаловать</h1>
-          {user && <p className="text-gray-400 text-sm">{user.email}</p>}
+          <h1 className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>
+            Добро пожаловать
+          </h1>
+          {user && (
+            <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>{user.email}</p>
+          )}
         </div>
-        <Link
-          href="/cabinet/requests/new"
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex-shrink-0"
-        >
+        <Link href="/cabinet/requests/new" className="nexora-btn-primary flex-shrink-0">
           + Создать заявку
         </Link>
       </div>
 
+      {/* Unread notifications */}
       {user && user.unreadCount > 0 && (
-        <div className="mb-6 bg-indigo-900/40 border border-indigo-700 rounded-lg p-4 flex items-center justify-between">
-          <div className="text-sm text-indigo-300">
+        <div className="nexora-card mb-6 p-4 flex items-center justify-between gap-4"
+             style={{ border: "1px solid rgba(37,99,235,0.2)", background: "var(--color-brand-dim)" }}>
+          <p className="text-sm" style={{ color: "var(--color-brand)" }}>
             У вас <strong>{user.unreadCount}</strong> непрочитанных уведомлений
-          </div>
+          </p>
           <button
             onClick={async () => {
               await clientApi.markNotificationsRead().catch(() => {});
               const u = await clientApi.me().catch(() => null);
               if (u) setUser(u);
             }}
-            className="text-xs text-indigo-400 hover:text-indigo-200 underline"
-          >
+            className="text-xs font-semibold underline flex-shrink-0"
+            style={{ color: "var(--color-brand)" }}>
             Отметить прочитанными
           </button>
         </div>
       )}
 
+      {/* Recent requests */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-white">Последние заявки</h2>
-        <Link href="/cabinet/requests" className="text-sm text-indigo-400 hover:text-indigo-300">
+        <h2 className="text-base font-bold" style={{ color: "var(--color-text-primary)" }}>
+          Последние заявки
+        </h2>
+        <Link href="/cabinet/requests" className="text-sm font-medium"
+              style={{ color: "var(--color-brand)" }}>
           Все заявки →
         </Link>
       </div>
 
       {recent.length === 0 ? (
-        <div className="text-center py-12 border border-dashed border-gray-700 rounded-xl">
-          <p className="text-gray-500 text-sm mb-4">Заявок пока нет</p>
-          <Link
-            href="/cabinet/requests/new"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-          >
+        <div className="text-center py-16 rounded-2xl"
+             style={{ border: "2px dashed var(--color-border)" }}>
+          <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
+            Заявок пока нет
+          </p>
+          <Link href="/cabinet/requests/new" className="nexora-btn-primary">
             Создать первую заявку
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
-          {recent.map((req) => (
-            <Link
-              key={req.id}
-              href={`/cabinet/request/${req.id}`}
-              className="block bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 hover:border-gray-600 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-white font-mono text-sm">{req.requestNumber}</span>
-                  <span className="ml-3 text-gray-400 text-sm">
-                    {req.cryptoAmount} {req.cryptoAsset}
-                  </span>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[req.status] ?? "bg-gray-700 text-gray-200"}`}>
-                  {STATUS_LABELS[req.status] ?? req.status}
+          {recent.map(req => (
+            <Link key={req.id} href={`/cabinet/request/${req.id}`}
+                  className="nexora-card flex items-center justify-between gap-4 px-5 py-4 block">
+              <div>
+                <span className="font-mono font-bold text-sm" style={{ color: "var(--color-text-primary)" }}>
+                  {req.requestNumber}
+                </span>
+                <span className="ml-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  {req.cryptoAmount} {req.cryptoAsset}
                 </span>
               </div>
+              <StatusBadge status={req.status} />
             </Link>
           ))}
         </div>

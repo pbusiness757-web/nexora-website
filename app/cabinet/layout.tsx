@@ -5,13 +5,13 @@ import Link from "next/link";
 import { clientApi, ClientUser } from "@/lib/clientApi";
 
 export default function CabinetLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [user, setUser] = useState<ClientUser | null>(null);
+  const router    = useRouter();
+  const pathname  = usePathname();
+  const [user, setUser]       = useState<ClientUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const publicPaths = ["/cabinet/login", "/cabinet/register"];
-  const isPublic = publicPaths.includes(pathname);
+  const isPublic    = publicPaths.includes(pathname);
 
   useEffect(() => {
     if (isPublic) { setLoading(false); return; }
@@ -28,49 +28,80 @@ export default function CabinetLayout({ children }: { children: React.ReactNode 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-gray-400 text-sm">Загрузка...</div>
+      <div className="min-h-screen flex items-center justify-center"
+           style={{ background: "var(--color-bg-base)" }}>
+        <div className="text-sm" style={{ color: "var(--color-text-muted)" }}>Загрузка…</div>
       </div>
     );
   }
 
   if (isPublic) return <>{children}</>;
 
+  const navLinks = [
+    { href: "/cabinet",          label: "Главная" },
+    { href: "/cabinet/requests", label: "Заявки"  },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="border-b border-gray-800 bg-gray-900">
+    <div className="min-h-screen" style={{ background: "var(--color-bg-surface)" }}>
+      <header style={{
+        background:     "rgba(255,255,255,0.95)",
+        backdropFilter: "blur(12px)",
+        borderBottom:   "1px solid var(--color-border)",
+        position:       "sticky",
+        top:            0,
+        zIndex:         50,
+      }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <span className="font-semibold text-indigo-400">Nexora</span>
-            <nav className="flex gap-4 text-sm">
-              <Link href="/cabinet" className="text-gray-300 hover:text-white transition-colors">
-                Главная
-              </Link>
-              <Link href="/cabinet/requests" className="text-gray-300 hover:text-white transition-colors">
-                Заявки
-              </Link>
+            <Link href="/cabinet" className="font-black text-lg"
+                  style={{ color: "var(--color-brand)" }}>
+              Nexora
+            </Link>
+            <nav className="flex gap-1">
+              {navLinks.map(link => {
+                const active = pathname === link.href
+                  || (link.href !== "/cabinet" && pathname.startsWith(link.href));
+                return (
+                  <Link key={link.href} href={link.href}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                        style={{
+                          color:      active ? "var(--color-brand)"     : "var(--color-text-secondary)",
+                          background: active ? "var(--color-brand-dim)" : "transparent",
+                        }}>
+                    {link.label}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
-          <div className="flex items-center gap-4 text-sm">
+
+          <div className="flex items-center gap-3">
             {user && (
-              <span className="text-gray-400 hidden sm:block">
-                {user.email}
+              <span className="hidden sm:flex items-center gap-2">
+                <span style={{ color: "var(--color-text-muted)", fontSize: "0.8rem" }}>
+                  {user.email}
+                </span>
                 {user.unreadCount > 0 && (
-                  <span className="ml-2 bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="text-white text-xs font-bold px-1.5 py-0.5 rounded-full"
+                        style={{ background: "var(--color-brand)" }}>
                     {user.unreadCount}
                   </span>
                 )}
               </span>
             )}
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
+            <button onClick={handleLogout}
+                    className="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
+                    style={{
+                      color:  "var(--color-text-secondary)",
+                      border: "1px solid var(--color-border)",
+                    }}>
               Выйти
             </button>
           </div>
         </div>
       </header>
+
       <main className="max-w-5xl mx-auto px-4 py-8">{children}</main>
     </div>
   );

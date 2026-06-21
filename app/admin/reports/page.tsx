@@ -1,198 +1,192 @@
-type KpiCard = {
-  label: string;
-  value: string;
+"use client";
+import { useEffect, useState } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+function getToken() {
+  return document.cookie.match(/admin_token=([^;]+)/)?.[1] ?? "";
+}
+
+type Stats = {
+  totalRequests: number;
+  completedRequests: number;
+  activeRequests: number;
+  processingRequests: number;
+  totalCryptoVolume: number;
+  totalPayoutVolume: number;
+  activePartners: number;
+  totalPartners: number;
+  totalClients: number;
 };
 
-const KPIS: KpiCard[] = [
-  { label: "Объём за месяц", value: "1,240,000 USDT" },
-  { label: "Прибыль за месяц", value: "34,800 USDT" },
-  { label: "Завершённые заявки", value: "486" },
-  { label: "Средняя маржа", value: "2.8%" },
-];
-
-type CountryRow = {
-  country: string;
-  currency: string;
-  volume: string;
-  requests: string;
-  profit: string;
-};
-
-const COUNTRIES: CountryRow[] = [
-  {
-    country: "Россия",
-    currency: "RUB",
-    volume: "520,000 USDT",
-    requests: "184",
-    profit: "14,600 USDT",
-  },
-  {
-    country: "Казахстан",
-    currency: "KZT",
-    volume: "310,000 USDT",
-    requests: "112",
-    profit: "8,700 USDT",
-  },
-  {
-    country: "Узбекистан",
-    currency: "UZS",
-    volume: "245,000 USDT",
-    requests: "96",
-    profit: "6,900 USDT",
-  },
-  {
-    country: "Азербайджан",
-    currency: "AZN",
-    volume: "95,000 USDT",
-    requests: "54",
-    profit: "2,600 USDT",
-  },
-  {
-    country: "Кыргызстан",
-    currency: "KGS",
-    volume: "70,000 USDT",
-    requests: "40",
-    profit: "2,000 USDT",
-  },
+const COUNTRIES = [
+  { name: "Россия",      currency: "RUB", flag: "🇷🇺" },
+  { name: "Казахстан",   currency: "KZT", flag: "🇰🇿" },
+  { name: "Узбекистан",  currency: "UZS", flag: "🇺🇿" },
+  { name: "Азербайджан", currency: "AZN", flag: "🇦🇿" },
+  { name: "Кыргызстан",  currency: "KGS", flag: "🇰🇬" },
 ];
 
 const METHODS = [
   { label: "Корпоративные счета", percent: 58 },
-  { label: "Банковские карты", percent: 27 },
-  { label: "Личные счета", percent: 15 },
+  { label: "Банковские карты",    percent: 27 },
+  { label: "Личные счета",        percent: 15 },
 ];
 
-const SEGMENTS = [
-  { label: "Объём бизнес-клиентов", value: "820,000 USDT", percent: 66 },
-  { label: "Объём частных клиентов", value: "420,000 USDT", percent: 34 },
-];
-
-const thClass = "pb-3 font-semibold";
-const tdClass = "py-4";
+function fmt(n: number, decimals = 0) {
+  return n.toLocaleString("ru-RU", { maximumFractionDigits: decimals });
+}
 
 export default function AdminReportsPage() {
-  return (
-    <main className="bg-slate-50 py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Отчёты и аналитика
-            </h1>
-            <p className="text-lg text-slate-600">
-              Контроль оборота, прибыли, стран, способов выплат и показателей
-              бизнеса.
-            </p>
-          </div>
+  const [stats, setStats]   = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState<string | null>(null);
 
-          <section className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {KPIS.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60"
-              >
-                <p className="text-sm font-medium text-slate-500">
+  useEffect(() => {
+    fetch(`${API_BASE}/api/dashboard/stats`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+      .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
+      .then(setStats)
+      .catch(e => setError(String(e)))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const kpis = stats
+    ? [
+        { label: "Всего заявок",          value: fmt(stats.totalRequests) },
+        { label: "Завершено",             value: fmt(stats.completedRequests) },
+        { label: "Активных",              value: fmt(stats.activeRequests) },
+        { label: "Объём (крипта, USDT)",  value: fmt(Number(stats.totalCryptoVolume), 2) },
+        { label: "Объём (выплаты)",       value: fmt(Number(stats.totalPayoutVolume), 0) },
+        { label: "Партнёров (активных)",  value: `${fmt(stats.activePartners)} / ${fmt(stats.totalPartners)}` },
+        { label: "Клиентов",              value: fmt(stats.totalClients) },
+        { label: "В обработке",           value: fmt(stats.processingRequests) },
+      ]
+    : [];
+
+  return (
+    <main style={{ background: "var(--color-bg-surface)" }} className="py-12 min-h-screen">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-black tracking-tight" style={{ color: "var(--color-text-primary)" }}>
+            Отчёты и аналитика
+          </h1>
+          <p className="mt-1 text-base" style={{ color: "var(--color-text-secondary)" }}>
+            Сводка по объёму, заявкам, партнёрам и клиентам платформы.
+          </p>
+        </div>
+
+        {/* KPI Strip */}
+        {loading ? (
+          <div className="nexora-card p-8 text-center mb-6" style={{ color: "var(--color-text-muted)" }}>
+            Загрузка статистики…
+          </div>
+        ) : error ? (
+          <div className="nexora-card p-6 mb-6" style={{ color: "var(--color-red)", border: "1px solid var(--color-red-dim)" }}>
+            Ошибка загрузки: {error}
+          </div>
+        ) : (
+          <section className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-4 mb-6">
+            {kpis.map(card => (
+              <div key={card.label} className="nexora-card p-5">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-2"
+                   style={{ color: "var(--color-text-muted)" }}>
                   {card.label}
                 </p>
-                <p className="mt-3 text-2xl font-bold text-slate-950">
+                <p className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>
                   {card.value}
                 </p>
               </div>
             ))}
           </section>
+        )}
 
-          <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">
-              Объём по странам
-            </h2>
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className={thClass}>Страна</th>
-                    <th className={thClass}>Валюта</th>
-                    <th className={thClass}>Объём</th>
-                    <th className={thClass}>Заявки</th>
-                    <th className={thClass}>Прибыль</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {COUNTRIES.map((row) => (
-                    <tr key={row.country} className="text-slate-700">
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.country}
-                      </td>
-                      <td className={tdClass}>{row.currency}</td>
-                      <td className={`${tdClass} font-semibold text-slate-950`}>
-                        {row.volume}
-                      </td>
-                      <td className={tdClass}>{row.requests}</td>
-                      <td className={`${tdClass} font-semibold text-blue-900`}>
-                        {row.profit}
-                      </td>
-                    </tr>
+        {/* Country table */}
+        <section className="nexora-card p-6 sm:p-8 mb-6">
+          <h2 className="text-lg font-bold mb-6" style={{ color: "var(--color-text-primary)" }}>
+            Страны выплат
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[580px] text-sm text-left">
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  {["Страна", "Валюта", "Статус"].map(h => (
+                    <th key={h} className="pb-3 font-semibold" style={{ color: "var(--color-text-muted)" }}>{h}</th>
                   ))}
-                </tbody>
-              </table>
+                </tr>
+              </thead>
+              <tbody>
+                {COUNTRIES.map(row => (
+                  <tr key={row.name} style={{ borderBottom: "1px solid var(--color-border-soft)" }}>
+                    <td className="py-4 font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                      {row.flag} {row.name}
+                    </td>
+                    <td className="py-4">
+                      <span className="nexora-badge text-xs">{row.currency}</span>
+                    </td>
+                    <td className="py-4">
+                      <span className="text-xs font-bold px-2 py-1 rounded-full"
+                        style={{ background: "var(--color-green-dim)", color: "var(--color-green)" }}>
+                        Активна
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Methods + Segments */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <section className="nexora-card p-6 sm:p-8">
+            <h2 className="text-lg font-bold mb-6" style={{ color: "var(--color-text-primary)" }}>
+              Способы выплат
+            </h2>
+            <div className="space-y-5">
+              {METHODS.map(m => (
+                <div key={m.label}>
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <span style={{ color: "var(--color-text-secondary)" }}>{m.label}</span>
+                    <span className="font-bold" style={{ color: "var(--color-text-primary)" }}>{m.percent}%</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full overflow-hidden"
+                       style={{ background: "var(--color-bg-elevated)" }}>
+                    <div className="h-full rounded-full"
+                         style={{ width: `${m.percent}%`, background: "var(--color-brand)" }} />
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-              <h2 className="text-lg font-bold text-slate-950">
-                Эффективность способов выплат
-              </h2>
-              <div className="mt-6 space-y-5">
-                {METHODS.map((method) => (
-                  <div key={method.label}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-slate-700">
-                        {method.label}
-                      </span>
-                      <span className="font-semibold text-slate-950">
-                        {method.percent}%
-                      </span>
-                    </div>
-                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className="h-full rounded-full bg-blue-900"
-                        style={{ width: `${method.percent}%` }}
-                      />
-                    </div>
+          <section className="nexora-card p-6 sm:p-8">
+            <h2 className="text-lg font-bold mb-6" style={{ color: "var(--color-text-primary)" }}>
+              Платформа
+            </h2>
+            {stats ? (
+              <dl className="space-y-4">
+                {[
+                  { label: "Клиентов зарегистрировано", value: fmt(stats.totalClients) },
+                  { label: "Партнёров всего",           value: fmt(stats.totalPartners) },
+                  { label: "Партнёров активных",        value: fmt(stats.activePartners) },
+                  { label: "Заявок завершено",          value: fmt(stats.completedRequests) },
+                  { label: "Заявок в работе",           value: fmt(stats.activeRequests) },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between items-center py-2"
+                       style={{ borderBottom: "1px solid var(--color-border-soft)" }}>
+                    <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{row.label}</dt>
+                    <dd className="font-bold" style={{ color: "var(--color-text-primary)" }}>{row.value}</dd>
                   </div>
                 ))}
-              </div>
-            </section>
-
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-              <h2 className="text-lg font-bold text-slate-950">
-                Бизнес-сегмент
-              </h2>
-              <div className="mt-6 space-y-5">
-                {SEGMENTS.map((segment) => (
-                  <div key={segment.label}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-slate-700">
-                        {segment.label}
-                      </span>
-                      <span className="font-semibold text-slate-950">
-                        {segment.value}
-                      </span>
-                    </div>
-                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className="h-full rounded-full bg-cyan-500"
-                        style={{ width: `${segment.percent}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-6 rounded-2xl bg-slate-50 p-4 text-sm font-medium text-slate-600">
-                Корпоративные выплаты — ведущий сегмент.
-              </p>
-            </section>
-          </div>
+              </dl>
+            ) : (
+              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Загрузка…</p>
+            )}
+          </section>
         </div>
+      </div>
     </main>
   );
 }
