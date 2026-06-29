@@ -19,6 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Отчёты', href: '/admin/reports' },
   { label: 'Финансы', href: '/admin/finance' },
   { label: 'Журнал действий', href: '/admin/audit-logs' },
+  { label: 'Операторы',       href: '/admin/admins' },
 ];
 
 export default function AdminSidebar() {
@@ -26,8 +27,7 @@ export default function AdminSidebar() {
   const router = useRouter();
 
   async function handleLogout() {
-    const apiBase =
-      process.env.NEXT_PUBLIC_API_URL ?? '';
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? '';
     await fetch(`${apiBase}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
@@ -37,11 +37,19 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:block">
+    <aside
+      className="hidden w-64 shrink-0 lg:block"
+      style={{ borderRight: '1px solid var(--color-border)', background: 'var(--color-bg-base)' }}
+    >
       <div className="flex h-full flex-col px-4 py-6">
         <div className="px-3">
-          <span className="text-xl font-bold text-blue-900">Nexora</span>
-          <span className="ml-2 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-blue-900">
+          <span className="text-xl font-bold" style={{ color: 'var(--color-brand)' }}>
+            Nexora
+          </span>
+          <span
+            className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wider"
+            style={{ background: 'var(--color-brand-dim)', color: 'var(--color-brand)' }}
+          >
             Admin
           </span>
         </div>
@@ -73,16 +81,17 @@ export default function AdminSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-auto rounded-2xl border border-slate-200 px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+          className="mt-auto rounded-2xl px-3 py-2.5 text-left text-sm font-semibold transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+          style={{ border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
         >
           Выйти
         </button>
 
-        <div className="mt-4 rounded-2xl bg-slate-50 p-4">
-          <p className="text-sm font-semibold text-slate-950">
+        <div className="mt-4 rounded-2xl p-4" style={{ background: 'var(--color-bg-elevated)' }}>
+          <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Операционный центр
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
             Инфраструктура выплат крипто-в-банк
           </p>
         </div>

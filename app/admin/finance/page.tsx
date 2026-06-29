@@ -75,7 +75,7 @@ export default function AdminFinancePage() {
 
   useEffect(() => {
     let active = true;
-    fetch(`${API_BASE}/api/finance/summary`, { credentials: "include" })
+    fetch(`${API_BASE}/api/admin/finance/summary`, { credentials: "include" })
       .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(d => { if (active) setData(d); })
       .catch(() => { if (active) setError("Не удалось загрузить финансовую сводку."); })
@@ -86,13 +86,20 @@ export default function AdminFinancePage() {
   return (
     <div className="py-12 min-h-screen" style={{ background: "var(--color-bg-surface)" }}>
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-black tracking-tight" style={{ color: "var(--color-text-primary)" }}>
-            Финансы
-          </h1>
-          <p className="mt-1 text-base" style={{ color: "var(--color-text-secondary)" }}>
-            Выручка, комиссии партнёров и прибыль по выплатам.
-          </p>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight" style={{ color: "var(--color-text-primary)" }}>
+              Финансы
+            </h1>
+            <p className="mt-1 text-base" style={{ color: "var(--color-text-secondary)" }}>
+              Выручка, комиссии партнёров и прибыль по выплатам.
+            </p>
+          </div>
+          <a href={`${API_BASE}/api/admin/finance/export`}
+             className="rounded-2xl px-5 py-2.5 text-sm font-semibold"
+             style={{ background: "var(--color-brand)", color: "#fff", textDecoration: "none" }}>
+            ↓ Экспорт CSV
+          </a>
         </div>
 
         {loading ? (

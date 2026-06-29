@@ -42,7 +42,6 @@ type ApiRequest = {
   clientId: string;
   client: ApiClient | null;
   payout: ApiPayout | null;
-  // AML fields
   amlStatus: string;
   riskScore: number | null;
   amlComment: string | null;
@@ -58,47 +57,44 @@ type HistoryEntry = {
   createdAt: string;
 };
 
-type AmlForm = {
-  amlStatus: string;
-  riskScore: string;
-  amlComment: string;
+type AmlForm = { amlStatus: string; riskScore: string; amlComment: string };
+
+type BadgeStyle = { bg: string; color: string };
+
+const STATUS_META: Record<string, { label: string } & BadgeStyle> = {
+  CREATED:          { label: "Создана",          bg: "var(--color-bg-elevated)",   color: "var(--color-text-secondary)" },
+  WAITING_PAYMENT:  { label: "Ожидание оплаты",  bg: "var(--color-amber-dim)",     color: "var(--color-amber)"          },
+  CRYPTO_RECEIVED:  { label: "Крипто получено",  bg: "var(--color-brand-dim)",     color: "var(--color-brand)"          },
+  AML_REVIEW:       { label: "AML-проверка",     bg: "rgba(8,145,178,0.08)",       color: "#0891b2"                     },
+  READY_FOR_PAYOUT: { label: "Готово к выплате", bg: "rgba(99,102,241,0.08)",      color: "#6366f1"                     },
+  PROCESSING:       { label: "В обработке",      bg: "var(--color-amber-dim)",     color: "var(--color-amber)"          },
+  COMPLETED:        { label: "Завершено",         bg: "var(--color-green-dim)",     color: "var(--color-green)"          },
+  ON_HOLD:          { label: "На удержании",      bg: "var(--color-red-dim)",       color: "var(--color-red)"            },
 };
 
-const STATUS_META: Record<string, { label: string; style: string }> = {
-  CREATED:          { label: "Создана",           style: "bg-slate-100 text-slate-600" },
-  WAITING_PAYMENT:  { label: "Ожидание оплаты",   style: "bg-slate-100 text-slate-600" },
-  CRYPTO_RECEIVED:  { label: "Крипто получено",   style: "bg-blue-50 text-blue-700" },
-  AML_REVIEW:       { label: "AML-проверка",      style: "bg-cyan-50 text-cyan-700" },
-  READY_FOR_PAYOUT: { label: "Готово к выплате",  style: "bg-indigo-50 text-indigo-700" },
-  PROCESSING:       { label: "В обработке",       style: "bg-amber-50 text-amber-600" },
-  COMPLETED:        { label: "Завершено",          style: "bg-emerald-50 text-emerald-600" },
-  ON_HOLD:          { label: "На удержании",       style: "bg-rose-50 text-rose-600" },
+const PAYOUT_STATUS_META: Record<string, { label: string } & BadgeStyle> = {
+  PENDING:    { label: "Ожидает",      bg: "var(--color-bg-elevated)", color: "var(--color-text-secondary)" },
+  READY:      { label: "Готово",       bg: "rgba(99,102,241,0.08)",    color: "#6366f1"                     },
+  PROCESSING: { label: "В обработке", bg: "var(--color-amber-dim)",   color: "var(--color-amber)"          },
+  COMPLETED:  { label: "Выполнено",   bg: "var(--color-green-dim)",   color: "var(--color-green)"          },
+  FAILED:     { label: "Ошибка",      bg: "var(--color-red-dim)",     color: "var(--color-red)"            },
+  ON_HOLD:    { label: "Удержание",   bg: "var(--color-red-dim)",     color: "var(--color-red)"            },
 };
 
-const PAYOUT_STATUS_META: Record<string, { label: string; style: string }> = {
-  PENDING:    { label: "Ожидает",      style: "bg-slate-100 text-slate-600" },
-  READY:      { label: "Готово",       style: "bg-indigo-50 text-indigo-700" },
-  PROCESSING: { label: "В обработке", style: "bg-amber-50 text-amber-600" },
-  COMPLETED:  { label: "Выполнено",   style: "bg-emerald-50 text-emerald-700" },
-  FAILED:     { label: "Ошибка",      style: "bg-rose-50 text-rose-700" },
-  ON_HOLD:    { label: "Удержание",   style: "bg-rose-50 text-rose-600" },
+const AML_META: Record<string, { label: string } & BadgeStyle> = {
+  PENDING:  { label: "Ожидает",      bg: "var(--color-bg-elevated)", color: "var(--color-text-secondary)" },
+  PASSED:   { label: "Пройдена",     bg: "var(--color-green-dim)",   color: "var(--color-green)"          },
+  REVIEW:   { label: "На проверке",  bg: "var(--color-amber-dim)",   color: "var(--color-amber)"          },
+  REJECTED: { label: "Отклонена",    bg: "var(--color-red-dim)",     color: "var(--color-red)"            },
 };
 
-const AML_META: Record<string, { label: string; style: string }> = {
-  PENDING:  { label: "Ожидает",       style: "bg-slate-100 text-slate-600" },
-  PASSED:   { label: "Пройдена",      style: "bg-emerald-50 text-emerald-700" },
-  REVIEW:   { label: "На проверке",  style: "bg-amber-50 text-amber-700" },
-  REJECTED: { label: "Отклонена",    style: "bg-rose-50 text-rose-700" },
+const FALLBACK_BADGE: BadgeStyle & { label: string } = {
+  label: "—", bg: "var(--color-bg-elevated)", color: "var(--color-text-muted)",
 };
 
 const TIMELINE_ORDER = [
-  "CREATED",
-  "WAITING_PAYMENT",
-  "CRYPTO_RECEIVED",
-  "AML_REVIEW",
-  "READY_FOR_PAYOUT",
-  "PROCESSING",
-  "COMPLETED",
+  "CREATED", "WAITING_PAYMENT", "CRYPTO_RECEIVED",
+  "AML_REVIEW", "READY_FOR_PAYOUT", "PROCESSING", "COMPLETED",
 ];
 
 const AML_BLOCKED = new Set(["READY_FOR_PAYOUT", "PROCESSING", "COMPLETED"]);
@@ -107,56 +103,60 @@ const STATUS_ACTIONS: { label: string; targetStatus: string; primary?: boolean }
   { label: "Начать AML-проверку",    targetStatus: "AML_REVIEW",       primary: true },
   { label: "Крипто получено",        targetStatus: "CRYPTO_RECEIVED" },
   { label: "Готово к выплате",       targetStatus: "READY_FOR_PAYOUT" },
-  { label: "В обработке",           targetStatus: "PROCESSING" },
+  { label: "В обработке",            targetStatus: "PROCESSING" },
   { label: "Завершить заявку",       targetStatus: "COMPLETED",        primary: true },
   { label: "Поставить на удержание", targetStatus: "ON_HOLD" },
 ];
 
-function statusMeta(status: string) {
-  return STATUS_META[status] ?? { label: status, style: "bg-slate-100 text-slate-500" };
+function smeta(s: string) { return STATUS_META[s] ?? { ...FALLBACK_BADGE, label: s }; }
+function pmeta(s: string) { return PAYOUT_STATUS_META[s] ?? { ...FALLBACK_BADGE, label: s }; }
+function ameta(s: string) { return AML_META[s] ?? { ...FALLBACK_BADGE, label: s }; }
+
+function Badge({ m }: { m: { label: string; bg: string; color: string } }) {
+  return (
+    <span className="rounded-full px-3 py-1 text-xs font-semibold"
+          style={{ background: m.bg, color: m.color }}>
+      {m.label}
+    </span>
+  );
 }
 
-function payoutStatusMeta(status: string) {
-  return PAYOUT_STATUS_META[status] ?? { label: status, style: "bg-slate-100 text-slate-500" };
-}
-
-function amlMeta(status: string) {
-  return AML_META[status] ?? { label: status, style: "bg-slate-100 text-slate-500" };
-}
-
-function formatNumber(value: string) {
-  return Number(value).toLocaleString("en-US");
-}
-
-function formatTs(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("ru-RU", {
+function fmt(v: string | number) { return Number(v).toLocaleString("ru-RU"); }
+function fmtTs(iso: string) {
+  return new Date(iso).toLocaleString("ru-RU", {
     day: "2-digit", month: "2-digit", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
 }
 
-const markerStyles = {
-  done:    "border-blue-900 bg-blue-900 text-white",
-  current: "border-cyan-500 bg-cyan-50 text-cyan-700",
-  pending: "border-slate-200 bg-white text-slate-400",
-} as const;
+const CARD_STYLE = {
+  background: "var(--color-bg-base)",
+  border: "1px solid var(--color-border)",
+  borderRadius: "1.5rem",
+};
+const ROW_STYLE = { borderBottom: "1px solid var(--color-border-soft)" };
+const INPUT_STYLE = {
+  width: "100%", borderRadius: "0.75rem",
+  border: "1px solid var(--color-border)",
+  background: "var(--color-bg-base)",
+  color: "var(--color-text-primary)",
+  padding: "0.625rem 1rem", fontSize: "0.875rem", outline: "none",
+};
 
-function InfoCard({
-  title,
-  rows,
-}: {
+function InfoCard({ title, rows }: {
   title: string;
   rows: { label: string; value: string; mono?: boolean }[];
 }) {
   return (
-    <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-      <h2 className="text-lg font-bold text-slate-950">{title}</h2>
-      <dl className="mt-6 divide-y divide-slate-100">
+    <section style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
+      <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>{title}</h2>
+      <dl className="mt-6">
         {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-4 py-4">
-            <dt className="text-sm text-slate-600">{row.label}</dt>
-            <dd className={`text-right font-semibold text-slate-950 ${row.mono ? "font-mono text-slate-500" : ""}`}>
+          <div key={row.label} className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+            <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{row.label}</dt>
+            <dd className="text-right font-semibold"
+                style={{ color: row.mono ? "var(--color-text-muted)" : "var(--color-text-primary)",
+                         fontFamily: row.mono ? "monospace" : undefined }}>
               {row.value}
             </dd>
           </div>
@@ -170,27 +170,22 @@ export default function AdminRequestDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
-  const [request, setRequest]       = useState<ApiRequest | null>(null);
-  const [history, setHistory]       = useState<HistoryEntry[]>([]);
+  const [request, setRequest]         = useState<ApiRequest | null>(null);
+  const [history, setHistory]         = useState<HistoryEntry[]>([]);
   const [partnerData, setPartnerData] = useState<ApiPartner | null>(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState<string | null>(null);
-  const [updating, setUpdating]     = useState(false);
-  const [amlSaving, setAmlSaving]   = useState(false);
-  const [assigning, setAssigning]   = useState(false);
-  const [toast, setToast]           = useState<{ text: string; ok: boolean } | null>(null);
-  const [amlForm, setAmlForm]       = useState<AmlForm>({
-    amlStatus: "PENDING",
-    riskScore: "",
-    amlComment: "",
-  });
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState<string | null>(null);
+  const [updating, setUpdating]       = useState(false);
+  const [amlSaving, setAmlSaving]     = useState(false);
+  const [assigning, setAssigning]     = useState(false);
+  const [toast, setToast]             = useState<{ text: string; ok: boolean } | null>(null);
+  const [amlForm, setAmlForm]         = useState<AmlForm>({ amlStatus: "PENDING", riskScore: "", amlComment: "" });
 
   const showToast = (text: string, ok: boolean) => {
     setToast({ text, ok });
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Resolve partner name from partnerId by fetching the partners list
   async function resolvePartner(partnerId: string): Promise<ApiPartner | null> {
     try {
       const res = await fetch(`${API_BASE}/api/partners?limit=100`, { credentials: "include" });
@@ -198,9 +193,7 @@ export default function AdminRequestDetailsPage() {
       const data = await res.json();
       const list: ApiPartner[] = Array.isArray(data) ? data : (data.data ?? []);
       return list.find((p) => p.id === partnerId) ?? null;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
 
   const load = useCallback(async () => {
@@ -220,11 +213,9 @@ export default function AdminRequestDetailsPage() {
       setError(null);
       setAmlForm({
         amlStatus: reqData.amlStatus ?? "PENDING",
-        riskScore: reqData.riskScore !== null && reqData.riskScore !== undefined
-          ? String(reqData.riskScore) : "",
+        riskScore: reqData.riskScore != null ? String(reqData.riskScore) : "",
         amlComment: reqData.amlComment ?? "",
       });
-      // Resolve partner if payout exists with a partnerId
       if (reqData.payout?.partnerId) {
         resolvePartner(reqData.payout.partnerId).then((p) => setPartnerData(p));
       } else {
@@ -244,23 +235,15 @@ export default function AdminRequestDetailsPage() {
     setUpdating(true);
     try {
       const res = await fetch(`${API_BASE}/api/requests/${request.id}/status`, {
-        method: "PATCH",
-        credentials: "include",
+        method: "PATCH", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: targetStatus }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        showToast(body.error ?? "Ошибка при обновлении статуса", false);
-        return;
-      }
-      showToast("Статус изменён -> " + statusMeta(targetStatus).label, true);
+      if (!res.ok) { const b = await res.json().catch(() => ({})); showToast(b.error ?? "Ошибка", false); return; }
+      showToast("Статус -> " + smeta(targetStatus).label, true);
       await load();
-    } catch {
-      showToast("Сетевая ошибка при обновлении статуса", false);
-    } finally {
-      setUpdating(false);
-    }
+    } catch { showToast("Сетевая ошибка", false); }
+    finally { setUpdating(false); }
   }
 
   async function handleAmlSubmit(e: React.FormEvent) {
@@ -271,25 +254,16 @@ export default function AdminRequestDetailsPage() {
       const body: Record<string, unknown> = { amlStatus: amlForm.amlStatus };
       if (amlForm.riskScore !== "") body.riskScore = Number(amlForm.riskScore);
       if (amlForm.amlComment.trim() !== "") body.amlComment = amlForm.amlComment.trim();
-
       const res = await fetch(`${API_BASE}/api/requests/${request.id}/aml`, {
-        method: "PATCH",
-        credentials: "include",
+        method: "PATCH", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        showToast(errBody.error ?? "Ошибка при обновлении AML", false);
-        return;
-      }
-      showToast("AML обновлена -> " + amlMeta(amlForm.amlStatus).label, true);
+      if (!res.ok) { const b = await res.json().catch(() => ({})); showToast(b.error ?? "Ошибка AML", false); return; }
+      showToast("AML -> " + ameta(amlForm.amlStatus).label, true);
       await load();
-    } catch {
-      showToast("Сетевая ошибка при обновлении AML", false);
-    } finally {
-      setAmlSaving(false);
-    }
+    } catch { showToast("Сетевая ошибка", false); }
+    finally { setAmlSaving(false); }
   }
 
   async function handleAssignPartner() {
@@ -297,38 +271,23 @@ export default function AdminRequestDetailsPage() {
     setAssigning(true);
     try {
       const res = await fetch(`${API_BASE}/api/requests/${request.id}/assign-partner`, {
-        method: "POST",
-        credentials: "include",
+        method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        // Surface specific backend error messages
-        showToast(body.error ?? "Не удалось назначить партнёра", false);
-        return;
-      }
-      // Capture partner directly from the response (name available here)
-      if (body.partner) {
-        setPartnerData(body.partner as ApiPartner);
-      }
-      showToast(
-        "Партнёр назначен: " + (body.partner?.name ?? "") +
-        " — выплата #" + (body.payout?.payoutNumber ?? ""),
-        true
-      );
+      if (!res.ok) { showToast(body.error ?? "Не удалось назначить партнёра", false); return; }
+      if (body.partner) setPartnerData(body.partner as ApiPartner);
+      showToast("Партнёр: " + (body.partner?.name ?? "") + " — выплата #" + (body.payout?.payoutNumber ?? ""), true);
       await load();
-    } catch {
-      showToast("Сетевая ошибка при назначении партнёра", false);
-    } finally {
-      setAssigning(false);
-    }
+    } catch { showToast("Сетевая ошибка", false); }
+    finally { setAssigning(false); }
   }
 
   if (loading) {
     return (
-      <div className="px-6 py-16">
+      <div className="px-6 py-16" style={{ background: "var(--color-bg-surface)" }}>
         <div className="mx-auto max-w-7xl">
-          <p className="text-sm text-slate-500">Загрузка заявки...</p>
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Загрузка заявки...</p>
         </div>
       </div>
     );
@@ -336,9 +295,10 @@ export default function AdminRequestDetailsPage() {
 
   if (error || !request) {
     return (
-      <div className="px-6 py-16">
+      <div className="px-6 py-16" style={{ background: "var(--color-bg-surface)" }}>
         <div className="mx-auto max-w-7xl">
-          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+          <p className="rounded-2xl px-4 py-3 text-sm font-medium"
+             style={{ background: "var(--color-red-dim)", color: "var(--color-red)" }}>
             {error ?? "Заявка не найдена."}
           </p>
         </div>
@@ -347,8 +307,8 @@ export default function AdminRequestDetailsPage() {
   }
 
   const currentIndex = TIMELINE_ORDER.indexOf(request.status);
-  const meta         = statusMeta(request.status);
-  const amlBadge     = amlMeta(request.amlStatus ?? "PENDING");
+  const meta         = smeta(request.status);
+  const amlBadge     = ameta(request.amlStatus ?? "PENDING");
   const amlRejected  = request.amlStatus === "REJECTED";
   const canAssign    = request.status === "READY_FOR_PAYOUT" && !request.payout && !amlRejected;
 
@@ -363,32 +323,28 @@ export default function AdminRequestDetailsPage() {
   const cryptoRows = [
     { label: "Актив",   value: request.cryptoAsset },
     { label: "Сеть",    value: request.network },
-    { label: "Сумма",   value: formatNumber(request.cryptoAmount) + " " + request.cryptoAsset },
+    { label: "Сумма",   value: fmt(request.cryptoAmount) + " " + request.cryptoAsset },
     { label: "Создана", value: request.createdAt.slice(0, 10) },
   ];
 
   const payoutRows = request.payout
     ? [
         { label: "Номер выплаты", value: request.payout.payoutNumber, mono: true },
-        { label: "Статус",        value: payoutStatusMeta(request.payout.status).label },
-        { label: "Сумма",         value: formatNumber(request.payout.amount) + " " + request.payout.currency },
+        { label: "Статус",        value: pmeta(request.payout.status).label },
+        { label: "Сумма",         value: fmt(request.payout.amount) + " " + request.payout.currency },
       ]
     : [
-        { label: "Сумма",   value: formatNumber(request.payoutAmount) + " " + request.payoutCurrency },
+        { label: "Сумма",   value: fmt(request.payoutAmount) + " " + request.payoutCurrency },
         { label: "Валюта",  value: request.payoutCurrency },
         { label: "Выплата", value: "Ещё не создана" },
       ];
 
   return (
-    <div className="px-6 py-16">
+    <div className="min-h-screen px-6 py-12" style={{ background: "var(--color-bg-surface)" }}>
       {/* Toast */}
       {toast && (
-        <div
-          className={
-            "fixed right-6 top-6 z-50 rounded-2xl px-5 py-3 text-sm font-semibold shadow-xl " +
-            (toast.ok ? "bg-emerald-600 text-white" : "bg-rose-600 text-white")
-          }
-        >
+        <div className="fixed right-6 top-6 z-50 rounded-2xl px-5 py-3 text-sm font-semibold shadow-xl"
+             style={{ background: toast.ok ? "var(--color-green)" : "var(--color-red)", color: "#fff" }}>
           {toast.text}
         </div>
       )}
@@ -397,62 +353,63 @@ export default function AdminRequestDetailsPage() {
         {/* Header */}
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl"
+                style={{ color: "var(--color-text-primary)" }}>
               Заявка {request.requestNumber}
             </h1>
-            <span className={"rounded-full px-3 py-1 text-xs font-semibold " + meta.style}>
-              {meta.label}
-            </span>
-            <span className={"rounded-full px-3 py-1 text-xs font-semibold " + amlBadge.style}>
-              AML: {amlBadge.label}
-            </span>
+            <Badge m={meta} />
+            <Badge m={{ ...amlBadge, label: "AML: " + amlBadge.label }} />
           </div>
-          <p className="text-lg text-slate-600">Детали заявки на выплату крипто-в-банк.</p>
+          <p className="text-lg" style={{ color: "var(--color-text-secondary)" }}>
+            Детали заявки на выплату крипто-в-банк.
+          </p>
         </div>
 
         {/* AML REJECTED banner */}
         {amlRejected && (
-          <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4">
-            <p className="text-sm font-semibold text-rose-700">
-              AML отклонена — переход в статусы Готово к выплате, В обработке и Завершено заблокирован.
-              Измените AML-статус, чтобы разблокировать прогресс.
+          <div className="mt-6 rounded-2xl px-5 py-4"
+               style={{ background: "var(--color-red-dim)", border: "1px solid var(--color-red)" }}>
+            <p className="text-sm font-semibold" style={{ color: "var(--color-red)" }}>
+              AML отклонена — переход в Готово к выплате / В обработке / Завершено заблокирован.
             </p>
           </div>
         )}
 
         {/* Status timeline */}
-        <section className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">Хронология статусов</h2>
+        <section className="mt-8" style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
+          <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+            Хронология статусов
+          </h2>
 
           {history.length > 0 ? (
             <ol className="mt-8 space-y-4">
               {history.map((entry) => (
                 <li key={entry.id} className="flex gap-4">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blue-900 bg-blue-900 text-xs font-bold text-white">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                        style={{ background: "var(--color-brand)", border: "2px solid var(--color-brand)" }}>
                     OK
                   </span>
                   <div className="flex flex-1 flex-col justify-center">
-                    <p className="font-semibold text-slate-950">
-                      {statusMeta(entry.fromStatus).label}
-                      <span className="mx-2 text-slate-400">-&gt;</span>
-                      {statusMeta(entry.toStatus).label}
+                    <p className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                      {smeta(entry.fromStatus).label}
+                      <span className="mx-2" style={{ color: "var(--color-text-muted)" }}>→</span>
+                      {smeta(entry.toStatus).label}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      {formatTs(entry.createdAt)}
-                      {entry.changedBy && entry.changedBy !== "unknown"
-                        ? " · " + entry.changedBy
-                        : ""}
+                    <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                      {fmtTs(entry.createdAt)}
+                      {entry.changedBy && entry.changedBy !== "unknown" ? " · " + entry.changedBy : ""}
                     </p>
                   </div>
                 </li>
               ))}
               <li className="flex gap-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-cyan-500 bg-cyan-50 text-xs font-bold text-cyan-700">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                      style={{ background: "rgba(8,145,178,0.12)", color: "#0891b2", border: "2px solid #0891b2" }}>
                   NOW
                 </span>
                 <div className="flex flex-1 flex-col justify-center">
-                  <p className="font-semibold text-slate-950">
-                    Текущий: {statusMeta(request.status).label}
+                  <p className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                    Текущий: {smeta(request.status).label}
                   </p>
                 </div>
               </li>
@@ -460,37 +417,30 @@ export default function AdminRequestDetailsPage() {
           ) : (
             <ol className="mt-8 space-y-6">
               {TIMELINE_ORDER.map((step, index) => {
-                const state =
-                  currentIndex === -1
-                    ? "pending"
-                    : index < currentIndex
-                    ? "done"
-                    : index === currentIndex
-                    ? "current"
-                    : "pending";
+                const state = currentIndex === -1 ? "pending"
+                  : index < currentIndex ? "done"
+                  : index === currentIndex ? "current"
+                  : "pending";
                 const isLast = index === TIMELINE_ORDER.length - 1;
+                const markerStyle =
+                  state === "done"    ? { background: "var(--color-brand)", border: "2px solid var(--color-brand)", color: "#fff" }
+                  : state === "current" ? { background: "rgba(8,145,178,0.12)", border: "2px solid #0891b2", color: "#0891b2" }
+                  : { background: "var(--color-bg-base)", border: "2px solid var(--color-border)", color: "var(--color-text-muted)" };
                 return (
                   <li key={step} className="relative flex gap-4">
                     {!isLast && (
-                      <span
-                        className={
-                          "absolute left-5 top-10 h-[calc(100%-0.5rem)] w-px " +
-                          (state === "done" ? "bg-blue-900" : "bg-slate-200")
-                        }
-                        aria-hidden="true"
-                      />
+                      <span className="absolute left-5 top-10 h-[calc(100%-0.5rem)] w-px"
+                            style={{ background: state === "done" ? "var(--color-brand)" : "var(--color-border)" }}
+                            aria-hidden="true" />
                     )}
-                    <span
-                      className={
-                        "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-bold " +
-                        markerStyles[state]
-                      }
-                    >
-                      {state === "done" ? "OK" : index + 1}
+                    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                          style={markerStyle}>
+                      {state === "done" ? "✓" : index + 1}
                     </span>
                     <div className="flex flex-1 items-center pt-2">
-                      <p className={"font-semibold " + (state === "pending" ? "text-slate-400" : "text-slate-950")}>
-                        {statusMeta(step).label}
+                      <p className="font-semibold"
+                         style={{ color: state === "pending" ? "var(--color-text-muted)" : "var(--color-text-primary)" }}>
+                        {smeta(step).label}
                       </p>
                     </div>
                   </li>
@@ -505,12 +455,14 @@ export default function AdminRequestDetailsPage() {
           <InfoCard title="Крипто-платёж"        rows={cryptoRows} />
           <InfoCard title="Детали выплаты"        rows={payoutRows} />
 
-          {/* Operator status actions */}
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-950">Действия оператора</h2>
-            <p className="mt-1 text-sm text-slate-500">
+          {/* Operator actions */}
+          <section style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
+            <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+              Действия оператора
+            </h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
               Текущий статус:{" "}
-              <span className="font-semibold text-slate-800">{meta.label}</span>
+              <span className="font-semibold" style={{ color: "var(--color-text-primary)" }}>{meta.label}</span>
             </p>
 
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -523,12 +475,13 @@ export default function AdminRequestDetailsPage() {
                     disabled={updating || isBlocked}
                     title={isBlocked ? "Заблокировано: AML отклонена" : undefined}
                     onClick={() => handleStatusChange(action.targetStatus)}
-                    className={
+                    className="rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:opacity-50"
+                    style={
                       isBlocked
-                        ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed"
+                        ? { background: "var(--color-bg-elevated)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)", cursor: "not-allowed" }
                         : action.primary
-                        ? "rounded-2xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-950 disabled:opacity-50"
-                        : "rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:text-blue-900 disabled:opacity-50"
+                        ? { background: "var(--color-brand)", color: "#fff", border: "none" }
+                        : { background: "var(--color-bg-base)", color: "var(--color-text-primary)", border: "1px solid var(--color-border)" }
                     }
                   >
                     {updating ? "..." : action.label}
@@ -537,12 +490,9 @@ export default function AdminRequestDetailsPage() {
               })}
             </div>
 
-            {/* Direct status override */}
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <label
-                htmlFor="status-override"
-                className="block text-xs font-medium text-slate-500 mb-2"
-              >
+            <div className="mt-6 pt-6" style={{ borderTop: "1px solid var(--color-border-soft)" }}>
+              <label htmlFor="status-override" className="block text-xs font-medium mb-2"
+                     style={{ color: "var(--color-text-muted)" }}>
                 Установить статус напрямую
               </label>
               <select
@@ -550,103 +500,100 @@ export default function AdminRequestDetailsPage() {
                 value={request.status}
                 disabled={updating}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 disabled:opacity-50"
+                style={INPUT_STYLE}
               >
                 {Object.entries(STATUS_META).map(([value, m]) => (
-                  <option key={value} value={value}>
-                    {m.label}
-                  </option>
+                  <option key={value} value={value}>{m.label}</option>
                 ))}
               </select>
             </div>
           </section>
         </div>
 
-        {/* Partner Assignment Card */}
-        <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
+        {/* Partner Assignment */}
+        <section className="mt-6" style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-bold text-slate-950">Партнёр выплаты</h2>
-              {request.payout && (
-                <span className={"rounded-full px-3 py-1 text-xs font-semibold " + payoutStatusMeta(request.payout.status).style}>
-                  {payoutStatusMeta(request.payout.status).label}
-                </span>
-              )}
+              <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+                Партнёр выплаты
+              </h2>
+              {request.payout && <Badge m={pmeta(request.payout.status)} />}
             </div>
 
-            {/* Assign-partner button: only when READY_FOR_PAYOUT, no existing payout, AML not rejected */}
             {canAssign && (
               <button
                 type="button"
                 disabled={assigning}
                 onClick={handleAssignPartner}
-                className="rounded-2xl bg-indigo-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-2xl px-6 py-3 text-sm font-semibold text-white transition disabled:opacity-50"
+                style={{ background: "var(--color-brand)" }}
               >
                 {assigning ? "Поиск партнёра..." : "Назначить партнёра"}
               </button>
             )}
 
-            {/* Can't assign because AML rejected */}
             {request.status === "READY_FOR_PAYOUT" && !request.payout && amlRejected && (
-              <span className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-600">
+              <span className="rounded-2xl px-4 py-2.5 text-sm font-medium"
+                    style={{ background: "var(--color-red-dim)", color: "var(--color-red)", border: "1px solid var(--color-red)" }}>
                 Недоступно — AML отклонена
               </span>
             )}
           </div>
 
-          {/* Payout + partner details */}
           {request.payout ? (
-            <dl className="mt-6 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-slate-50 px-4">
+            <dl className="mt-6 rounded-xl px-4"
+                style={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border)" }}>
               {partnerData && (
-                <div className="flex items-center justify-between gap-4 py-4">
-                  <dt className="text-sm text-slate-600">Партнёр</dt>
-                  <dd className="text-right font-semibold text-slate-950">{partnerData.name}</dd>
+                <div className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Партнёр</dt>
+                  <dd className="font-semibold" style={{ color: "var(--color-text-primary)" }}>{partnerData.name}</dd>
                 </div>
               )}
               {partnerData && (
-                <div className="flex items-center justify-between gap-4 py-4">
-                  <dt className="text-sm text-slate-600">Страна / валюта</dt>
-                  <dd className="text-right font-semibold text-slate-950">
+                <div className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Страна / валюта</dt>
+                  <dd className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
                     {partnerData.country} / {partnerData.currency}
                   </dd>
                 </div>
               )}
               {partnerData && (
-                <div className="flex items-center justify-between gap-4 py-4">
-                  <dt className="text-sm text-slate-600">Комиссия партнёра</dt>
-                  <dd className="text-right font-semibold text-slate-950">{Number(partnerData.feePercent).toFixed(2)}%</dd>
+                <div className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Комиссия партнёра</dt>
+                  <dd className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                    {Number(partnerData.feePercent).toFixed(2)}%
+                  </dd>
                 </div>
               )}
-              <div className="flex items-center justify-between gap-4 py-4">
-                <dt className="text-sm text-slate-600">Номер выплаты</dt>
-                <dd className="text-right font-mono text-sm font-semibold text-slate-500">
+              <div className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+                <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Номер выплаты</dt>
+                <dd className="font-semibold font-mono text-sm" style={{ color: "var(--color-text-muted)" }}>
                   {request.payout.payoutNumber}
                 </dd>
               </div>
-              <div className="flex items-center justify-between gap-4 py-4">
-                <dt className="text-sm text-slate-600">Сумма выплаты</dt>
-                <dd className="text-right font-semibold text-slate-950">
-                  {formatNumber(request.payout.amount)} {request.payout.currency}
+              <div className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+                <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Сумма выплаты</dt>
+                <dd className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                  {fmt(request.payout.amount)} {request.payout.currency}
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-4 py-4">
-                <dt className="text-sm text-slate-600">Статус выплаты</dt>
-                <dd className="text-right">
-                  <span className={"rounded-full px-2.5 py-0.5 text-xs font-semibold " + payoutStatusMeta(request.payout.status).style}>
-                    {payoutStatusMeta(request.payout.status).label}
-                  </span>
-                </dd>
+                <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Статус выплаты</dt>
+                <dd><Badge m={pmeta(request.payout.status)} /></dd>
               </div>
               {!partnerData && request.payout.partnerId && (
-                <div className="flex items-center justify-between gap-4 py-4">
-                  <dt className="text-sm text-slate-600">ID партнёра</dt>
-                  <dd className="text-right font-mono text-xs text-slate-400">{request.payout.partnerId}</dd>
+                <div className="flex items-center justify-between gap-4 py-4" style={ROW_STYLE}>
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>ID партнёра</dt>
+                  <dd className="font-mono text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    {request.payout.partnerId}
+                  </dd>
                 </div>
               )}
             </dl>
           ) : (
-            <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 px-5 py-5">
-              <p className="text-sm text-slate-500">
+            <div className="mt-6 rounded-xl px-5 py-5"
+                 style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)" }}>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 {request.status === "READY_FOR_PAYOUT"
                   ? "Заявка готова к выплате. Нажмите кнопку выше, чтобы автоматически выбрать лучшего партнёра."
                   : "Выплата будет создана после перехода заявки в статус Готово к выплате."}
@@ -656,54 +603,46 @@ export default function AdminRequestDetailsPage() {
         </section>
 
         {/* AML Card */}
-        <section className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
+        <section className="mt-6" style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-lg font-bold text-slate-950">AML Проверка</h2>
-            <span className={"rounded-full px-3 py-1 text-xs font-semibold " + amlBadge.style}>
-              {amlBadge.label}
-            </span>
+            <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>AML Проверка</h2>
+            <Badge m={amlBadge} />
           </div>
 
-          {/* Current AML data */}
           {(request.riskScore !== null || request.amlComment || request.amlReviewedBy) && (
-            <dl className="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-100 bg-slate-50 px-4">
+            <dl className="mt-4 rounded-xl px-4"
+                style={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border)" }}>
               {request.riskScore !== null && (
-                <div className="flex items-center justify-between py-3">
-                  <dt className="text-sm text-slate-600">Риск-балл</dt>
-                  <dd className="font-semibold text-slate-950">{request.riskScore}/100</dd>
+                <div className="flex items-center justify-between py-3" style={ROW_STYLE}>
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Риск-балл</dt>
+                  <dd className="font-semibold" style={{ color: "var(--color-text-primary)" }}>{request.riskScore}/100</dd>
                 </div>
               )}
               {request.amlComment && (
-                <div className="flex flex-col gap-1 py-3">
-                  <dt className="text-sm text-slate-600">Комментарий</dt>
-                  <dd className="text-sm font-medium text-slate-800">{request.amlComment}</dd>
+                <div className="flex flex-col gap-1 py-3" style={ROW_STYLE}>
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Комментарий</dt>
+                  <dd className="text-sm" style={{ color: "var(--color-text-primary)" }}>{request.amlComment}</dd>
                 </div>
               )}
               {request.amlReviewedBy && (
                 <div className="flex items-center justify-between py-3">
-                  <dt className="text-sm text-slate-600">Проверил</dt>
-                  <dd className="text-sm font-medium text-slate-800">
+                  <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Проверил</dt>
+                  <dd className="text-sm" style={{ color: "var(--color-text-primary)" }}>
                     {request.amlReviewedBy}
-                    {request.amlReviewedAt ? " · " + formatTs(request.amlReviewedAt) : ""}
+                    {request.amlReviewedAt ? " · " + fmtTs(request.amlReviewedAt) : ""}
                   </dd>
                 </div>
               )}
             </dl>
           )}
 
-          {/* AML action form */}
           <form onSubmit={handleAmlSubmit} className="mt-6 space-y-4">
             <div>
-              <label htmlFor="aml-status" className="block text-xs font-medium text-slate-500 mb-1">
-                Результат AML
-              </label>
-              <select
-                id="aml-status"
-                value={amlForm.amlStatus}
-                onChange={(e) => setAmlForm((f) => ({ ...f, amlStatus: e.target.value }))}
-                disabled={amlSaving}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 disabled:opacity-50"
-              >
+              <label htmlFor="aml-status" className="block text-xs font-medium mb-1"
+                     style={{ color: "var(--color-text-muted)" }}>Результат AML</label>
+              <select id="aml-status" value={amlForm.amlStatus} disabled={amlSaving}
+                      onChange={(e) => setAmlForm((f) => ({ ...f, amlStatus: e.target.value }))}
+                      style={INPUT_STYLE}>
                 <option value="PENDING">Ожидает</option>
                 <option value="PASSED">Пройдена</option>
                 <option value="REVIEW">На проверке</option>
@@ -712,43 +651,27 @@ export default function AdminRequestDetailsPage() {
             </div>
 
             <div>
-              <label htmlFor="risk-score" className="block text-xs font-medium text-slate-500 mb-1">
-                Риск-балл (0-100, необязательно)
-              </label>
-              <input
-                id="risk-score"
-                type="number"
-                min="0"
-                max="100"
-                placeholder="например, 72"
-                value={amlForm.riskScore}
-                onChange={(e) => setAmlForm((f) => ({ ...f, riskScore: e.target.value }))}
-                disabled={amlSaving}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 disabled:opacity-50"
-              />
+              <label htmlFor="risk-score" className="block text-xs font-medium mb-1"
+                     style={{ color: "var(--color-text-muted)" }}>Риск-балл (0–100, необязательно)</label>
+              <input id="risk-score" type="number" min="0" max="100"
+                     placeholder="например, 72" value={amlForm.riskScore} disabled={amlSaving}
+                     onChange={(e) => setAmlForm((f) => ({ ...f, riskScore: e.target.value }))}
+                     style={INPUT_STYLE} />
             </div>
 
             <div>
-              <label htmlFor="aml-comment" className="block text-xs font-medium text-slate-500 mb-1">
-                Комментарий (необязательно)
-              </label>
-              <textarea
-                id="aml-comment"
-                rows={3}
-                maxLength={2000}
-                placeholder="Заметки по результатам AML-проверки..."
-                value={amlForm.amlComment}
-                onChange={(e) => setAmlForm((f) => ({ ...f, amlComment: e.target.value }))}
-                disabled={amlSaving}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 disabled:opacity-50 resize-none"
-              />
+              <label htmlFor="aml-comment" className="block text-xs font-medium mb-1"
+                     style={{ color: "var(--color-text-muted)" }}>Комментарий (необязательно)</label>
+              <textarea id="aml-comment" rows={3} maxLength={2000}
+                        placeholder="Заметки по результатам AML-проверки..."
+                        value={amlForm.amlComment} disabled={amlSaving}
+                        onChange={(e) => setAmlForm((f) => ({ ...f, amlComment: e.target.value }))}
+                        style={{ ...INPUT_STYLE, resize: "none" }} />
             </div>
 
-            <button
-              type="submit"
-              disabled={amlSaving}
-              className="w-full rounded-2xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-950 disabled:opacity-50 sm:w-auto"
-            >
+            <button type="submit" disabled={amlSaving}
+                    className="rounded-2xl px-6 py-3 text-sm font-semibold text-white transition disabled:opacity-50 sm:w-auto w-full"
+                    style={{ background: "var(--color-brand)" }}>
               {amlSaving ? "Сохранение..." : "Сохранить AML"}
             </button>
           </form>

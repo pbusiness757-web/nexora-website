@@ -86,4 +86,5 @@ export const clientApi = {
   },
   getNotifications: () => apiFetch<Notification[]>("/api/client-requests/notifications"),
   markNotificationsRead: () =>
-    apiFetch<void>("/api/client-requests/notifications/read", { m
+    apiFetch<void>("/api/client-requests/notifications/read", { method: "POST" }),
+};
