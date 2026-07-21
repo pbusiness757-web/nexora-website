@@ -83,11 +83,11 @@ const organizationJsonLd = {
   description:
     "Крипто-в-банк платформа для выплат поставщикам, подрядчикам и корпоративных B2B-расчётов по странам СНГ.",
   areaServed: ["RU", "KZ", "UZ", "AZ", "KG"],
-  sameAs: ["https://t.me/nexorapay"],
+  sameAs: ["https://t.me/nexoranotify_bot"],
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",
-    url: "https://t.me/nexorapay",
+    url: "https://t.me/nexoranotify_bot",
   },
 };
 

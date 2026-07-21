@@ -91,7 +91,7 @@ export default function Header() {
 
             {/* Telegram */}
             <a
-              href="https://t.me/nexorapay"
+              href="https://t.me/nexoranotify_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all"

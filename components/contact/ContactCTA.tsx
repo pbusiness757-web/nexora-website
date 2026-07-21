@@ -62,7 +62,7 @@ export default function ContactCTA() {
                 {t.primaryButton}
               </a>
               <a
-                href="https://t.me/nexorapay"
+                href="https://t.me/nexoranotify_bot"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="nexora-btn-secondary text-base flex items-center justify-center gap-2"
