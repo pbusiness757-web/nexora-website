@@ -58,7 +58,7 @@ export default function ContactCTA() {
             </div>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <a href="/exchange" className="nexora-btn-primary text-base">
+              <a href="/cabinet/register" className="nexora-btn-primary text-base">
                 {t.primaryButton}
               </a>
               <a

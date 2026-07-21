@@ -50,7 +50,8 @@ export default function AdminClientsPage() {
   const cardStyle = { background: "var(--color-bg-surface)", border: "1px solid var(--color-border)", borderRadius: "1rem" };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen py-10 px-6" style={{ background: "var(--color-bg-surface)" }}>
+    <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>Клиенты</h1>
@@ -156,6 +157,7 @@ export default function AdminClientsPage() {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }

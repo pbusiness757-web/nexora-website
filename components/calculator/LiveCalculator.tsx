@@ -226,7 +226,7 @@ export default function LiveCalculator() {
 
           {/* CTA */}
           <a
-            href="/exchange"
+            href="/cabinet/register"
             className="nexora-btn-primary mt-5 w-full flex items-center justify-center gap-2 text-base"
           >
             {t.button}

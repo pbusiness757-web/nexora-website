@@ -118,7 +118,7 @@ export default function Header() {
 
             {/* CTA */}
             <Link
-              href="/exchange"
+              href="/cabinet/register"
               className="nexora-btn-primary hidden sm:inline-flex items-center gap-2 text-sm !py-2.5 !px-5 !rounded-xl"
             >
               {dict.nav?.createRequest ?? 'Создать заявку'}
@@ -179,7 +179,7 @@ export default function Header() {
                 ))}
               </select>
               <Link
-                href="/exchange"
+                href="/cabinet/register"
                 className="nexora-btn-primary !py-2 !px-4 !text-sm !rounded-xl"
                 onClick={() => setMobileOpen(false)}
               >

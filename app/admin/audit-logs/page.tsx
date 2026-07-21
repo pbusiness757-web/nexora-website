@@ -54,7 +54,8 @@ export default function AdminAuditLogsPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen py-10 px-6" style={{ background: "var(--color-bg-surface)" }}>
+    <div className="mx-auto max-w-7xl space-y-6">
       <div>
         <h1 className="text-2xl font-black" style={{ color: "var(--color-text-primary)" }}>
           Журнал аудита
@@ -168,6 +169,7 @@ export default function AdminAuditLogsPage() {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }

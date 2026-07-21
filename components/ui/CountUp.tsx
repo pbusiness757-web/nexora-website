@@ -15,10 +15,13 @@ export default function CountUp({ value, durationMs = 1200 }: CountUpProps) {
   const target = Number(value);
   const isNumeric = value.trim() !== '' && Number.isFinite(target);
   const ref = useRef<HTMLSpanElement>(null);
-  const [display, setDisplay] = useState(isNumeric ? 0 : value);
+  // Start with real value so SSR/bots see the correct number.
+  // Animation resets to 0 and counts up on first scroll into view.
+  const [display, setDisplay] = useState(isNumeric ? target : value);
+  const animated = useRef(false);
 
   useEffect(() => {
-    if (!isNumeric) return;
+    if (!isNumeric || animated.current) return;
     const el = ref.current;
     if (!el) return;
 
@@ -37,6 +40,9 @@ export default function CountUp({ value, durationMs = 1200 }: CountUpProps) {
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
+        animated.current = true;
+        setDisplay(0); // reset then animate
+        start = null;
         const step = (ts: number) => {
           if (start === null) start = ts;
           const progress = Math.min((ts - start) / durationMs, 1);

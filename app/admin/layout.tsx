@@ -42,19 +42,28 @@ export default function AdminLayout({
 
   // Login screen renders full-bleed without the sidebar chrome.
   if (isLogin) {
-    return <div className="min-h-screen bg-slate-50">{children}</div>;
+    return (
+      <div className="min-h-screen" style={{ background: "var(--color-bg-surface)" }}>
+        {children}
+      </div>
+    );
   }
 
   if (!checked) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <p className="text-sm text-slate-500">Проверка доступа…</p>
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{ background: "var(--color-bg-surface)" }}
+      >
+        <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+          Проверка доступа…
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen" style={{ background: "var(--color-bg-surface)" }}>
       <AdminSidebar />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

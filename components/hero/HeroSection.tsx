@@ -342,7 +342,7 @@ export default function HeroSection() {
               transition: 'all 0.7s ease 0.3s',
             }}
           >
-            <Link href="/exchange" className="nexora-btn-primary text-base !py-3.5 !px-8">
+            <Link href="/cabinet/register" className="nexora-btn-primary text-base !py-3.5 !px-8">
               {t.primaryCta}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

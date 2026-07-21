@@ -120,7 +120,7 @@ export default function BusinessSolutions() {
             </p>
           </div>
           <a
-            href="/exchange"
+            href="/cabinet/register"
             className="nexora-btn-primary shrink-0 text-sm"
           >
             {t.ctaButton}
