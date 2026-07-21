@@ -39,7 +39,7 @@ const az = {
     currencyLabel: "Alıcı valyutası",
     autoLabel: "avto",
     summarySend: "Siz göndərirsiniz",
-    summaryFee: "Şəbəkə komissiyası (1%)",
+    summaryFee: "Xidmət komissiyası",
     summaryRate: "Mübadilə məzənnəsi",
     receiveLabel: "Alıcı alır",
     button: "Sorğu yarat",

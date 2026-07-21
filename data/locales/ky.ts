@@ -39,7 +39,7 @@ const ky = {
     currencyLabel: "Алуучунун валютасы",
     autoLabel: "авто",
     summarySend: "Сиз жөнөтөсүз",
-    summaryFee: "Тармак комиссиясы (1%)",
+    summaryFee: "Кызмат комиссиясы",
     summaryRate: "Алмашуу курсу",
     receiveLabel: "Алуучу алат",
     button: "Өтүнмө түзүү",

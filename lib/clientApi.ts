@@ -23,6 +23,8 @@ export interface RequestDetail extends MyRequest {
   rateSnapshot: string | null; nexoraFeePercent: string; nexoraFeeAmount: string | null;
   partnerFeePercent: string; partnerFeeAmount: string | null; netPayoutAmount: string | null;
   amlStatus: string;
+  walletAddress: string | null;
+  recipientDetails: string | null;
   payout: { id: string; payoutNumber: string; status: string; amount: string; currency: string } | null;
   proofUploads: { id: string; originalName: string; mimeType: string; size: number; uploadedAt: string }[];
 }
@@ -31,9 +33,14 @@ export interface StatusHistoryEntry {
 }
 export interface Notification { id: string; message: string; isRead: boolean; createdAt: string; requestId: string | null }
 export interface PageResult<T> { data: T[]; total: number; page: number; limit: number }
-export interface RatesSnapshot { rates: Record<string, number>; updatedAt: string }
+export interface RatesSnapshot {
+  rates: Record<string, number>;
+  cryptoPrices: Record<string, number>; // price of 1 unit in USDT (BTC, ETH, TON, TRX, LTC)
+  updatedAt: string;
+}
 export interface CreateRequestBody {
   cryptoAsset: string; network: string; cryptoAmount: number; country: string;
+  recipientDetails?: string;
 }
 
 export const clientApi = {

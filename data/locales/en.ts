@@ -39,7 +39,7 @@ const en = {
     currencyLabel: "Recipient currency",
     autoLabel: "auto",
     summarySend: "You send",
-    summaryFee: "Network fee (1%)",
+    summaryFee: "Service fee",
     summaryRate: "Exchange rate",
     receiveLabel: "Recipient receives",
     button: "Create Request",

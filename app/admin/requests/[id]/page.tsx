@@ -40,6 +40,7 @@ type ApiRequest = {
   payoutAmount: string;
   createdAt: string;
   clientId: string;
+  country: string | null;
   client: ApiClient | null;
   payout: ApiPayout | null;
   amlStatus: string;
@@ -47,6 +48,8 @@ type ApiRequest = {
   amlComment: string | null;
   amlReviewedAt: string | null;
   amlReviewedBy: string | null;
+  walletAddress: string | null;
+  recipientDetails: string | null;
 };
 
 type HistoryEntry = {
@@ -100,8 +103,9 @@ const TIMELINE_ORDER = [
 const AML_BLOCKED = new Set(["READY_FOR_PAYOUT", "PROCESSING", "COMPLETED"]);
 
 const STATUS_ACTIONS: { label: string; targetStatus: string; primary?: boolean }[] = [
-  { label: "Начать AML-проверку",    targetStatus: "AML_REVIEW",       primary: true },
+  { label: "Ожидает оплаты",         targetStatus: "WAITING_PAYMENT",  primary: true },
   { label: "Крипто получено",        targetStatus: "CRYPTO_RECEIVED" },
+  { label: "Начать AML-проверку",    targetStatus: "AML_REVIEW",       primary: true },
   { label: "Готово к выплате",       targetStatus: "READY_FOR_PAYOUT" },
   { label: "В обработке",            targetStatus: "PROCESSING" },
   { label: "Завершить заявку",       targetStatus: "COMPLETED",        primary: true },
@@ -175,11 +179,13 @@ export default function AdminRequestDetailsPage() {
   const [partnerData, setPartnerData] = useState<ApiPartner | null>(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
-  const [updating, setUpdating]       = useState(false);
-  const [amlSaving, setAmlSaving]     = useState(false);
-  const [assigning, setAssigning]     = useState(false);
-  const [toast, setToast]             = useState<{ text: string; ok: boolean } | null>(null);
-  const [amlForm, setAmlForm]         = useState<AmlForm>({ amlStatus: "PENDING", riskScore: "", amlComment: "" });
+  const [updating, setUpdating]         = useState(false);
+  const [amlSaving, setAmlSaving]       = useState(false);
+  const [assigning, setAssigning]       = useState(false);
+  const [toast, setToast]               = useState<{ text: string; ok: boolean } | null>(null);
+  const [amlForm, setAmlForm]           = useState<AmlForm>({ amlStatus: "PENDING", riskScore: "", amlComment: "" });
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [walletAddressInput, setWalletAddressInput] = useState("");
 
   const showToast = (text: string, ok: boolean) => {
     setToast({ text, ok });
@@ -230,17 +236,23 @@ export default function AdminRequestDetailsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function handleStatusChange(targetStatus: string) {
+  async function handleStatusChange(targetStatus: string, walletAddr?: string) {
     if (!request || updating) return;
     setUpdating(true);
     try {
+      const body: Record<string, unknown> = { status: targetStatus };
+      if (targetStatus === "WAITING_PAYMENT" && walletAddr && walletAddr.trim()) {
+        body.walletAddress = walletAddr.trim();
+      }
       const res = await fetch(`${API_BASE}/api/requests/${request.id}/status`, {
         method: "PATCH", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: targetStatus }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) { const b = await res.json().catch(() => ({})); showToast(b.error ?? "Ошибка", false); return; }
-      showToast("Статус -> " + smeta(targetStatus).label, true);
+      showToast("Статус → " + smeta(targetStatus).label, true);
+      setPendingStatus(null);
+      setWalletAddressInput("");
       await load();
     } catch { showToast("Сетевая ошибка", false); }
     finally { setUpdating(false); }
@@ -324,8 +336,15 @@ export default function AdminRequestDetailsPage() {
     { label: "Актив",   value: request.cryptoAsset },
     { label: "Сеть",    value: request.network },
     { label: "Сумма",   value: fmt(request.cryptoAmount) + " " + request.cryptoAsset },
+    { label: "Страна",  value: request.country ?? "—" },
     { label: "Создана", value: request.createdAt.slice(0, 10) },
   ];
+
+  // Parse recipient details JSON
+  let recipientInfo: Record<string, string> | null = null;
+  if (request.recipientDetails) {
+    try { recipientInfo = JSON.parse(request.recipientDetails); } catch { /* ignore */ }
+  }
 
   const payoutRows = request.payout
     ? [
@@ -468,17 +487,26 @@ export default function AdminRequestDetailsPage() {
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {STATUS_ACTIONS.filter((a) => a.targetStatus !== request.status).map((action) => {
                 const isBlocked = amlRejected && AML_BLOCKED.has(action.targetStatus);
+                const isWaiting = action.targetStatus === "WAITING_PAYMENT";
                 return (
                   <button
                     key={action.targetStatus}
                     type="button"
                     disabled={updating || isBlocked}
                     title={isBlocked ? "Заблокировано: AML отклонена" : undefined}
-                    onClick={() => handleStatusChange(action.targetStatus)}
+                    onClick={() => {
+                      if (isWaiting) {
+                        setPendingStatus(pendingStatus === "WAITING_PAYMENT" ? null : "WAITING_PAYMENT");
+                      } else {
+                        handleStatusChange(action.targetStatus);
+                      }
+                    }}
                     className="rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:opacity-50"
                     style={
                       isBlocked
                         ? { background: "var(--color-bg-elevated)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)", cursor: "not-allowed" }
+                        : pendingStatus === "WAITING_PAYMENT" && isWaiting
+                        ? { background: "var(--color-amber-dim)", color: "var(--color-amber)", border: "1px solid var(--color-amber)" }
                         : action.primary
                         ? { background: "var(--color-brand)", color: "#fff", border: "none" }
                         : { background: "var(--color-bg-base)", color: "var(--color-text-primary)", border: "1px solid var(--color-border)" }
@@ -489,6 +517,42 @@ export default function AdminRequestDetailsPage() {
                 );
               })}
             </div>
+
+            {/* Wallet address input — shown when moving to WAITING_PAYMENT */}
+            {pendingStatus === "WAITING_PAYMENT" && (
+              <div className="mt-4 rounded-2xl p-4" style={{ background: "var(--color-amber-dim)", border: "1px solid var(--color-amber)" }}>
+                <p className="text-sm font-semibold mb-3" style={{ color: "var(--color-amber)" }}>
+                  Укажите адрес крипто-кошелька для отправки платежа клиентом
+                </p>
+                <input
+                  type="text"
+                  placeholder={`Адрес ${request.cryptoAsset} (${request.network})`}
+                  value={walletAddressInput}
+                  onChange={(e) => setWalletAddressInput(e.target.value)}
+                  style={{ ...INPUT_STYLE, fontFamily: "monospace", fontSize: "0.8rem" }}
+                  autoFocus
+                />
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    disabled={updating || !walletAddressInput.trim()}
+                    onClick={() => handleStatusChange("WAITING_PAYMENT", walletAddressInput)}
+                    className="rounded-2xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+                    style={{ background: "var(--color-amber)" }}
+                  >
+                    {updating ? "..." : "Подтвердить"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPendingStatus(null); setWalletAddressInput(""); }}
+                    className="rounded-2xl px-5 py-2.5 text-sm font-semibold transition"
+                    style={{ background: "var(--color-bg-base)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="mt-6 pt-6" style={{ borderTop: "1px solid var(--color-border-soft)" }}>
               <label htmlFor="status-override" className="block text-xs font-medium mb-2"
@@ -601,6 +665,65 @@ export default function AdminRequestDetailsPage() {
             </div>
           )}
         </section>
+
+        {/* Wallet Address + Recipient Details */}
+        {(request.walletAddress || recipientInfo) && (
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Wallet address */}
+            {request.walletAddress && (
+              <section style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
+                <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+                  Адрес кошелька (отправлено клиенту)
+                </h2>
+                <div className="mt-4 rounded-xl px-4 py-3"
+                     style={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border)" }}>
+                  <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>
+                    {request.cryptoAsset} · {request.network}
+                  </p>
+                  <p className="break-all font-mono text-sm font-semibold"
+                     style={{ color: "var(--color-text-primary)" }}>
+                    {request.walletAddress}
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Recipient details */}
+            {recipientInfo && (
+              <section style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>
+                <h2 className="text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>
+                  Реквизиты клиента
+                </h2>
+                <dl className="mt-4">
+                  {recipientInfo.cardNumber && (
+                    <div className="flex items-center justify-between gap-4 py-3" style={ROW_STYLE}>
+                      <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Номер карты</dt>
+                      <dd className="font-mono font-semibold text-sm" style={{ color: "var(--color-text-primary)" }}>
+                        {recipientInfo.cardNumber}
+                      </dd>
+                    </div>
+                  )}
+                  {recipientInfo.bankName && (
+                    <div className="flex items-center justify-between gap-4 py-3" style={ROW_STYLE}>
+                      <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Банк</dt>
+                      <dd className="font-semibold text-sm" style={{ color: "var(--color-text-primary)" }}>
+                        {recipientInfo.bankName}
+                      </dd>
+                    </div>
+                  )}
+                  {recipientInfo.recipientName && (
+                    <div className="flex items-center justify-between gap-4 py-3">
+                      <dt className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Получатель</dt>
+                      <dd className="font-semibold text-sm" style={{ color: "var(--color-text-primary)" }}>
+                        {recipientInfo.recipientName}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </section>
+            )}
+          </div>
+        )}
 
         {/* AML Card */}
         <section className="mt-6" style={{ ...CARD_STYLE, padding: "1.5rem 2rem" }}>

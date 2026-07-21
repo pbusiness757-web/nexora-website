@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   getPayoutCurrency,
   supportedPayoutCountries,
@@ -8,25 +8,26 @@ import {
 } from '../../lib/countryCurrency';
 import { useLocale } from '../../lib/locale-context';
 
-const CRYPTO_ASSETS: { code: string; usd: number; icon: string }[] = [
-  { code: 'USDT', usd: 1,       icon: '💵' },
-  { code: 'BTC',  usd: 64250,   icon: '₿' },
-  { code: 'ETH',  usd: 3120.5,  icon: '⬡' },
-  { code: 'TON',  usd: 6.74,    icon: '💎' },
-  { code: 'TRX',  usd: 0.118,   icon: '⚡' },
-  { code: 'USDC', usd: 1,       icon: '🔵' },
-  { code: 'LTC',  usd: 84.2,    icon: '🌐' },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 
-const FIAT_PER_USD: Record<string, number> = {
-  RUB: 92.4,
-  KZT: 478.5,
-  UZS: 12650,
-  AZN: 1.7,
-  KGS: 89.2,
+type RatesData = {
+  rates: Record<string, number>;
+  cryptoPrices: Record<string, number>;
+  updatedAt: string;
 };
 
-const FEE_RATE = 0.01;
+const CRYPTO_ASSETS: { code: string; icon: string }[] = [
+  { code: 'USDT', icon: '💵' },
+  { code: 'BTC',  icon: '₿' },
+  { code: 'ETH',  icon: '⬡' },
+  { code: 'TON',  icon: '💎' },
+  { code: 'TRX',  icon: '⚡' },
+  { code: 'USDC', icon: '🔵' },
+  { code: 'LTC',  icon: '🌐' },
+];
+
+const STABLES = new Set(['USDT', 'USDC']);
+const FEE_RATE = 0.03; // 3% (2% Nexora + 1% partner)
 
 const fmt = (v: number, d = 2) =>
   v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -49,23 +50,47 @@ export default function LiveCalculator() {
   const t = dict.calculator;
   const countryNames = dict.countries.names;
 
-  const [amount, setAmount] = useState('10000');
-  const [asset, setAsset] = useState(CRYPTO_ASSETS[0].code);
+  const [amount,  setAmount]  = useState('10000');
+  const [asset,   setAsset]   = useState(CRYPTO_ASSETS[0].code);
   const [country, setCountry] = useState<PayoutCountry>(supportedPayoutCountries[0]);
+  const [ratesData, setRatesData] = useState<RatesData | null>(null);
 
   const payoutCurrency = getPayoutCurrency(country);
 
+  useEffect(() => {
+    const fetchRates = () => {
+      fetch(`${API_BASE}/api/rates`)
+        .then(r => r.json())
+        .then((d: RatesData) => setRatesData(d))
+        .catch(() => {/* silent: use null, shows fallback */});
+    };
+    fetchRates();
+    const timer = setInterval(fetchRates, 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Fallback static prices for when API is unavailable
+  const FALLBACK_CRYPTO: Record<string, number> = {
+    USDT: 1, BTC: 97000, ETH: 3400, TON: 5.5, TRX: 0.28, USDC: 1, LTC: 100,
+  };
+  const FALLBACK_FIAT: Record<string, number> = {
+    RUB: 92.4, KZT: 478.5, UZS: 12650, AZN: 1.7, KGS: 89.2,
+  };
+
   const { send, fee, receive, rate } = useMemo(() => {
-    const parsed = Math.max(0, Number(amount) || 0);
-    const usd = CRYPTO_ASSETS.find(a => a.code === asset)?.usd ?? 1;
-    const fiatPerUsd = FIAT_PER_USD[payoutCurrency] ?? FIAT_PER_USD.RUB;
-    const feeValue = parsed * FEE_RATE;
-    const net = parsed - feeValue;
-    const oneAssetInFiat = usd * fiatPerUsd;
+    const parsed     = Math.max(0, Number(amount) || 0);
+    const cryptoUsdt = STABLES.has(asset)
+      ? 1
+      : (ratesData?.cryptoPrices?.[asset] ?? FALLBACK_CRYPTO[asset] ?? 1);
+    const fiatPerUsdt = ratesData?.rates?.[payoutCurrency] ?? FALLBACK_FIAT[payoutCurrency] ?? 1;
+    const feeValue    = parsed * FEE_RATE;
+    const net         = parsed - feeValue;
+    const oneAssetInFiat = cryptoUsdt * fiatPerUsdt;
     return { send: parsed, fee: feeValue, receive: net * oneAssetInFiat, rate: oneAssetInFiat };
-  }, [amount, asset, payoutCurrency]);
+  }, [amount, asset, payoutCurrency, ratesData]);
 
   const selectedIcon = CRYPTO_ASSETS.find(a => a.code === asset)?.icon ?? '💵';
+  const isLive = !!ratesData;
 
   return (
     <section
@@ -88,6 +113,14 @@ export default function LiveCalculator() {
           className="nexora-card p-6 sm:p-8"
           style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}
         >
+          {/* Live indicator */}
+          <div className="flex items-center gap-2 mb-5 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            <span className={`flex h-2 w-2 rounded-full ${isLive ? 'bg-green-400 animate-pulse' : 'bg-gray-300'}`} />
+            {isLive
+              ? `Онлайн-курс · ${new Date(ratesData!.updatedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
+              : 'Загрузка курса…'}
+          </div>
+
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {/* Asset */}
             <div>
@@ -185,8 +218,8 @@ export default function LiveCalculator() {
           >
             {[
               { label: t.summarySend, value: `${fmt(send)} ${asset}` },
-              { label: t.summaryFee,  value: `${fmt(fee)} ${asset}`, accent: true },
-              { label: t.summaryRate, value: `1 ${asset} = ${fmt(rate)} ${payoutCurrency}` },
+              { label: `${t.summaryFee} (3%)`, value: `${fmt(fee)} ${asset}`, accent: true },
+              { label: t.summaryRate, value: `1 ${asset} = ${fmt(rate, 2)} ${payoutCurrency}` },
             ].map(row => (
               <div key={row.label} className="flex items-center justify-between">
                 <span style={{ color: 'var(--color-text-secondary)' }}>{row.label}</span>

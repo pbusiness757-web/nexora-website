@@ -39,7 +39,7 @@ const kk = {
     currencyLabel: "Алушы валютасы",
     autoLabel: "авто",
     summarySend: "Сіз жібересіз",
-    summaryFee: "Желі комиссиясы (1%)",
+    summaryFee: "Қызмет комиссиясы",
     summaryRate: "Айырбас бағамы",
     receiveLabel: "Алушы алады",
     button: "Өтінім жасау",

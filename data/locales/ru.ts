@@ -40,7 +40,7 @@ const ru = {
     currencyLabel: "Валюта получателя",
     autoLabel: "авто",
     summarySend: "Вы отправляете",
-    summaryFee: "Сетевая комиссия (1%)",
+    summaryFee: "Комиссия сервиса",
     summaryRate: "Курс обмена",
     receiveLabel: "Получатель получает",
     button: "Создать заявку",

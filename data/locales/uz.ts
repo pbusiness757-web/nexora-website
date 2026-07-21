@@ -39,7 +39,7 @@ const uz = {
     currencyLabel: "Qabul qiluvchi valyutasi",
     autoLabel: "avto",
     summarySend: "Siz yuborasiz",
-    summaryFee: "Tarmoq komissiyasi (1%)",
+    summaryFee: "Xizmat komissiyasi",
     summaryRate: "Ayirboshlash kursi",
     receiveLabel: "Qabul qiluvchi oladi",
     button: "Soʻrov yaratish",
