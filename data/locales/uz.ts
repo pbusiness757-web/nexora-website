@@ -376,37 +376,49 @@ const uz = {
       "Namoyish uchun soʻrov koʻrsatilgan. Jonli kuzatuv ishga tushgandan soʻng mavjud boʻladi.",
   },
   footer: {
-    description: "Jismoniy shaxslar va biznes uchun kripto-bank toʻlov infratuzilmasi.",
+    description:
+      "Jismoniy shaxslar va biznes uchun kripto-bank toʻlov infratuzilmasi.",
     columns: {
       platform: {
         title: "Platforma",
-        links: ["Kalkulyator", "Kurslar", "Davlatlar", "Savollar"],
+        links: [
+          { label: "Kalkulyator", href: "/#calculator" },
+          { label: "Kurslar", href: "/#rates" },
+          { label: "Mamlakatlar", href: "/#countries" },
+          { label: "Savollar", href: "/#faq" }
+        ],
       },
       business: {
         title: "Biznes",
         links: [
-          "Yetkazib beruvchilarga toʻlovlar",
-          "Pudratchilarga toʻlovlar",
-          "Korporativ toʻlovlar",
-          "Hisob-fakturalarni toʻlash",
+          { label: "Yetkazib beruvchilarga toʻlovlar", href: "/#business" },
+          { label: "Pudratchilar toʻlovlari", href: "/#business" },
+          { label: "Korporativ toʻlovlar", href: "/#business" },
+          { label: "Hisob-fakturalar toʻlovi", href: "/#business" }
         ],
       },
       countries: {
         title: "Davlatlar",
-        links: ["Rossiya", "Qozogʻiston", "Oʻzbekiston", "Ozarbayjon", "Qirgʻiziston"],
+        links: [
+          { label: "Rossiya", href: "/#countries" },
+          { label: "Qozogʻiston", href: "/#countries" },
+          { label: "O'zbekiston", href: "/#countries" },
+          { label: "Ozarbayjon", href: "/#countries" },
+          { label: "Qirgʻiziston", href: "/#countries" }
+        ],
       },
       legal: {
         title: "Huquqiy maʼlumot",
         links: [
-          "AML siyosati",
-          "Maxfiylik siyosati",
-          "Foydalanish shartlari",
-          "Aloqa",
+          { label: "AML siyosati", href: "/aml" },
+          { label: "Maxfiylik siyosati", href: "/privacy" },
+          { label: "Foydalanish shartlari", href: "/terms" },
+          { label: "Kontaktlar", href: "/contacts" }
         ],
       },
     },
     rights: "© 2026 Nexora. Barcha huquqlar himoyalangan.",
-  },
+  }
 };
 
 export default uz;

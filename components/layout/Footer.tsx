@@ -35,8 +35,23 @@ export default function Footer() {
               {t.description}
             </p>
 
+            {/* Email */}
+            <a
+              href="mailto:support@nexoraexample.pro"
+              className="mt-4 flex items-center gap-2 text-sm transition-colors w-fit"
+              style={{ color: 'var(--color-text-secondary)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)'; }}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              support@nexoraexample.pro
+            </a>
+
             {/* Social */}
-            <div className="mt-5 flex gap-3">
+            <div className="mt-4 flex gap-3">
               {[
                 {
                   href: 'https://t.me/nexoranotify_bot',
@@ -84,17 +99,17 @@ export default function Footer() {
                   {column.title}
                 </h3>
                 <ul className="space-y-3">
-                  {column.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
+                  {column.links.map((link: { label: string; href: string }) => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
                         className="text-sm transition-colors"
                         style={{ color: 'var(--color-text-secondary)' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)'; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)'; }}
                       >
-                        {link}
-                      </a>
+                        {link.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>

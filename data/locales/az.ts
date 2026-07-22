@@ -376,37 +376,49 @@ const az = {
       "Nümayiş üçün sorğu göstərilir. Canlı izləmə işə salındıqdan sonra mövcud olacaq.",
   },
   footer: {
-    description: "Fiziki şəxslər və biznes üçün kripto-bank ödəniş infrastrukturu.",
+    description:
+      "Fiziki şəxslər və biznes üçün kripto-bank ödəniş infrastrukturu.",
     columns: {
       platform: {
         title: "Platforma",
-        links: ["Kalkulyator", "Məzənnələr", "Ölkələr", "Suallar"],
+        links: [
+          { label: "Kalkulyator", href: "/#calculator" },
+          { label: "Məzənnələr", href: "/#rates" },
+          { label: "Ölkələr", href: "/#countries" },
+          { label: "Suallar", href: "/#faq" }
+        ],
       },
       business: {
         title: "Biznes",
         links: [
-          "Təchizatçı ödənişləri",
-          "Podratçı ödənişləri",
-          "Korporativ ödənişlər",
-          "Hesab-faktura ödənişləri",
+          { label: "Təchizatçılara ödənişlər", href: "/#business" },
+          { label: "Podratçılara ödənişlər", href: "/#business" },
+          { label: "Korporativ ödənişlər", href: "/#business" },
+          { label: "Faktura ödənişləri", href: "/#business" }
         ],
       },
       countries: {
         title: "Ölkələr",
-        links: ["Rusiya", "Qazaxıstan", "Özbəkistan", "Azərbaycan", "Qırğızıstan"],
+        links: [
+          { label: "Rusiya", href: "/#countries" },
+          { label: "Qazaxıstan", href: "/#countries" },
+          { label: "Özbəkistan", href: "/#countries" },
+          { label: "Azərbaycan", href: "/#countries" },
+          { label: "Qırğızıstan", href: "/#countries" }
+        ],
       },
       legal: {
         title: "Hüquqi məlumat",
         links: [
-          "AML siyasəti",
-          "Məxfilik siyasəti",
-          "İstifadə şərtləri",
-          "Əlaqə",
+          { label: "AML Siyasəti", href: "/aml" },
+          { label: "Məxfilik Siyasəti", href: "/privacy" },
+          { label: "İstifadə Şərtləri", href: "/terms" },
+          { label: "Əlaqə", href: "/contacts" }
         ],
       },
     },
     rights: "© 2026 Nexora. Bütün hüquqlar qorunur.",
-  },
+  }
 };
 
 export default az;

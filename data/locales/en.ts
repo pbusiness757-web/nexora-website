@@ -373,28 +373,44 @@ const en = {
     columns: {
       platform: {
         title: "Platform",
-        links: ["Calculator", "Rates", "Countries", "FAQ"],
+        links: [
+          { label: "Calculator", href: "/#calculator" },
+          { label: "Rates", href: "/#rates" },
+          { label: "Countries", href: "/#countries" },
+          { label: "FAQ", href: "/#faq" }
+        ],
       },
       business: {
         title: "Business",
         links: [
-          "Supplier Payments",
-          "Contractor Payments",
-          "Corporate Payouts",
-          "Invoice Settlements",
+          { label: "Supplier Payments", href: "/#business" },
+          { label: "Contractor Payments", href: "/#business" },
+          { label: "Corporate Payouts", href: "/#business" },
+          { label: "Invoice Settlements", href: "/#business" }
         ],
       },
       countries: {
         title: "Countries",
-        links: ["Russia", "Kazakhstan", "Uzbekistan", "Azerbaijan", "Kyrgyzstan"],
+        links: [
+          { label: "Russia", href: "/#countries" },
+          { label: "Kazakhstan", href: "/#countries" },
+          { label: "Uzbekistan", href: "/#countries" },
+          { label: "Azerbaijan", href: "/#countries" },
+          { label: "Kyrgyzstan", href: "/#countries" }
+        ],
       },
       legal: {
         title: "Legal",
-        links: ["AML Policy", "Privacy Policy", "Terms of Service", "Contacts"],
+        links: [
+          { label: "AML Policy", href: "/aml" },
+          { label: "Privacy Policy", href: "/privacy" },
+          { label: "Terms of Service", href: "/terms" },
+          { label: "Contacts", href: "/contacts" }
+        ],
       },
     },
     rights: "© 2026 Nexora. All rights reserved.",
-  },
+  }
 };
 
 export default en;

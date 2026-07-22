@@ -45,7 +45,7 @@ export default function NewsSection() {
               </span>
 
               <h3
-                className="flex-1 text-base font-bold leading-7 transition-colors duration-200 group-hover:text-amber-400"
+                className="flex-1 text-base font-bold leading-7 transition-colors duration-200"
                 style={{ color: 'var(--color-text-primary)' }}
               >
                 {item.title}
@@ -72,12 +72,14 @@ export default function NewsSection() {
         </div>
 
         <div className="mt-12 text-center">
-          <button
-            type="button"
+          <a
+            href="https://t.me/nexoranotify_bot"
+            target="_blank"
+            rel="noopener noreferrer"
             className="nexora-btn-secondary text-sm"
           >
             {t.cta}
-          </button>
+          </a>
         </div>
       </div>
     </section>

@@ -79,7 +79,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: "Nexora",
   url: SITE_URL,
-  logo: `${SITE_URL}/og-image.png`,
+  logo: `${SITE_URL}/favicon.ico`,
   description:
     "Крипто-в-банк платформа для выплат поставщикам, подрядчикам и корпоративных B2B-расчётов по странам СНГ.",
   areaServed: ["RU", "KZ", "UZ", "AZ", "KG"],
@@ -87,6 +87,7 @@ const organizationJsonLd = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",
+    email: "support@nexoraexample.pro",
     url: "https://t.me/nexoranotify_bot",
   },
 };
