@@ -372,6 +372,8 @@ const az = {
       "Tamamlandı",
     ],
     stateLabels: { done: "Hazır", current: "Davam edir", pending: "Gözləyir" },
+    notFound: "Sorğu tapılmadı. Nömrəni yoxlayın və yenidən cəhd edin.",
+    loadError: "Yükləmə xətası. Daha sonra cəhd edin və ya dəstəklə əlaqə saxlayın.",
     footnote:
       "Nümayiş üçün sorğu göstərilir. Canlı izləmə işə salındıqdan sonra mövcud olacaq.",
   },

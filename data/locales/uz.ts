@@ -372,6 +372,8 @@ const uz = {
       "Yakunlandi",
     ],
     stateLabels: { done: "Tayyor", current: "Jarayonda", pending: "Kutilmoqda" },
+    notFound: "So'rov topilmadi. Raqamni tekshirib, qayta urinib ko'ring.",
+    loadError: "Yuklash xatosi. Keyinroq urinib ko'ring yoki qo'llab-quvvatlash xizmatiga murojaat qiling.",
     footnote:
       "Namoyish uchun soʻrov koʻrsatilgan. Jonli kuzatuv ishga tushgandan soʻng mavjud boʻladi.",
   },

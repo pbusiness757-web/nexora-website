@@ -364,6 +364,8 @@ const en = {
       "Completed",
     ],
     stateLabels: { done: "Done", current: "In progress", pending: "Pending" },
+    notFound: "Request not found. Please check the number and try again.",
+    loadError: "Failed to load. Please try again later or contact support.",
     footnote:
       "Sample request shown for demonstration. Live tracking will be available after launch.",
   },
