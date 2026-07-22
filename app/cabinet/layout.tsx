@@ -40,6 +40,7 @@ export default function CabinetLayout({ children }: { children: React.ReactNode 
   const navLinks = [
     { href: "/cabinet",          label: "Главная" },
     { href: "/cabinet/requests", label: "Заявки"  },
+    { href: "/cabinet/profile",  label: "Профиль" },
   ];
 
   return (

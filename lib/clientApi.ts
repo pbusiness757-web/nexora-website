@@ -94,4 +94,11 @@ export const clientApi = {
   getNotifications: () => apiFetch<Notification[]>("/api/client-requests/notifications"),
   markNotificationsRead: () =>
     apiFetch<void>("/api/client-requests/notifications/read", { method: "POST" }),
+  getProfile: () => apiFetch<{
+    id: string; email: string; createdAt: string; lastLoginAt: string | null; totalRequests: number;
+  }>("/api/client-auth/profile"),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiFetch<{ ok: boolean }>("/api/client-auth/change-password", {
+      method: "POST", body: JSON.stringify({ currentPassword, newPassword }),
+    }),
 };
